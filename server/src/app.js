@@ -70,7 +70,11 @@ const authLimiter = rateLimit({
   message: { success: false, status: 429, code: 'RATE_LIMITED', message: 'Too many auth attempts.' },
 });
 
-// ============ HEALTH CHECK ============
+// ============ ROOT / HEALTH CHECK ============
+app.get('/', (_req, res) => {
+  res.status(200).json({ success: true, status: 200, message: 'FoodHub API is running', data: { service: 'foodhub-api', env: config.env, docs: '/api/foods', health: '/health', time: new Date().toISOString() } });
+});
+
 app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, status: 200, message: 'OK', data: { service: 'foodhub-api', env: config.env, time: new Date().toISOString() } });
 });
