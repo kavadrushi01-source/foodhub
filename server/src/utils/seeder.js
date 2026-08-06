@@ -26,32 +26,28 @@ const foods = [
     nutrition: { calories: 480, protein: 18, carbs: 52, fat: 21, fiber: 4 }, tags: ['bestseller', 'veg'] },
   { name: 'Cheese Burst Pizza', category: 'Pizza', price: 349, discountPrice: 299, isBestseller: true, isVeg: true, cuisine: 'Italian', prepTime: 25, stock: 30,
     description: 'Double cheese mozzarella over a hand-tossed base, loaded with bell peppers, olives, and sweet corn. A cheese lovers dream.',
-    images: ['https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800'], ingredients: ['Mozzarella', 'Bell peppers', 'Olives', 'Corn', 'Tomato sauce'], allergens: ['Gluten', 'Dairy'],
+    images: ['https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800'], ingredients: ['Mozzarella', 'Bell peppers', 'Olives', 'Corn', 'Tomato sauce'], allergens: ['Gluten', 'Dairy'],
     nutrition: { calories: 290, protein: 12, carbs: 36, fat: 11, fiber: 2 }, tags: ['bestseller', 'veg', 'cheesy'] },
   { name: 'Chicken Tikka Biryani', category: 'Biryani', price: 259, isVeg: false, cuisine: 'Indian', prepTime: 30, stock: 40, isBestseller: true,
-    description: 'Long-grain basmati rice slow-cooked with marinated chicken tikka, saffron, and aromatic spices. Served with raita and salan.',
-    images: ['https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=800'], ingredients: ['Basmati rice', 'Chicken', 'Saffron', 'Yogurt', 'Spices'], allergens: ['Dairy'],
+    description: 'Long-grain basmati rice slow-cooked with marinated chicken tikka, saffron, and aromatic spices. Served with a cooling raita.',
+    images: ['https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800'], ingredients: ['Basmati rice', 'Chicken', 'Saffron', 'Yogurt', 'Spices'], allergens: ['Dairy'],
     nutrition: { calories: 540, protein: 28, carbs: 62, fat: 18, fiber: 3 }, tags: ['spicy', 'non-veg'] },
   { name: 'Chocolate Lava Cake', category: 'Desserts', price: 129, isVeg: true, cuisine: 'French', prepTime: 12, stock: 25, isNewArrival: true,
     description: 'Warm chocolate cake with a molten centre, dusted with cocoa and served with a scoop of vanilla bean ice cream.',
-    images: ['https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800'], ingredients: ['Dark chocolate', 'Butter', 'Eggs', 'Flour', 'Sugar'], allergens: ['Gluten', 'Dairy', 'Eggs'],
+    images: ['https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800'], ingredients: ['Dark chocolate', 'Butter', 'Eggs', 'Flour', 'Sugar'], allergens: ['Gluten', 'Dairy', 'Eggs'],
     nutrition: { calories: 410, protein: 6, carbs: 44, fat: 24, fiber: 2 }, tags: ['dessert', 'chocolate'] },
   { name: 'Fresh Lime Soda', category: 'Beverages', price: 79, isVeg: true, cuisine: 'Indian', prepTime: 5, stock: 80,
     description: 'Tangy lime juice mixed with sweet or salted soda. The perfect refreshing companion to any meal.',
-    images: ['https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800'], ingredients: ['Lime', 'Soda', 'Sugar/Salt'], allergens: [],
-    nutrition: { calories: 90, protein: 0, carbs: 23, fat: 0, fiber: 0 }, tags: ['refreshing'] },
+    images: ['https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800'], nutrition: { calories: 90, protein: 0, carbs: 23, fat: 0, fiber: 0 }, tags: ['refreshing'] },
   { name: 'Garden Fresh Salad', category: 'Salads', price: 199, isVeg: true, cuisine: 'Continental', prepTime: 10, stock: 20, isNewArrival: true,
     description: 'Crisp romaine, cherry tomatoes, cucumber, carrots, and sprouts tossed in a light vinaigrette with a sprinkle of seeds.',
-    images: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800'], ingredients: ['Romaine', 'Tomato', 'Cucumber', 'Carrot', 'Sprouts', 'Vinaigrette'], allergens: [],
-    nutrition: { calories: 150, protein: 5, carbs: 14, fat: 8, fiber: 5 }, tags: ['healthy', 'low-cal'] },
+    images: ['https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800'], nutrition: { calories: 150, protein: 5, carbs: 14, fat: 8, fiber: 5 }, tags: ['healthy', 'low-cal'] },
   { name: 'Creamy Alfredo Pasta', category: 'Pasta', price: 229, discountPrice: 199, isVeg: true, cuisine: 'Italian', prepTime: 20, stock: 35,
     description: 'Penne pasta tossed in a rich parmesan cream sauce with garlic, mushrooms, and a touch of black pepper.',
-    images: ['https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800'], ingredients: ['Penne', 'Parmesan', 'Cream', 'Garlic', 'Mushrooms'], allergens: ['Gluten', 'Dairy'],
-    nutrition: { calories: 520, protein: 15, carbs: 58, fat: 24, fiber: 3 }, tags: ['creamy', 'veg'] },
+    images: ['https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=800'], nutrition: { calories: 520, protein: 15, carbs: 58, fat: 24, fiber: 3 }, tags: ['creamy', 'veg'] },
   { name: 'Salmon Nigiri Platter', category: 'Sushi', price: 399, isVeg: false, cuisine: 'Japanese', prepTime: 18, stock: 15, isBestseller: true,
-    description: 'Six pieces of fresh salmon nigiri on seasoned sushi rice, served with wasabi, pickled ginger, and soy sauce.',
-    images: ['https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800'], ingredients: ['Salmon', 'Sushi rice', 'Nori', 'Wasabi'], allergens: ['Fish', 'Soy'],
-    nutrition: { calories: 320, protein: 22, carbs: 38, fat: 9, fiber: 1 }, tags: ['fresh', 'premium'] },
+    description: 'Eight pieces of fresh salmon nigiri on seasoned sushi rice, served with wasabi, pickled ginger, and soy sauce.',
+    images: ['https://images.unsplash.com/photo-1563612116625-3012372fccce?w=800'], nutrition: { calories: 320, protein: 22, carbs: 38, fat: 9, fiber: 1 }, tags: ['fresh', 'premium'] },
 ];
 
 const coupons = [
@@ -60,41 +56,72 @@ const coupons = [
   { code: 'FOODIE20', description: '20% off above ₹500', type: 'percentage', value: 20, maxDiscount: 150, minOrder: 500, maxUses: 200, endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) },
 ];
 
+const defaultUsers = [
+  { name: 'Admin User', email: 'admin@foodhub.com', password: 'Admin@123', role: 'admin', isEmailVerified: true },
+  { name: 'Test Customer', email: 'user@foodhub.com', password: 'User@123', role: 'user', isEmailVerified: true },
+  { name: 'Delivery Partner', email: 'delivery@foodhub.com', password: 'Delivery@123', role: 'delivery', isEmailVerified: true, deliveryProfile: { vehicleNumber: 'MH12AB1234', vehicleType: 'bike', isOnline: true, rating: 4.8 } },
+];
+
+// Upsert defaults without throwing when they already exist
+const upsertIfNeeded = async (Model, docs, filterFn) => {
+  const inserted = [];
+  for (const doc of docs) {
+    const filter = filterFn(doc);
+    const exists = await Model.findOne(filter);
+    if (!exists) {
+      const created = await Model.create(doc);
+      inserted.push(created);
+    }
+  }
+  return inserted;
+};
+
+/**
+ * Idempotent seed: only inserts what is missing. Safe to run on every boot in
+ * any environment (never deletes user data in production).
+ */
+export const seedIfEmpty = async () => {
+  const [catCount, foodCount] = await Promise.all([Category.countDocuments(), Food.countDocuments()]);
+  if (catCount > 0 && foodCount > 0) {
+    logger.info('🌱 Database already seeded, skipping');
+    return;
+  }
+
+  logger.info('🌱 Seeding database...');
+  await upsertIfNeeded(User, defaultUsers, (u) => ({ email: u.email }));
+
+  await Category.deleteMany({});
+  await Food.deleteMany({});
+  await Coupon.deleteMany({});
+
+  const catDocs = await Category.insertMany(categories);
+  const catMap = new Map(catDocs.map((c) => [c.name, c._id]));
+  const foodDocs = foods.map((f) => ({ ...f, category: catMap.get(f.category) }));
+  await Food.insertMany(foodDocs);
+  await Coupon.insertMany(coupons);
+
+  const settings = await Settings.findOne({ key: 'store' });
+  if (!settings) await Settings.create({ key: 'store' });
+
+  logger.info(`✅ Seeding complete! ${foodDocs.length} foods, ${catDocs.length} categories, ${coupons.length} coupons`);
+};
 
 const seed = async () => {
   try {
     await connectDB();
-    logger.info('🌱 Seeding database...');
-    if (config.env !== 'production') {
-      await Promise.all([User.deleteMany({}), Category.deleteMany({}), Food.deleteMany({}), Coupon.deleteMany({}), Settings.deleteMany({})]);
-      logger.info('🧹 Cleared existing data');
-    }
-    await User.create({ name: 'Admin User', email: 'admin@foodhub.com', password: 'Admin@123', role: 'admin', isEmailVerified: true });
-    await User.create({ name: 'Test Customer', email: 'user@foodhub.com', password: 'User@123', role: 'user', isEmailVerified: true });
-    await User.create({ name: 'Delivery Partner', email: 'delivery@foodhub.com', password: 'Delivery@123', role: 'delivery', isEmailVerified: true, deliveryProfile: { vehicleNumber: 'MH12AB1234', vehicleType: 'bike', isOnline: true, rating: 4.8 } });
-    logger.info('👤 Created users (admin/user/delivery)');
-
-    const catDocs = await Category.insertMany(categories);
-    const catMap = new Map(catDocs.map((c) => [c.name, c._id]));
-    const foodDocs = foods.map((f) => ({ ...f, category: catMap.get(f.category) }));
-    await Food.insertMany(foodDocs);
-    logger.info(`🍽️ Inserted ${foodDocs.length} foods across ${catDocs.length} categories`);
-    await Coupon.insertMany(coupons);
-    logger.info(`🎟️ Inserted ${coupons.length} coupons`);
-    await Settings.create({ key: 'store' });
-
-    logger.info('✅ Seeding complete!');
-    logger.info('   Admin login:     admin@foodhub.com / Admin@123');
-    logger.info('   User login:      user@foodhub.com / User@123');
-    logger.info('   Delivery login:  delivery@foodhub.com / Delivery@123');
+    await seedIfEmpty();
   } catch (err) {
     logger.error('Seed failed:', err);
-    process.exit(1);
+    process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
-    process.exit(0);
   }
 };
 
-seed();
+// Only run `seed` directly when invoked as a script (node src/utils/seeder.js)
+const isMain = process.argv[1] && process.argv[1].endsWith('seeder.js');
+if (isMain) {
+  seed();
+}
 
+export default seed;
