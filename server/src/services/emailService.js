@@ -17,6 +17,9 @@ const getTransporter = async () => {
       port: config.email.port,
       secure: config.email.port === 465,
       auth: { user: config.email.user, pass: config.email.pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
     return transporter;
   }
@@ -53,6 +56,11 @@ const sendEmail = async ({ to, subject, html, text }) => {
     subject,
     text,
     html,
+  }).catch(async (err) => {
+    logger.error('Email send failed:', err.message);
+    if (transporter) transporter.close();
+    transporter = null;
+    return null;
   });
 
   if (!config.isProd) {
