@@ -138,7 +138,7 @@ CORS is configured so the Vercel frontend is the only allowed origin.
      - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
      - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
    - ⚠️ Test keys: old `rzp_test_TMZbiC2C6OMIDw` **expires 08 Aug 2026 4:37 PM**; newer `rzp_test_TMrEhfZK45uris` (generated 07 Aug) safe. **Decision (Scenario A): do NOT swap test keys — wait for live approval and go straight to live keys.** COD covers payment until then.
-2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. To send to real users you must **verify a domain** in Resend and update `EMAIL_FROM`.
+2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. **Decision: no domain purchased → email stays sandbox (free).** To send to real users you'd later buy a domain, verify it in Resend, and update `EMAIL_FROM`:
    - Resend: https://resend.com → Domains → add + verify domain
    - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`
 3. **Security cleanup**
@@ -148,7 +148,7 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 
 ### 🟠 Should fix soon
 4. ~~Reconnect Render to the new repo~~ ✅ **Done** — Render already points at **`kavadrushi01-source/foodhub`**, branch `main`. Auto-deploy works.
-5. **Custom domain** for the frontend (nice branding). Add your domain in Vercel → Settings → Domains.
+5. **Custom domain** for the frontend (nice branding) — **Decision: skipped for now (no domain purchased, keep free Vercel URL).** Add later if wanted: Vercel → Settings → Domains.
 6. **Remove Facebook social element** ✅ **DONE** — footer FB icon + `Settings.social.facebook` removed; codebase fully Facebook-free.
 
 ### 🚀 Upgrade ideas (later, optional)
@@ -195,6 +195,7 @@ npm run build          # -> client/dist
 - 2026-08-07 (Razorpay): Resubmitted correct website URL `https://foodhub-seven-gules.vercel.app` after the old Netlify URL was rejected; entry is now **scanning** (awaiting approval 24-48 hrs). Confirmed online-payment being down does not affect verification. Noted older test key expires 08 Aug 2026.
 - 2026-08-07 (maintenance): Removed all Facebook OAuth (config, passport strategy, routes, user model fields, client login buttons, `passport-facebook` dep). Repo `kavadrushi01-source/foodhub` is now the single main repo.
 - 2026-08-07 (cleanup): Removed footer Facebook icon + `Settings.social.facebook` — codebase fully Facebook-free. Render confirmed connected to `kavadrushi01-source/foodhub` (main, auto-deploy). GitHub token audit: none exist. Payment decision: wait for LIVE approval → go straight to live keys (no test-key swap).
+- 2026-08-07 (domain decision): **No domain purchased.** Email stays in Resend sandbox (test-only); custom URL skipped; site keeps free Vercel URL. Google login verified working (free, no domain). JWT secrets rotated + `COOKIE_SECURE=true` set.
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*

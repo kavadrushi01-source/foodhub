@@ -24,7 +24,7 @@
 - Frontend returns HTTP 200, built with correct `VITE_API_URL`
 - Render CORS origin = `https://foodhub-seven-gules.vercel.app`
 
-**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review), real SMTP email, Razorpay webhook. (COD + test payments work now.)
+**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review). Email = sandbox (test-only, no domain). COD + test payments work now.
 
 ---
 
@@ -116,14 +116,14 @@
 - ✅ GitHub token audit: no stale tokens (classic + fine-grained empty)
 
 ### Optional / future work
-- [ ] Razorpay **LIVE** keys wiring (site **Under review**, 24–48h; decision = wait & go live, no test-key swap; COD covers gap)
-- [ ] Rotate `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` (values provided)
-- [ ] Set `COOKIE_SECURE=true` in Render
-- [ ] Real SMTP delivery (verify domain in Resend)
-- [ ] Custom domain on Vercel (optional)
+- [ ] Razorpay **LIVE** keys wiring (site **Under review**, 24–48h; decision: **wait, no test-key swap**; COD works meanwhile)
+- [ ] Google login ✅ verified live & free (no domain needed)
+- [ ] **Domain: skipped** (none purchased) — email stays Resend sandbox (test-only), site stays on free Vercel URL
+- [ ] Real SMTP delivery (needs a purchased domain → verify in Resend → update `EMAIL_FROM`) — deferred until user buys a domain
+- [ ] Custom domain on Vercel — deferred (optional, needs a purchased domain)
 - [ ] Payment gateway UPI enablement
 - [ ] Razorpay webhook for server-side payment confirmation
-- [ ] Duplicate schema-index warning cleanup (cosmetic)
+- [ ] Duplicate schema field warning cleanup (cosmetic)
 - [ ] Frontend prod testing scripts
 
 ---
@@ -194,6 +194,11 @@ Invoke-RestMethod http://localhost:5000/health
 - Facebook removed entirely (OAuth + social links). Render confirmed on main repo, auto-deploy.
 - GitHub token audit clean. Payment config live (cod/upi/razorpay).
 - Decision: **Scenario A** — wait for Razorpay live review (24–48h), then straight to live keys (no test-key swap). COD covers payments meanwhile.
+
+### 2026-08-07 — Domains skipped (free), config rotated, Google verified
+- JWT secrets rotated + `COOKIE_SECURE=true` set in Render.
+- Google login verified live & free (no domain needed).
+- Domain NOT purchased → email stays Resend sandbox (test-only); site stays on free Vercel URL. Deferred until user decides.
 
 ### (Next session: record here)
 - ...
