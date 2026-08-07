@@ -34,7 +34,6 @@ const settingsSchema = new mongoose.Schema(
     social: {
       twitter: { type: String, default: '' },
       instagram: { type: String, default: '' },
-      facebook: { type: String, default: '' },
     },
   },
   { timestamps: true },

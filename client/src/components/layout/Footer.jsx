@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Instagram, Twitter, Facebook, Mail, Phone, MapPin, Send, ChevronRight } from 'lucide-react';
+import { Instagram, Twitter, Mail, Phone, MapPin, Send, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Footer() {
@@ -27,7 +27,6 @@ export default function Footer() {
           <div className="flex items-center gap-2.5 mt-5">
             <SocialBtn label="Instagram"><Instagram size={17} /></SocialBtn>
             <SocialBtn label="Twitter"><Twitter size={17} /></SocialBtn>
-            <SocialBtn label="Facebook"><Facebook size={17} /></SocialBtn>
           </div>
         </div>
 
