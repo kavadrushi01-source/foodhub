@@ -130,10 +130,14 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 - **Email SMTP added** (Resend) + code timeout fix so email never hangs the app
 
 ### 🔴 Must-do (blockers before full production)
-1. **Razorpay LIVE keys** — your site is under review at Razorpay (was submitted with the wrong Netlify URL; must update to the live Vercel URL). When approved, generate **live** keys and replace test keys in Render.
-   - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
-   - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
-   - **Live URL to submit:** `https://foodhub-seven-gules.vercel.app`
+1. **Razorpay LIVE keys** — in progress. The correct URL (`https://foodhub-seven-gules.vercel.app`) was **resubmitted** on 2026-08-07 and is now **"scanning your website..."** (Razorpay auto-verify ~3-5 min, then manual approval 24-48 hrs). ✅
+   - The old rejected URL was `https://astonishing-sawine-e1a7ce.netlify.app` (Netlify, wrong — Razorpay closed it because it didn't match the originally-submitted URL).
+   - **Submission details:** website = `https://foodhub-seven-gules.vercel.app`; *"Does your website require users to login to complete a payment?"* → **Yes**; test account used: `user@foodhub.com` / `User@123` (demo customer seed).
+   - Online payment being down does **NOT** affect verification — Razorpay only checks the URL loads the site, it does not test that payments complete.
+   - When approved: switch **Test → Live** toggle, generate new **`rzp_live_...`** keys, replace test keys in Render:
+     - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
+     - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
+   - ⚠️ Old test key `rzp_test_TMZbiC2C6OMIDw` **expires 08 Aug 2026 4:37 PM**; newer test key `rzp_test_TMrEhfZK45uris` (generated same day) is safe — switch Render to it if testing online payment before live approval.
 2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. To send to real users you must **verify a domain** in Resend and update `EMAIL_FROM`.
    - Resend: https://resend.com → Domains → add + verify domain
    - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`
@@ -189,6 +193,7 @@ npm run build          # -> client/dist
 
 ## 7. Session Log
 - 2026-08-07: Backend deployed+verified on Render (u3oy); Frontend deployed on Vercel; resolved a token/account/repo setup, fixed **SPA 404** with vercel.json; full API + UI route test passed; created this summary.
+- 2026-08-07 (Razorpay): Resubmitted correct website URL `https://foodhub-seven-gules.vercel.app` after the old Netlify URL was rejected; entry is now **scanning** (awaiting approval 24-48 hrs). Confirmed online-payment being down does not affect verification. Noted older test key expires 08 Aug 2026.
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
