@@ -159,7 +159,7 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 11. **Performance** — ✅ DONE 2026-08-08: route-level code-splitting (React `lazy`+`Suspense`); main bundle `267KB → 122KB`. Image optimization/CI tuning remains optional.
 12. **Observability** — ✅ CODE DONE 2026-08-08: Sentry wired client (`@sentry/react`) + server (`@sentry/node`). Just needs DSNs in env to activate.
 13. **Uptime monitor / status page** for the live site.
-14. **CI/CD** — ✅ DONE 2026-08-08: `.github/workflows/ci.yml` (install → server syntax-check → client build → server boot + health with Mongo service).
+14. **CI/CD** — ⚠️ CODE DONE but **NOT pushed** 2026-08-08: `.github/workflows/ci.yml` (install → server syntax-check → client build → server boot + health with Mongo service) exists locally and is valid, but the current Git credential is only an OAuth App **without the GitHub `workflow` scope**, so Git refuses to push any `.github/workflows` file (`refusing to allow an OAuth App to create or update workflow`). **To push it:** use a PAT with the `workflow` scope (or re-auth git with `gh auth login --scopes workflow`), then `git add -A && git push origin main`. Local repo must keep the file; it is currently untracked/not on `origin/main`.
 
 ---
 
@@ -232,6 +232,7 @@ npm run build          # -> client/dist
   - **Frontend:** all 13 SP routes return 200 on Vercel ✅.
   - **Build/syntax:** `npm run build` compiles clean; `node --check` passes on every server+client file; CI workflow `.github/workflows/ci.yml` valid.
   - **Result: zero bugs/errors found this session.** No code changes required.
+- 2026-08-08 (push): Code + docs pushed to `kavadrushi01-source/foodhub` (main). `WEBSITE_SUMMARY.md` updated. The only un-pushed item is `.github/workflows/ci.yml`, blocked by missing GitHub `workflow` scope (see item #14).
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
