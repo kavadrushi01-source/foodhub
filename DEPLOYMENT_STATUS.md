@@ -110,10 +110,17 @@
 - ⏳ Test live SMTP (email verify/reset) — pending real SMTP
 - ✅ Verify admin + delivery dashboards live
 - ✅ Facebook OAuth removed (config, strategy, routes, model fields, client buttons)
+- ✅ Facebook social link removed (footer icon + `Settings.social.facebook`) — codebase fully Facebook-free
+- ✅ Render connected to `kavadrushi01-source/foodhub` (main) — auto-deploy
+- ✅ Payment config live: `razorpayConfigured=true`, methods = [cod, upi, razorpay]
+- ✅ GitHub token audit: no stale tokens (classic + fine-grained empty)
 
 ### Optional / future work
-- [ ] Razorpay **LIVE** keys wiring (site under review; test keys work, COD works)
+- [ ] Razorpay **LIVE** keys wiring (site **Under review**, 24–48h; decision = wait & go live, no test-key swap; COD covers gap)
+- [ ] Rotate `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` (values provided)
+- [ ] Set `COOKIE_SECURE=true` in Render
 - [ ] Real SMTP delivery (verify domain in Resend)
+- [ ] Custom domain on Vercel (optional)
 - [ ] Payment gateway UPI enablement
 - [ ] Razorpay webhook for server-side payment confirmation
 - [ ] Duplicate schema-index warning cleanup (cosmetic)
@@ -182,6 +189,11 @@ Invoke-RestMethod http://localhost:5000/health
 ### 2026-08-07 — DEPLOYED (LIVE)
 - Backend on Render (`u3oy`), frontend on Vercel (`foodhub-seven-gules`), SPA routing fixed, full live API + UI route tests passed. Repo now `kavadrushi01-source/foodhub`.
 - Razorpay website resubmitted with correct Vercel URL (scanning, awaiting approval). Live keys + real SMTP are the remaining blockers.
+
+### 2026-08-07 — Facebook removed + payment decision (LIVE verified)
+- Facebook removed entirely (OAuth + social links). Render confirmed on main repo, auto-deploy.
+- GitHub token audit clean. Payment config live (cod/upi/razorpay).
+- Decision: **Scenario A** — wait for Razorpay live review (24–48h), then straight to live keys (no test-key swap). COD covers payments meanwhile.
 
 ### (Next session: record here)
 - ...

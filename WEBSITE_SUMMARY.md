@@ -137,29 +137,29 @@ CORS is configured so the Vercel frontend is the only allowed origin.
    - When approved: switch **Test → Live** toggle, generate new **`rzp_live_...`** keys, replace test keys in Render:
      - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
      - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
-   - ⚠️ Old test key `rzp_test_TMZbiC2C6OMIDw` **expires 08 Aug 2026 4:37 PM**; newer test key `rzp_test_TMrEhfZK45uris` (generated same day) is safe — switch Render to it if testing online payment before live approval.
+   - ⚠️ Test keys: old `rzp_test_TMZbiC2C6OMIDw` **expires 08 Aug 2026 4:37 PM**; newer `rzp_test_TMrEhfZK45uris` (generated 07 Aug) safe. **Decision (Scenario A): do NOT swap test keys — wait for live approval and go straight to live keys.** COD covers payment until then.
 2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. To send to real users you must **verify a domain** in Resend and update `EMAIL_FROM`.
    - Resend: https://resend.com → Domains → add + verify domain
    - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`
 3. **Security cleanup**
-   - **Revoke the GitHub token** you shared: https://github.com/settings/tokens → delete the token (it has repo access)
-   - Audit Google OAuth creds in Render. Consider rotating `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` to strong random values.
-   - Production cookies: `COOKIE_SECURE=true`, `COOKIE_SAMESITE=none` (or `lax`) in Render.
+   - **GitHub tokens: ✅ none exist** (checked 2026-08-07 — both classic and fine-grained lists are empty; nothing to revoke).
+   - Rotate `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` to strong random values (values generated & provided 2026-08-07).
+   - Production cookies: `COOKIE_SECURE=true`, `COOKIE_SAMESITE=lax` in Render.
 
 ### 🟠 Should fix soon
-4. **Reconnect Render to the new repo** — Render still deploys from the old `kavadrushi01-source/foodhub` is the main repo. Point it at the correct repo so every push auto-deploys the backend (currently code is pushed to both repos as a workaround).
-   - Render → `foodhub-api` → Settings → Source/Connected Git Repository → change to `kavadrushi01-source/foodhub` (branch `main`)
+4. ~~Reconnect Render to the new repo~~ ✅ **Done** — Render already points at **`kavadrushi01-source/foodhub`**, branch `main`. Auto-deploy works.
 5. **Custom domain** for the frontend (nice branding). Add your domain in Vercel → Settings → Domains.
+6. **Remove Facebook social element** ✅ **DONE** — footer FB icon + `Settings.social.facebook` removed; codebase fully Facebook-free.
 
 ### 🚀 Upgrade ideas (later, optional)
-6. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) — enable in Razorpay dashboard.
-7. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
-8. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
-9. **Browser-level e2e test** of the full purchase (UI), not just API.
-10. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
-11. **Observability** — add error tracking (Sentry) for production.
-12. **Uptime monitor / status page** for the live site.
-13. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
+7. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) — enable in Razorpay dashboard.
+8. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
+9. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
+10. **Browser-level e2e test** of the full purchase (UI), not just API.
+11. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
+12. **Observability** — add error tracking (Sentry) for production.
+13. **Uptime monitor / status page** for the live site.
+14. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
 
 ---
 
@@ -194,6 +194,7 @@ npm run build          # -> client/dist
 - 2026-08-07: Backend deployed+verified on Render (u3oy); Frontend deployed on Vercel; resolved a token/account/repo setup, fixed **SPA 404** with vercel.json; full API + UI route test passed; created this summary.
 - 2026-08-07 (Razorpay): Resubmitted correct website URL `https://foodhub-seven-gules.vercel.app` after the old Netlify URL was rejected; entry is now **scanning** (awaiting approval 24-48 hrs). Confirmed online-payment being down does not affect verification. Noted older test key expires 08 Aug 2026.
 - 2026-08-07 (maintenance): Removed all Facebook OAuth (config, passport strategy, routes, user model fields, client login buttons, `passport-facebook` dep). Repo `kavadrushi01-source/foodhub` is now the single main repo.
+- 2026-08-07 (cleanup): Removed footer Facebook icon + `Settings.social.facebook` — codebase fully Facebook-free. Render confirmed connected to `kavadrushi01-source/foodhub` (main, auto-deploy). GitHub token audit: none exist. Payment decision: wait for LIVE approval → go straight to live keys (no test-key swap).
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
