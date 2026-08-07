@@ -10,6 +10,7 @@ import passport from './config/oauth.js';
 
 import config from './config/index.js';
 import logger from './config/logger.js';
+import Sentry from './config/sentry.js';
 
 import authRoutes from './routes/authRoutes.js';
 import foodRoutes from './routes/foodRoutes.js';
@@ -21,6 +22,11 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import { errorHandler, notFound } from './middlewares/error.js';
 
 const app = express();
+
+// Sentry request tracking (no-op when no DSN configured)
+if (config.sentry.dsn) {
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 // ============ SECURITY MIDDLEWARE ============
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -90,5 +96,9 @@ app.use('/api/payments', paymentRoutes);
 // ============ ERROR HANDLING ============
 app.use(notFound);
 app.use(errorHandler);
+// Sentry error reporting must be the outermost error middleware (no-op when no DSN)
+if (config.sentry.dsn) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 export default app;

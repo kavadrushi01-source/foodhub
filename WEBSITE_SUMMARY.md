@@ -156,10 +156,37 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 8. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
 9. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
 10. **Browser-level e2e test** of the full purchase (UI), not just API.
-11. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
-12. **Observability** — add error tracking (Sentry) for production.
+11. **Performance** — ✅ DONE 2026-08-08: route-level code-splitting (React `lazy`+`Suspense`); main bundle `267KB → 122KB`. Image optimization/CI tuning remains optional.
+12. **Observability** — ✅ CODE DONE 2026-08-08: Sentry wired client (`@sentry/react`) + server (`@sentry/node`). Just needs DSNs in env to activate.
 13. **Uptime monitor / status page** for the live site.
-14. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
+14. **CI/CD** — ✅ DONE 2026-08-08: `.github/workflows/ci.yml` (install → server syntax-check → client build → server boot + health with Mongo service).
+
+---
+
+## 7. Upgrade setup — Dashboard steps YOU do (no code needed)
+
+### Sentry (activate error tracking)
+1. Create free account: https://sentry.io → New Project → pick "React" (client) and "Node.js" (server).
+2. Copy the **DSN** (like `https://xxx@sentry.io/111`).
+3. Render env: add `SENTRY_DSN` = that DSN.
+4. Vercel env: add `VITE_SENTRY_DSN` = same DSN → redeploy.
+*(Code already handles it — just add the env vars.)*
+
+### UptimeRobot (free uptime monitoring)
+1. https://uptimerobot.com → free account.
+2. **+ New Monitor** → HTTP(S).
+3. URL = `https://foodhub-api-u3oy.onrender.com/health`
+4. Interval 5 min → Create. Add a second monitor for `https://foodhub-seven-gules.vercel.app`.
+5. Free tier = 50 monitors, 10-min alerts (works).
+
+### Vercel Analytics (traffic + speed)
+1. Vercel → project → **Analytics** tab.
+2. Enable **Web Analytics** + **Speed Insights**.
+3. Redeploy (auto-instrumented).
+
+### Razorpay UPI (GPay/PhonePe/Paytm)
+1. Razorpay dashboard → Settings → Payments → **UPI**.
+2. Enable **UPI** *(Needs live account approval first).*
 
 ---
 

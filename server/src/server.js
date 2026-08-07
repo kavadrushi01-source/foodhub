@@ -3,9 +3,11 @@ import config from './config/index.js';
 import { connectDB } from './config/database.js';
 import logger from './config/logger.js';
 import { seedIfEmpty } from './utils/seeder.js';
+import { initSentry } from './config/sentry.js';
 
 const start = async () => {
   try {
+    initSentry();
     await connectDB();
     await seedIfEmpty();
     const server = app.listen(config.port, () => {

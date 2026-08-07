@@ -60,6 +60,11 @@ const config = {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
     max: parseInt(process.env.RATE_LIMIT_MAX || '300', 10),
   },
+
+  sentry: {
+    dsn: process.env.SENTRY_DSN || '',
+    env: process.env.NODE_ENV || 'development',
+  },
 };
 
 export default config;
