@@ -1,6 +1,6 @@
 # 🍔 FoodHub — Complete Website Summary & Test Verification
 
-> **Date:** 2026-08-07
+> **Date:** 2026-08-08
 > **Status:** 🟢 LIVE & VERIFIED (backend + frontend live; payments test-enabled; email wired)
 
 ---
@@ -223,6 +223,15 @@ npm run build          # -> client/dist
 - 2026-08-07 (maintenance): Removed all Facebook OAuth (config, passport strategy, routes, user model fields, client login buttons, `passport-facebook` dep). Repo `kavadrushi01-source/foodhub` is now the single main repo.
 - 2026-08-07 (cleanup): Removed footer Facebook icon + `Settings.social.facebook` — codebase fully Facebook-free. Render confirmed connected to `kavadrushi01-source/foodhub` (main, auto-deploy). GitHub token audit: none exist. Payment decision: wait for LIVE approval → go straight to live keys (no test-key swap).
 - 2026-08-07 (domain decision): **No domain purchased.** Email stays in Resend sandbox (test-only); custom URL skipped; site keeps free Vercel URL. Google login verified working (free, no domain). JWT secrets rotated + `COOKIE_SECURE=true` set.
+- 2026-08-08 (full live re-verification): Re-ran a comprehensive **55/55 PASS** suite against the live production stack (Render API + MongoDB Atlas + Vercel SPA).
+  - **Public/catalog:** health ✅, 8 categories, 8 foods, featured, search, veg filter, pagination, food detail, reviews ✅.
+  - **Guest auth-guards:** wishlist / orders / admin / delivery all correctly 401 for guests ✅.
+  - **Customer journey:** register, login, `/auth/me`, add/get address, wishlist toggle, order preview, **create COD order**, reject invalid payment method (`card` → 400 ✅, correct enum behavior), my orders, order detail, cancel ✅.
+  - **Admin:** login + all 11 endpoints (stats, revenue 30d, top-foods, category-stats, foods, categories, coupons, orders, users, reviews, settings) ✅; user blocked from admin (403) ✅.
+  - **Delivery:** login, deliverables, earnings ✅; delivery blocked from admin (403) ✅.
+  - **Frontend:** all 13 SP routes return 200 on Vercel ✅.
+  - **Build/syntax:** `npm run build` compiles clean; `node --check` passes on every server+client file; CI workflow `.github/workflows/ci.yml` valid.
+  - **Result: zero bugs/errors found this session.** No code changes required.
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
