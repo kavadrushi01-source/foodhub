@@ -1,7 +1,7 @@
 # 🍔 FoodHub — Complete Website Summary & Test Verification
 
 > **Date:** 2026-08-07
-> **Status:** 🟢 LIVE & VERIFIED (full website test passed; one bug found & fixed)
+> **Status:** 🟢 LIVE & VERIFIED (backend + frontend live; payments test-enabled; email wired)
 
 ---
 
@@ -121,24 +121,42 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 
 ## 5. ⚠️ Remaining / To Improve / Upgrade
 
-### ⛔ Must-do before going public (blockers)
-1. **Razorpay live keys** — the site is under review at Razorpay (24–48 h). Add `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` to Render env when approved (or use **test keys** now via "Switch to test mode"). Only COD works until then.
-2. **Real Email SMTP** — confirm `EMAIL_HOST/PASS` in Render are real (Resend / SendGrid / Gmail app password). Currently may be config-only, so **email verification & password reset won't send**.
-3. **Security cleanup** — **revoke the GitHub token** you shared during setup (Settings → Developer settings → Personal access tokens → delete it). Also audit Google OAuth creds in Render.
-4. **Facebook OAuth** — `FACEBOOK_APP_ID` currently empty (secret is set but ID is missing); Google login IS configured.
+### ✅ Already done this session
+- Frontend deployed on **Vercel**: https://foodhub-seven-gules.vercel.app
+- Backend deployed on **Render**: https://foodhub-api-u3oy.onrender.com
+- **SPA routing fixed** (all deep links return 200 via `client/vercel.json`)
+- **`/api` prefix bug fixed** (`VITE_API_URL` → `.../onrender.com/api`) — no more 404s
+- **Razorpay TEST keys added** → checkout offers COD / UPI / Razorpay
+- **Email SMTP added** (Resend) + code timeout fix so email never hangs the app
 
-### 🔧 Should fix soon
-5. **Reconnect Render to new repo** — the Render service still deploys from `kavadrushi01-source/foodhub`; after your code moved to `rushiahir/foodhub`, update the git source in Render so future deploys come from the current repo.
-6. **Custom domain** for the frontend (nice branding). Current URLs are auto-generated (vercel.app, onrender.com).
+### 🔴 Must-do (blockers before full production)
+1. **Razorpay LIVE keys** — your site is under review at Razorpay (was submitted with the wrong Netlify URL; must update to the live Vercel URL). When approved, generate **live** keys and replace test keys in Render.
+   - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
+   - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
+   - **Live URL to submit:** `https://foodhub-seven-gules.vercel.app`
+2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. To send to real users you must **verify a domain** in Resend and update `EMAIL_FROM`.
+   - Resend: https://resend.com → Domains → add + verify domain
+   - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`
+3. **Security cleanup**
+   - **Revoke the GitHub token** you shared: https://github.com/settings/tokens → delete the token (it has repo access)
+   - Audit Google OAuth creds in Render. Consider rotating `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` to strong random values.
+   - Production cookies: `COOKIE_SECURE=true`, `COOKIE_SAMESITE=none` (or `lax`) in Render.
+
+### 🟠 Should fix soon
+4. **Facebook OAuth** — `FACEBOOK_APP_ID` currently empty (secret set but ID missing). Either add a Facebook app, or remove/disable the FB login button. Google login IS working.
+5. **Reconnect Render to the new repo** — Render still deploys from the old `kavadrushi01-source/foodhub`. Point it at **`rushiahir/foodhub`** so every push to your main repo auto-deploys the backend (currently I push code to both repos as a workaround).
+   - Render → `foodhub-api` → Settings → Source/Connected Git Repository → change to `rushiahir/foodhub` (branch `main`)
+6. **Custom domain** for the frontend (nice branding). Add your domain in Vercel → Settings → Domains.
 
 ### 🚀 Upgrade ideas (later, optional)
-7. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) in the Razorpay dashboard.
-8. **Online payments end-to-end** test (card/UPI/NetBanking) once live keys are in.
-9. **Vercel Analytics** (Web + Speed Insights) — Vercel will prompt; one-click.
-10. **Production testing** — a browser-based e2e of the full purchase (UI-level).
-11. **Performance** — fine-tune Vite bundle chunks, add code-splitting if needed.
-12. **Observability** — wire Sentry / better error tracking for production.
-13. Add **live status page / uptime monitor** (optional).
+7. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) — enable in Razorpay dashboard.
+8. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
+9. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
+10. **Browser-level e2e test** of the full purchase (UI), not just API.
+11. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
+12. **Observability** — add error tracking (Sentry) for production.
+13. **Uptime monitor / status page** for the live site.
+14. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
 
 ---
 
