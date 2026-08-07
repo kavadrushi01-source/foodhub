@@ -22,7 +22,7 @@ const createHandoff = (user) => {
  */
 const findOrCreateUser = async (provider, data) => {
   const { providerId, email, name, avatar } = data;
-  const providerField = provider === 'google' ? 'googleId' : 'facebookId';
+  const providerField = 'googleId';
 
   const byProvider = await User.findOne({ [providerField]: providerId });
   if (byProvider) return byProvider;

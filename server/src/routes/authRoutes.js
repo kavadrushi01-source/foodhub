@@ -24,7 +24,7 @@ router.post('/resend-verification', validate(resendVerificationSchema), asyncHan
 router.post('/forgot-password', validate(forgotPasswordSchema), asyncHandler(auth.forgotPassword));
 router.post('/reset-password', validate(resetPasswordSchema), asyncHandler(auth.resetPassword));
 
-// ============ SOCIAL AUTH (Google / Facebook) ============
+// ============ SOCIAL AUTH (Google) ============
 router.get('/providers', asyncHandler(oauth.providers));
 router.post('/oauth/exchange', asyncHandler(oauth.exchange));
 
@@ -32,7 +32,7 @@ const socialRoute = (provider) => (req, res, next) => {
   if (!oauthEnabled[provider]) {
     return res.status(503).json({
       success: false, status: 503, code: 'OAUTH_NOT_CONFIGURED',
-      message: `${provider === 'google' ? 'Google' : 'Facebook'} sign in is not configured on the server yet.`,
+      message: 'This sign in method is not configured on the server yet.',
     });
   }
   return next();
@@ -48,18 +48,6 @@ router.get(
   socialRoute('google'),
   passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/oauth-callback?error=Authentication%20failed` }),
   oauth.handleOAuthCallback('google'),
-);
-
-router.get(
-  '/facebook',
-  socialRoute('facebook'),
-  passport.authenticate('facebook', { scope: ['email'], session: false }),
-);
-router.get(
-  '/facebook/callback',
-  socialRoute('facebook'),
-  passport.authenticate('facebook', { session: false, failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/oauth-callback?error=Authentication%20failed` }),
-  oauth.handleOAuthCallback('facebook'),
 );
 
 router.use(protect); // everything below requires auth

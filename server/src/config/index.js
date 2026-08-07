@@ -45,11 +45,6 @@ const config = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       callbackURL: `${process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`}/api/auth/google/callback`,
     },
-    facebook: {
-      clientID: process.env.FACEBOOK_APP_ID || '',
-      clientSecret: process.env.FACEBOOK_APP_SECRET || '',
-      callbackURL: `${process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`}/api/auth/facebook/callback`,
-    },
   },
 
   payments: {

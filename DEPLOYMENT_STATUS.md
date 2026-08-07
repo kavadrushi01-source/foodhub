@@ -109,6 +109,7 @@
 - ✅ Test full user journey — /health + /api/foods + login + COD order verified live
 - ⏳ Test live SMTP (email verify/reset) — pending real SMTP
 - ✅ Verify admin + delivery dashboards live
+- ✅ Facebook OAuth removed (config, strategy, routes, model fields, client buttons)
 
 ### Optional / future work
 - [ ] Razorpay **LIVE** keys wiring (site under review; test keys work, COD works)

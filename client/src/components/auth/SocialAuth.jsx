@@ -10,14 +10,8 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" className="fill-current">
-    <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07Z" />
-  </svg>
-);
-
 /**
- * Google / Facebook sign-in buttons. Providers that aren't configured on the
+ * Google sign-in buttons. Providers that aren't configured on the
  * server are hidden so the UI never shows a dead button.
  */
 export default function SocialAuth() {
@@ -37,7 +31,7 @@ export default function SocialAuth() {
   if (providers === null) return null;
   const enabled = Object.values(providers).some(Boolean);
   if (!enabled) return null;
-  const count = Number(Boolean(providers.google)) + Number(Boolean(providers.facebook));
+  const count = Number(Boolean(providers.google));
 
   return (
     <div className="mt-6">
@@ -55,17 +49,9 @@ export default function SocialAuth() {
             <GoogleIcon /> Google
           </a>
         )}
-        {providers.facebook && (
-          <a
-            href={getOAuthUrl('facebook')}
-            className="inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-800 text-sm font-semibold text-ink-700 dark:text-ink-100 hover:border-ink-300 hover:shadow-sm transition-all"
-          >
-            <FacebookIcon /> Facebook
-          </a>
-        )}
       </div>
     </div>
   );
 }
 
-export { GoogleIcon, FacebookIcon };
+export { GoogleIcon };

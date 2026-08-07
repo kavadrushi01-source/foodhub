@@ -12,7 +12,7 @@
 | **Frontend** | Vercel | **https://foodhub-seven-gules.vercel.app** |
 | **Backend API** | Render (Free) | https://foodhub-api-u3oy.onrender.com |
 | **Database** | MongoDB Atlas Clusters | connected & seeded |
-| **Source/GitHub** | GitHub (main account) | https://github.com/rushiahir/foodhub |
+| **Source/GitHub** | GitHub (main account) | https://github.com/kavadrushi01-source/foodhub |
 | **Local dev** | your laptop | frontend :5173 · backend :5000 |
 
 **Architecture:** React SPA (Vite) on Vercel → calls Express REST API on Render → MongoDB Atlas.
@@ -147,20 +147,19 @@ CORS is configured so the Vercel frontend is the only allowed origin.
    - Production cookies: `COOKIE_SECURE=true`, `COOKIE_SAMESITE=none` (or `lax`) in Render.
 
 ### 🟠 Should fix soon
-4. **Facebook OAuth** — `FACEBOOK_APP_ID` currently empty (secret set but ID missing). Either add a Facebook app, or remove/disable the FB login button. Google login IS working.
-5. **Reconnect Render to the new repo** — Render still deploys from the old `kavadrushi01-source/foodhub`. Point it at **`rushiahir/foodhub`** so every push to your main repo auto-deploys the backend (currently I push code to both repos as a workaround).
-   - Render → `foodhub-api` → Settings → Source/Connected Git Repository → change to `rushiahir/foodhub` (branch `main`)
-6. **Custom domain** for the frontend (nice branding). Add your domain in Vercel → Settings → Domains.
+4. **Reconnect Render to the new repo** — Render still deploys from the old `kavadrushi01-source/foodhub` is the main repo. Point it at the correct repo so every push auto-deploys the backend (currently code is pushed to both repos as a workaround).
+   - Render → `foodhub-api` → Settings → Source/Connected Git Repository → change to `kavadrushi01-source/foodhub` (branch `main`)
+5. **Custom domain** for the frontend (nice branding). Add your domain in Vercel → Settings → Domains.
 
 ### 🚀 Upgrade ideas (later, optional)
-7. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) — enable in Razorpay dashboard.
-8. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
-9. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
-10. **Browser-level e2e test** of the full purchase (UI), not just API.
-11. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
-12. **Observability** — add error tracking (Sentry) for production.
-13. **Uptime monitor / status page** for the live site.
-14. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
+6. **Razorpay UPI** enablement (GPay / PhonePe / Paytm) — enable in Razorpay dashboard.
+7. **Online payments end-to-end test** (card/UPI/NetBanking) once live keys are in.
+8. **Vercel Analytics** (Web + Speed Insights) — one-click in Vercel.
+9. **Browser-level e2e test** of the full purchase (UI), not just API.
+10. **Performance** — fine-tune Vite bundle chunks, lazy-load routes, image optimization.
+11. **Observability** — add error tracking (Sentry) for production.
+12. **Uptime monitor / status page** for the live site.
+13. **Backend startup recovery** — resilience/testing scripts (the repo has `test-*.js` files ready).
 
 ---
 
@@ -194,6 +193,7 @@ npm run build          # -> client/dist
 ## 7. Session Log
 - 2026-08-07: Backend deployed+verified on Render (u3oy); Frontend deployed on Vercel; resolved a token/account/repo setup, fixed **SPA 404** with vercel.json; full API + UI route test passed; created this summary.
 - 2026-08-07 (Razorpay): Resubmitted correct website URL `https://foodhub-seven-gules.vercel.app` after the old Netlify URL was rejected; entry is now **scanning** (awaiting approval 24-48 hrs). Confirmed online-payment being down does not affect verification. Noted older test key expires 08 Aug 2026.
+- 2026-08-07 (maintenance): Removed all Facebook OAuth (config, passport strategy, routes, user model fields, client login buttons, `passport-facebook` dep). Repo `kavadrushi01-source/foodhub` is now the single main repo.
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
