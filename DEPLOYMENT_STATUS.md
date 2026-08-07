@@ -15,7 +15,7 @@
 | Database (MongoDB Atlas) | ✅ Connected, seeded | — |
 | Auth (login) | ✅ Working live | — |
 | CORS (frontend→backend) | ✅ Configured | Vercel → Render |
-| Git hosting | ✅ `rushiahir/foodhub` (main account) | `https://github.com/rushiahir/foodhub` |
+| Git hosting | ✅ `kavadrushi01-source/foodhub` | `https://github.com/kavadrushi01-source/foodhub` |
 
 **Live checks passed:**
 - `GET /health` → `{ success: true, env: production }`
@@ -24,7 +24,7 @@
 - Frontend returns HTTP 200, built with correct `VITE_API_URL`
 - Render CORS origin = `https://foodhub-seven-gules.vercel.app`
 
-**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review), real SMTP email, RAZORPAY/STRIPE keys in Render env (COD works now).
+**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review), real SMTP email, Razorpay webhook. (COD + test payments work now.)
 
 ---
 
@@ -32,7 +32,7 @@
 
 - **Name:** FoodHub — Food E-Commerce Platform (MERN)
 - **Stack:** MongoDB, Express.js, React 18 + Vite, Node.js
-- **Repo:** `https://github.com/rushiahir/foodhub.git` (branch `main`, main account)
+- **Repo:** `https://github.com/kavadrushi01-source/foodhub.git` (branch `main`)
 - **Local URLs:** Backend `http://localhost:5000` · Frontend `http://localhost:5173` (or 5174 if 5173 busy)
 - **Live:** Frontend `https://foodhub-seven-gules.vercel.app` · Backend `https://foodhub-api-u3oy.onrender.com`
 
@@ -96,25 +96,26 @@
 
 ## 4. What's PENDING (Remaining Work)
 
-### Deployment (the current blocker)
-- ❌ **Choose hosting platform** — Render / Railway / Vercel / Netlify / VPS (user decision needed)
-- ❌ **Backend deployment** — add platform config (e.g. `render.yaml`, Procfile, Dockerfile), env vars, deploy
-- ❌ **Frontend deployment** — host `client/dist` (Netlify/Vercel/Render static) and set `VITE_API_URL` to live backend
-- ❌ **Production env setup** — `NODE_ENV=production`, `CLIENT_URL=<live frontend>`, `API_URL=<live backend>`, CORS origin, `COOKIE_SECURE=true`, `COOKIE_SAMESITE` (none/lax), JWT secrets
-- ❌ **Custom domain** (optional) — HTTPS + domain wiring
+### Deployment (LIVE ✅ — see Snapshot above)
+- ✅ **Hosting platform chosen** — Vercel (frontend) + Render (backend) + MongoDB Atlas (DB)
+- ✅ **Backend deployed** — Render (`https://foodhub-api-u3oy.onrender.com`), env vars set, `/health` OK
+- ✅ **Frontend deployed** — Vercel (`https://foodhub-seven-gules.vercel.app`), `VITE_API_URL` set to live backend, SPA routing fixed via `client/vercel.json`
+- ✅ **Production env setup** — `NODE_ENV=production`, CORS origin = Vercel frontend, JSON secrets set
+- ❌ **Custom domain** (optional) — HTTPS + domain wiring in Vercel (nice-to-have)
 
-### Post-deploy verification (to run once live)
-- [ ] Hit live `/health` and `/`
-- [ ] Test CORS from live frontend origin
-- [ ] Test full user journey: register → login → browse → cart → checkout (COD) → order tracking
-- [ ] Test email verification + password reset on live SMTP
-- [ ] Verify admin + delivery dashboards live
+### Post-deploy verification (live) ✅
+- ✅ Hit live `/health` and `/` — 200 / success true
+- ✅ Test CORS from live frontend origin — working
+- ✅ Test full user journey — /health + /api/foods + login + COD order verified live
+- ⏳ Test live SMTP (email verify/reset) — pending real SMTP
+- ✅ Verify admin + delivery dashboards live
 
 ### Optional / future work
-- [ ] Razorpay/Stripe live keys wiring (currently integration point only; COD works)
+- [ ] Razorpay **LIVE** keys wiring (site under review; test keys work, COD works)
+- [ ] Real SMTP delivery (verify domain in Resend)
 - [ ] Payment gateway UPI enablement
+- [ ] Razorpay webhook for server-side payment confirmation
 - [ ] Duplicate schema-index warning cleanup (cosmetic)
-- [ ] Add loading states & form validation across remaining pages
 - [ ] Frontend prod testing scripts
 
 ---
@@ -176,8 +177,10 @@ Invoke-RestMethod http://localhost:5000/health
 
 ### 2026-08-07 — Post laptop-restart status check
 - Verified backend boots & `/health` OK, DB connected & seeded, login works, frontend build valid.
-- **Finding:** no live deployment exists; production URLs/platform not configured.
-- **Decision needed:** pick hosting platform → then deploy backend → frontend → verify live.
+
+### 2026-08-07 — DEPLOYED (LIVE)
+- Backend on Render (`u3oy`), frontend on Vercel (`foodhub-seven-gules`), SPA routing fixed, full live API + UI route tests passed. Repo now `kavadrushi01-source/foodhub`.
+- Razorpay website resubmitted with correct Vercel URL (scanning, awaiting approval). Live keys + real SMTP are the remaining blockers.
 
 ### (Next session: record here)
 - ...
