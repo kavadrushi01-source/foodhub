@@ -6,17 +6,25 @@
 
 ## 1. Latest Status Snapshot
 
-| Area | Status | Last Verified |
-|------|--------|---------------|
-| Backend (local) | ✅ Running & healthy | 2026-08-07 |
-| Database (MongoDB Atlas) | ✅ Connected, seeded | 2026-08-07 |
-| Auth (login) | ✅ Working | 2026-08-07 |
-| Frontend build (`client/dist`) | ✅ Built, ready to host | 2026-08-07 |
-| Backend deployment (live URL) | ❌ NOT DEPLOYED | — |
-| Frontend deployment (live URL) | ❌ NOT DEPLOYED | — |
-| Production env vars | ❌ NOT SET | — |
+**✅ THE WEBSITE IS LIVE** (verified end-to-end 2026-08-07)
 
-**⚠️ Bottom line:** The app runs fully **locally only**. No production deployment exists yet — no hosting platform configured, no production URLs, no production `.env`.
+| Area | Status | URL |
+|------|--------|-----|
+| Frontend (VERCEL) | ✅ LIVE | `https://foodhub-seven-gules.vercel.app` |
+| Backend (RENDER) | ✅ LIVE & healthy | `https://foodhub-api-u3oy.onrender.com` |
+| Database (MongoDB Atlas) | ✅ Connected, seeded | — |
+| Auth (login) | ✅ Working live | — |
+| CORS (frontend→backend) | ✅ Configured | Vercel → Render |
+| Git hosting | ✅ `rushiahir/foodhub` (main account) | `https://github.com/rushiahir/foodhub` |
+
+**Live checks passed:**
+- `GET /health` → `{ success: true, env: production }`
+- `GET /api/foods` → 8 items
+- `POST /api/auth/login` (user@foodhub.com) → success, role `user`
+- Frontend returns HTTP 200, built with correct `VITE_API_URL`
+- Render CORS origin = `https://foodhub-seven-gules.vercel.app`
+
+**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review), real SMTP email, RAZORPAY/STRIPE keys in Render env (COD works now).
 
 ---
 
@@ -24,8 +32,9 @@
 
 - **Name:** FoodHub — Food E-Commerce Platform (MERN)
 - **Stack:** MongoDB, Express.js, React 18 + Vite, Node.js
-- **Repo:** `https://github.com/kavadrushi01-source/foodhub.git` (branch `main`)
+- **Repo:** `https://github.com/rushiahir/foodhub.git` (branch `main`, main account)
 - **Local URLs:** Backend `http://localhost:5000` · Frontend `http://localhost:5173` (or 5174 if 5173 busy)
+- **Live:** Frontend `https://foodhub-seven-gules.vercel.app` · Backend `https://foodhub-api-u3oy.onrender.com`
 
 ### Structure
 ```
