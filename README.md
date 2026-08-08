@@ -112,7 +112,7 @@ npm start            # serves the API (server)
 
 | Role | Email | Password | Use |
 |------|-------|----------|-----|
-| Admin | `admin@foodhub.com` | `Admin@123`-->if you try in live it's not going to work | `/admin` dashboard |
+| Admin | `admin@foodhub.com` | `Admin@123`--> if you try in live site link it's not going to work  | `/admin` dashboard |
 | Customer | `user@foodhub.com` | `User@123` | browse/cart/checkout |
 | Delivery | `delivery@foodhub.com` | `Delivery@123` | delivery app |
 
