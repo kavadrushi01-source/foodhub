@@ -152,6 +152,21 @@ export const seedIfEmpty = async () => {
   const newCoupons = coupons.filter((c) => !existingCouponCodes.has(c.code));
   if (newCoupons.length) await Coupon.insertMany(newCoupons);
 
+  // Dedupe cloned seed dishes: earlier seeds stored auto-slugged copies
+  // ("classic-veg-burger-4iku") while the new sync uses clean slugs. If both a
+  // clean-slug food and a suffixed clone with the SAME name exist, drop the
+  // suffix clone so the menu shows each dish exactly once.
+  const nameToSlug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const allFoods = await Food.find({}, 'name slug');
+  const cleanSlugs = new Set(allFoods.filter((f) => /^[a-z0-9-]+$/.test(f.slug)).map((f) => f.slug));
+  const cloneIds = allFoods
+    .filter((f) => /-[0-9a-z]{4}$/.test(f.slug) && cleanSlugs.has(nameToSlug(f.name)))
+    .map((f) => f._id);
+  if (cloneIds.length) {
+    await Food.deleteMany({ _id: { $in: cloneIds } });
+    logger.info(`🧹 Removed ${cloneIds.length} duplicate seed clones`);
+  }
+
   const settings = await Settings.findOne({ key: 'store' });
   if (!settings) {
     await Settings.create({ key: 'store' });
