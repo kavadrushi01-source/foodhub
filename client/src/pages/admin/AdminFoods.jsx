@@ -42,7 +42,9 @@ export default function AdminFoods() {
       if (editing === 'new') { await adminApi.createFood(payload); toast.success('Food created'); }
       else { await adminApi.updateFood(editing._id, payload); toast.success('Food updated'); }
       setEditing(null); load();
-    } catch {}
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to save food');
+    }
   };
 
   const remove = async (id) => {
@@ -72,7 +74,7 @@ export default function AdminFoods() {
             </select>
             <input className="input" placeholder="Cuisine" value={form.cuisine} onChange={(e) => setForm({ ...form, cuisine: e.target.value })} />
             <input className="input" placeholder="Prep time (min)" type="number" value={form.prepTime} onChange={(e) => setForm({ ...form, prepTime: e.target.value })} />
-            <input className="input sm:col-span-2 lg:col-span-3" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            <input className="input sm:col-span-2 lg:col-span-3" placeholder="Description (min 10 chars)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
             <input className="input sm:col-span-2 lg:col-span-3" placeholder="Image URL (comma separated)" value={form.images.join(', ')} onChange={(e) => setForm({ ...form, images: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
             <input className="input" placeholder="Ingredients (comma separated)" value={form.ingredients.join(', ')} onChange={(e) => setForm({ ...form, ingredients: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
             <input className="input" placeholder="Tags (comma separated)" value={form.tags.join(', ')} onChange={(e) => setForm({ ...form, tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
