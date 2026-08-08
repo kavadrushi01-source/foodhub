@@ -45,6 +45,4 @@ coverage/
 *.pid.lock
 
 # Personal build notes (kept local only, never pushed)
-docs/how-i-built-this/README.md
-docs/how-i-built-this/BUG_FIXES_LOG.md
-docs/how-i-built-this/DEPLOYMENT_GUIDE.md
+docs/how-i-built-this/
