@@ -1,118 +1,82 @@
-# 🍔 FoodHub — My Food-Delivery Website
-### A simple, easy-language guide for my non-technical friends
+# 🍔 FoodHub — Quick Use Guide (for me)
+
+Short how-to for using the site: login, OTP, admin, adding products.
 
 ---
 
-## What is this?
+## 1. Login & Emails
 
-I built my own **food-delivery website** — like the apps you already use, but I
-made the whole thing myself. Here is what it does:
+| Area | How | Login (demo) |
+|------|-----|--------------|
+| Customer | normal sign up / login | `user@foodhub.com` / `User@123` |
+| Admin | login → auto-goes to `/admin` | `admin@foodhub.com` / `Admin@123` |
+| Delivery | login → auto-goes to `/delivery` | `delivery@foodhub.com` / `Delivery@123` |
 
-- You open the site, look at photos of food, tap **Add to cart**, and place an order.
-- You can track the order all the way to your door, cancel it, use a discount code, and pay by **Cash on Delivery**, **UPI**, or **card**.
-- There is a little **AI assistant** called *Foodie* on every page — you type a
-  question and it answers instantly (menus, delivery, payments, even jokes!). 😄
-- The **shop owner** gets a secret control room where they can see all orders,
-  add new food, update items, and check how much the shop is earning.
-- The **delivery rider** gets their own app showing which order to pick up and
-  where to take it.
+- **Emails:** signup sends a **verify email**; "Forgot password" sends a **reset
+  email**. In dev, emails show in the terminal log (Ethereal preview link) — no real email goes out.
 
 ---
 
-## The three "worlds" inside the site
+## 2️⃣ Customer — Order in 4 steps
 
-| World | For whom | What they do |
-|-------|----------|--------------|
-| 🌆 **Customer** | People ordering | Browse food, cart, checkout, track, coupons, reviews, chat with Foodie |
-| 🧑‍💼 **Admin/Owner** | The shop owner | Dashboard with charts, add/edit food, manage orders, coupons, users, settings |
-| 🛵 **Delivery Rider** | Couriers | Get-assigned deliveries, mark each step, enter the customer's secret code (OTP) to complete |
+1. Open **Home / Menu** → search or filter → tap a dish.
+2. **Add to cart** (set quantity) → open cart.
+3. **Checkout** → add a delivery address → pick **COD / UPI / Card**.
+4. **Pay & place order** → track in **My Orders** (Pending → Confirmed → Preparing → Out for Delivery → Delivered).
 
-A special secret code (OTP) is given to the customer when the rider arrives — so
-deliveries can only be closed by genuine riders. That's a small detail but makes
-the system honest.
+**Coupon:** in the cart, type the code → discount shows instantly.
 
 ---
 
-## How the website is made — in everyday language
+## 3️⃣ Admin — Most-used actions
 
-Think of the website as a restaurant made from . . .
+| Task | Where | How |
+|---|---|---|
+| **Add product** | `/admin/foods` → **Add Food** | name, price, category, veg dot, photo, stock → Save |
+| **Edit / disable** | `/admin/foods` | click edit; toggle stock or availability |
+| **Categories** | `/admin/categories` | add/rename/delete |
+| **Coupons** | `/admin/coupons` | new code, type (% or flat), min order, expiry, active |
+| **Orders** | `/admin/orders` | change status ✅, **assign delivery partner**, **refund** |
+| **Users** | `/admin/users` | change role, enable/disable |
+| **Settings** | `/admin/settings` | delivery fee, tax %, online-payment toggle |
 
-1. **The Storeroom** 😕 → where all information lives (food items, orders,
-   customers). Technically called the **database** (MongoDB).
-2. **The Kitchen** 👨 – the "brains" part that follows all the rules — who can
-   log in, how an order is built, whether a coupon is valid, whether the payment
-   is real. This is called the **server / backend** (Node.js + Express).
-3. **The Dining Room / Front Desk** — everything you click and see — the
-   photos, buttons, pages. This is called the **frontend** (React).
-   *(Bonus: nothing visual happens without the kitchen's permission!)*
-
-When you log in, the "front desk" asks the "kitchen", the kitchen checks the
-"storeroom", and if everything is right the kitchen gives you a special *card*
-(token) that proves who you are for a while — and tells which room (customer /
-owner / rider) you're allowed into.
+> New product must fill all required fields — Save error messages tell you what's missing.
 
 ---
 
-## The owner and rider are not in the same room
+## 4️⃣ Delivery — OTP flow (important)
 
-Every person gets a **role** when they sign in, and the server checks that role at
-every door ("Prohibited!"). So a customer can't open the owner control room, and a
-rider can't change the menu. It's exactly like an office building with ID badges.
+1. Your **Today's** list shows assigned orders (customer name + address).
+2. Pick up ✅ → mark **Out for Delivery**.
+3. At the door, the customer reads a **4-digit OTP** from their order screen.
+4. Enter the **OTP** → only then can you close the order as **Delivered**.
 
----
-
-## Things I had to be extra careful about
-
-- **Making it look good** — buttons, colors, animations, dark mode, loading screens.
-- **Making it "mobile first"** — so it's as beautiful on a phone as on a computer.
-- **Making it safe**:
-  - Passwords are stored *scrambled* (nobody — not even the owner — can read them).
-  - Bank/Gateway secret keys (real Razorpay) live only in the secret server
-    settings on Render — never in the public code.
-  - There are **rate controls** — if someone tries to break in a million times, the
-    site says "slow down".
+> Order **cannot** be completed without the correct OTP — no fake handoffs.
 
 ---
 
-## 🐛 Bugs I fixed along the way (in simple words)
+## 5️⃣ OTP / Verification summary (chart)
 
-1. **Signup worked in the logic but broke in the browser** → it was a Cross-Origin
-   rule (a browser security rule). I allowed my site's address properly and it healed.
-2. **Checkout appeared empty** → a cart drawer that stayed "in front" and a code invention
-   about how the answer was wrapped. Fixed by closing the drawer + reading correctly.
-3. **The AI "Foodie" said "Auth required" to regular people** → a middleware rule
-   was accidentally blocking the guest chatbot. Moved the order of code — now it works for everyone.
-4. **Site sometimes broke "duplicate food items"** → the seed (the script that adds
-   starter demo data) now cleans duplicates each run.
+| Trigger | Who gets it | Where it appears | Used for |
+|---|---|---|---|
+| New signup | customer email | verification link/email | activate account |
+| Password reset | customer email | reset link/email | set new password |
+| Delivery drop-off | customer | order page shows code | rider enters to finish |
 
 ---
 
-## 🌍 Where a website lives (how I put it online)
+## 📍 Quick page map
 
-| Part | Where | Live URL |
-|------|-------|----------|
-| Website you load (frontend) | **Vercel** | foodhub-seven-gules.vercel.app |
-| The "kitchen" logic (API) | **Render** | foodhub-api-u3oy.onrender.com |
-| The storeroom (database) | **MongoDB Atlas** | cloud database |
-| Payments | **Razorpay** (live) | UPI / cards / COD |
-| Email service | **Resend** | verification & reset emails |
-
-When I change the code and push to **GitHub**, the two online services notice
-automatically and redeploy the site — I don't even have to press anything.
-
----
-
-## 🙋 Why I made this
-
-This started as a **learning project** — to understand how real food apps (Zomato,
-Swiggy, Blinkit) actually work, from the idea all the way to "it's live!".
-No shortcuts — I built each piece with my own hands: the pages, the delivery
-logic, the dashboard, and even the little AI friend.
-
-If you ever want to build your own app like this, the exact step-by-step path I
-took is in `docs/how-i-built-this/` in this repo — but this file is the
-friend-friendly "explain it like I'm five" version. 😉
+| Page | Who | What |
+|---|---|---|
+| **/menu** | customer | search, filter, sort |
+| **/cart** | customer | qty, coupon |
+| **/checkout** | customer | address + payment |
+| **/orders** | customer | track, cancel |
+| **/profile** | customer | settings, addresses, own wishlist |
+| **/admin** | admin | everything above |
+| **/delivery** | rider | pending deliveries, earnings |
 
 ---
 
-*Questions? Just ask — you'll get a straight, non-techie answer.* 🚀
+*That's it — easy. 🚀*
