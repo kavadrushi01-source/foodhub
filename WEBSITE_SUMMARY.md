@@ -130,14 +130,11 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 - **Email SMTP added** (Resend) + code timeout fix so email never hangs the app
 
 ### 🔴 Must-do (blockers before full production)
-1. **Razorpay LIVE keys** — in progress. The correct URL (`https://foodhub-seven-gules.vercel.app`) was **resubmitted** on 2026-08-07 and is now **"scanning your website..."** (Razorpay auto-verify ~3-5 min, then manual approval 24-48 hrs). ✅
-   - The old rejected URL was `https://astonishing-sawine-e1a7ce.netlify.app` (Netlify, wrong — Razorpay closed it because it didn't match the originally-submitted URL).
-   - **Submission details:** website = `https://foodhub-seven-gules.vercel.app`; *"Does your website require users to login to complete a payment?"* → **Yes**; test account used: `user@foodhub.com` / `User@123` (demo customer seed).
-   - Online payment being down does **NOT** affect verification — Razorpay only checks the URL loads the site, it does not test that payments complete.
-   - When approved: switch **Test → Live** toggle, generate new **`rzp_live_...`** keys, replace test keys in Render:
-     - Dashboard: https://dashboard.razorpay.com → Account & Settings → Websites & API keys
-     - Render env: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`
-   - ⚠️ Test keys: old `rzp_test_TMZbiC2C6OMIDw` **expires 08 Aug 2026 4:37 PM**; newer `rzp_test_TMrEhfZK45uris` (generated 07 Aug) safe. **Decision (Scenario A): do NOT swap test keys — wait for live approval and go straight to live keys.** COD covers payment until then.
+1. **Razorpay LIVE keys** — ✅ **APPROVED 2026-08-08** (`https://foodhub-seven-gules.vercel.app`). To activate:
+   - Generate **LIVE** keys in the Razorpay dashboard (Account & Settings → Websites & API keys) → they start `rzp_live_...`.
+   - Set them on Render: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` → Render auto-deploys.
+   - Toggle the website from **Test → Live** in the Razorpay dashboard.
+   - No code change required (server reads env vars; client gets the live key dynamically).
 2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. **Decision: no domain purchased → email stays sandbox (free).** To send to real users you'd later buy a domain, verify it in Resend, and update `EMAIL_FROM`:
    - Resend: https://resend.com → Domains → add + verify domain
    - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`

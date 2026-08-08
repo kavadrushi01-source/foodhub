@@ -24,7 +24,7 @@
 - Frontend returns HTTP 200, built with correct `VITE_API_URL`
 - Render CORS origin = `https://foodhub-seven-gules.vercel.app`
 
-**⚠️ Remaining before "fully production-ready":** live Razorpay keys (site under review). Email = sandbox (test-only, no domain). COD + test payments work now.
+**⚠️ Remaining before "fully production-ready":** ~~live Razorpay keys~~ — ✅ **APPROVED by Razorpay (2026-08-08)** for `https://foodhub-seven-gules.vercel.app`; just need to generate LIVE keys + set them in Render. Email = sandbox (test-only, no domain). COD + test payments work now.
 
 ---
 
@@ -116,7 +116,7 @@
 - ✅ GitHub token audit: no stale tokens (classic + fine-grained empty)
 
 ### Optional / future work
-- [ ] Razorpay **LIVE** keys wiring (site **Under review**, 24–48h; decision: **wait, no test-key swap**; COD works meanwhile)
+- [x] Razorpay website **APPROVED** (2026-08-08) → LIVE `rzp_live_...` keys: generate in Razorpay dashboard → set `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` in Render. No code change needed.
 - [ ] Google login ✅ verified live & free (no domain needed)
 - [ ] **Domain: skipped** (none purchased) — email stays Resend sandbox (test-only), site stays on free Vercel URL
 - [ ] Real SMTP delivery (needs a purchased domain → verify in Resend → update `EMAIL_FROM`) — deferred until user buys a domain
