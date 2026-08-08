@@ -168,7 +168,6 @@ FoodHub/
 ## 📚 More Docs
 
 - `WEBSITE_GUIDE.md` — how to use the site, role by role
-- `docs/how-i-built-this/` — the full build story + bug-fix log + deployment guide (for learners)
 
 ---
 
