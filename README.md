@@ -8,6 +8,21 @@ A full-stack **food delivery + e-commerce web app** built with the **MERN stack*
 
 ---
 
+## 🚀 Live Website
+
+> Try the deployed app right away — no setup needed.
+
+| What | Where |
+|------|-------|
+| **Website (frontend)** | <https://foodhub-seven-gules.vercel.app> |
+| **API (backend)** | <https://foodhub-api-u3oy.onrender.com> |
+| API health check | <https://foodhub-api-u3oy.onrender.com/health> |
+
+- Frontend hosted on **Vercel**, backend API on **Render** (free tier — may take a few seconds to wake up when idle).
+- **Demo credentials:** the accounts in the [Demo Accounts](#-demo-accounts-created-by-the-seeder) section work on the live site too.
+
+---
+
 ## ✨ Features
 
 ### 🧑 Customer
