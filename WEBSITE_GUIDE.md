@@ -1,128 +1,157 @@
-# 📖 FoodHub — Website User Guide
+# 🍔 FoodHub — Website & User Guide
 
-A complete walkthrough of how everything works, written by role. Read this to run the app, log in, order food, run the store (admin), deliver orders (delivery partner), or chat with the AI assistant.
-
----
-
-## Table of Contents
-1. [Running the website](#1-running-the-website)
-2. [Demo accounts](#2-demo-accounts)
-3. [Shopping as a customer](#3-shopping-as-a-customer)
-4. [The AI chat assistant (Foodie)](#4-the-ai-chat-assistant-foodie)
-5. [Admin dashboard](#5-admin-dashboard)
-6. [Delivery partner app](#6-delivery-partner-app)
-7. [Common tasks / troubleshooting](#7-common-tasks--troubleshooting)
+This guide explains **how the website works and how to use it** — as a customer,
+as a delivery partner, and as the admin. It assumes you have followed *Getting Started*
+in the README and the site is running at `http://localhost:5173`.
 
 ---
 
-## 1. Running the website
+## 1. What this site does in one line
 
-**One-time setup**
-1. `npm run setup` — installs server + client dependencies.
-2. `cp server/.env.example server/.env` and fill in your `MONGODB_URI` and JWT secrets.
-3. `npm run seed` — loads demo categories, foods, coupons and demo accounts.
-4. `npm run dev` — starts both apps.
-
-**Where to open**
-| App | URL |
-|-----|-----|
-| Website (client) | http://localhost:5173 |
-| API (server) | http://localhost:5000 |
-| API health check | http://localhost:5000/health |
-
-Use the **bright orange floating button** at the bottom-right of any page to open the **Foodie AI assistant**.
+FoodHub is an online **food ordering + delivery management** platform: customers
+browse a menu, add food to a cart, apply coupons, check out (COD / UPI / Razorpay),
+track orders and leave reviews — while **admins** manage everything and **delivery
+partners** fulfill orders with OTP-verified drop-offs. A built-in **AI chatbot**("Foodie")
+answers questions instantly on any page.
 
 ---
 
-## 2. Demo accounts
+## 2. Accounts & Roles
 
 | Role | Email | Password | What you get |
 |------|-------|----------|--------------|
-| Admin | `admin@foodhub.com` | `Admin@123` | Dashboard, full store control |
-| Customer | `user@foodhub.com` | `User@123` | Normal shopping experience |
-| Delivery | `delivery@foodhub.com` | `Delivery@123` | Delivery assignments & earnings |
+| Admin | `admin@foodhub.com` | `Admin@123` | `/admin` dashboard after login |
+| Customer | `user@foodhub.com` | `User@123` | normal shopping experience |
+| Delivery | `delivery@foodhub.com` | `Delivery@123` | delivery-partner app |
 
-**Login → your role directs you automatically** to the matching dashboard (customer home, admin dashboard, or delivery app).
-
----
-
-## 3. Shopping as a customer
-
-**Browse**
-- **Home** — featured dishes + "most popular" strip, or search straight from the hero.
-- **Menu** — browse by category, use filters (**veg** / **non-veg** / price), sort by price or rating. Every dish shows a **green dot (veg)** or **red dot (non-veg)**.
-- **Food detail** — open any dish to see ingredients, allergens, nutrition, prep time, ratings and reviews.
-
-**Order flow**
-1. Tap **+ Add** on any dish → go to **Cart** (or open the cart drawer in the navbar).
-2. In cart, enter a **coupon code** (see coupons) and review your summary — paying online during checkout gives **free delivery**.
-3. Hit **Checkout** → choose or add a **delivery address** → choose payment: **COD**, **UPI** (Google Pay / PhonePe / Paytm), or **Razorpay**.
-4. Confirm → you get an **order number** instantly.
-
-**Track & manage orders**
-- **My Orders** → open any order → live status timeline: *Pending → Confirmed → Preparing → Out for Delivery → Delivered*.
-- Cancel (while Pending/Confirmed) — online payments are auto-refunded.
-- Rate dishes and read others' reviews on food detail pages.
-
-**Profile & account**
-- Update name/phone, change password, save addresses, manage your wishlist.
+The site sends you to your correct area after login based on your role
+("role-based redirect"). New registrations are **customer** by default.
 
 ---
 
-## 4. The AI chat assistant (Foodie)
+## 3. Customer — Every Screen Explained
 
-The floating **bottom-right button** opens the chat widget. Foodie answers 90+ questions instantly using a built-in rule engine site base — no external API needed.
+### Home (`/`)
+- Animated **offer ticker** (free delivery on online payments, new dishes…).
+- **Hero section** with a search box — type a dish name and press search to go to the menu.
+- **Featured / bestseller** dishes (cards with photos, price, veg/non-veg dot, rating).
+- **Category cards** — click to browse that category on the Menu.
+- **How it works** strip — search → order → enjoy.
+- **"Why FoodHub"** trust section and a newsletter CTA.
 
-Examples of things to ask:
-- *"How do I place an order?"* → stepped walkthrough
-- *"Is delivery free?"* → delivery-policy answer
-- *"How do I track my order?"* → tracking walkthrough
-- *"How do I apply a coupon?"* → coupon walkthrough
-- *"What payment methods are available?"* → payment options
-- *"What are the bestsellers?"*, *"Do you have veg options?"*, *"Tell me a joke"*, *"x + y"*, etc.
+### Menu (`/menu`)
+- **Search box** (full-text across dish names/descriptions).
+- **Category chips** filter; **veg/non-veg toggle**; **sort** by popularity / price / rating; **pagination**.
+- Each dish card → tap opens **Food Detail**.
 
-Widget extras:
-- **`?` button** — opens a browsable **FAQ panel** grouped by topic (Ordering, Delivery, Payments, Coupons, Menu, Account). Tap a question to ask it.
-- **Conversation history persists** across page reloads (in your browser).
-- **Clear chat** — the **trash icon** in the header resets the conversation.
+### Food Detail (`/food/:slug`)
+- Full description, ingredients, allergens, **nutrition facts**, prep time, rating & **reviews**.
+- **Add to cart** (choose quantity), **toggle wishlist**, see **related dishes**.
+- Submit a review (own purchase recommended), mark reviews helpful.
+
+### Cart (`/cart`)
+- Add / remove / update quantities, see itemised totals (price × qty).
+- Enter a **coupon code** to see the discount instantly.
+- **Proceed to checkout**.
+
+### Checkout (`/checkout`)
+- Pick or add a **delivery address** (label, line1/line2, city, state, pincode, phone).
+- Choose an address as **default**.
+- **Payment method**: Cash on Delivery (recommended for demo; no keys needed) or
+  Razorpay/UPI if keys are configured. Online payment qualifies for **free delivery**.
+- Review order summary (subtotal, delivery charge, tax, coupon, grand total) and **Place Order**.
+
+### My Orders (`/orders`) & Order Detail (`/orders/:id`)
+- Live status timeline: **Pending → Confirmed → Preparing → Out for Delivery → Delivered**.
+- **Cancel order** button while it is still Pending/Confirmed (online payments auto-refund).
+- Invoice line items, delivery address, payment total.
+
+### My Account (`/profile`)
+- Update name/phone/avatar, **change password**, manage **addresses**.
+- **Wishlist** — items you starred.
+
+### AI Chatbot 💬 (every page, bottom-right)
+- Tap the floating **orange button** → chat window opens.
+- Ask anything: *"how do I place an order?", "is delivery free?", "track my order?",
+  "what payment methods?", "apply a coupon", "do you have veg options?"* — plus small talk,
+  jokes and even math (*"what is 100-20?"*).
+- Tap suggested **chips** under messages, or open the **? (FAQ)** panel to browse
+  full answers by topic.
+- History is saved between visits (clear with the 🗑 button in the header).
 
 ---
 
-## 5. Admin dashboard
+## 4. Admin Dashboard (`/admin`)
 
-Log in as **admin**. The left sidebar has:
+| Page | What you can do |
+|------|-----------------|
+| **Overview** | Revenue, order counts, top-selling foods, category stats (charts) |
+| **Foods** | Create / edit / delete dishes, manage **stock**, photos, veg flag, prices |
+| **Categories** | Add / rename / delete categories |
+| **Coupons** | Create codes (percent/flat), min-order, usage limits, activate/deactivate |
+| **Orders** | See every order, progress status (✅), **assign a delivery partner**, issue **refunds** |
+| **Users** | List customers/delivery, change role, enable/disable accounts |
+| **Reviews** | Moderate (view / delete) submitted reviews |
+| **Settings** | Store-level: delivery charge, tax %, online-payment toggles |
 
-- **Dashboard** — revenue, order stats, top-selling foods, 30-day revenue chart, category breakdown.
-- **Foods** — add / edit / delete dishes, set price, stock, veg/non-veg, category; images, descriptions (min 10 chars).
-- **Categories** — create, rename, archive.
-- **Coupons** — create discount codes (%), set min order, limits, active/inactive.
-- **Orders** — see every order, walk the status forward (Confirm → Prepare → Out for delivery), assign a **delivery partner**, issue **refunds**, view customer details.
-- **Users** — change roles (user/delivery/admin), disable accounts.
-- **Reviews** — moderate or delete reviews.
-- **Settings** — delivery charges, free-delivery threshold, tax, payment toggle, chatbot tips.
-
----
-
-## 6. Delivery partner app
-
-Log in as the delivery partner:
-- **Today's deliveries** — assigned orders listed with pickup/pack coordinates-style flow.
-- Open an order to run its status through **Out for delivery → Delivered**.
-- **Verify with OTP** — the customer's delivery OTP shown at handoff to confirm delivery.
-- **Earnings** — tracked per order, today vs all-time.
+The sidebar groups these; every admin action updates the store instantly.
 
 ---
 
-## 7. Common tasks / troubleshooting
+## 5. Delivery Partner App (`/delivery`)
 
-| Problem | Solution |
-|---------|----------|
-| Duplicate seed dishes on menu | Re-run `npm run seed` once — the seeder de-dupes auto-slugged clones. |
-| Free delivery not applied | Checkout with an **online payment** (COD also works, but the discount applies to online). |
-| Chatbot says "couldn't reach the kitchen" | Make sure the server is running on port 5000 and the chat uses `/api/chatbot/ask`. |
-| Can't verify email | In dev, email may not physically send if SMTP is unset — the app logs a preview link; or use resend-verification. |
-| 401 "Session expired" | Re-login; access tokens are short-lived (15m) and the client refreshes automatically. |
-| Payment not active | Add Razorpay keys to `server/.env` (test keys first). COD always works. |
-| Menu shows no images | Images are remote URLs in seed data — requires internet. |
+- **Dashboard** — your assigned deliveries with pickup/address items.
+- Open an order → **mark status** at each leg (Picked Up → Out for Delivery…).
+- At drop-off the customer gets a **4-digit OTP** — you enter the correct OTP to
+  complete the delivery (**OTP-verified completion**, no fake handoffs).
+- **Orders detail** screen shows item list, customer address and phone.
+- **Earnings** shows your payout balance.
 
-For deeper build details, see [`HOW_I_BUILT_THIS.md`](HOW_I_BUILT_THIS.md).
+Demo login uses the *delivery@foodhub.com* demo account in the main app;
+
+---
+
+## 6. FAQ (People ask)
+
+**Q: Why is delivery free?** — Free delivery when you pay online; otherwise a delivery fee (setting in admin → Settings) is added.
+
+**Q: My coupon isn't working** — Check it's still active, respects the min-order, not expired, and has usage left (admin can verify).
+
+**Q: I can't cancel my order** — Only Pending/Confirmed orders can; once Preparing/Out for delivery the rider must complete it.
+
+**Q: Where are Razorpay payments?** — You must add `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` to `server/.env`; until then COD is used. Payments integration & verification code is complete.
+
+**Q: Why is the chatbot saying "I'm not sure"?** — It matches 100+ hand-written intents
+  by regex score; you can add new intents in `server/src/utils/chatbotKnowledge.js`.
+
+---
+
+## 7. Useful API Endpoints (for developers)
+
+| Method | Endpoint | Notes |
+|--------|----------|-------|
+| `POST` | `/api/auth/register` | create customer account + tokens |
+| `POST` | `/api/auth/login` | login |
+| `POST` | `/api/auth/refresh` | rotate access token |
+| `POST` | `/api/auth/logout` | logout |
+| `GET` | `/api/foods?category=&isVeg=&sort=&page=` | public catalogue |
+| `GET` | `/api/foods/:slug`, `/api/categories` | detail / categories |
+| `POST` | `/api/orders/preview` | order totals preview |
+| `POST` | `/api/orders` | create order (auth) |
+| `GET` | `/api/orders/me` | my orders (auth) |
+| `POST` | `/api/orders/coupon/apply` | coupon check |
+| `POST` | `/api/chatbot/ask` | AI assistant (public) |
+| `/api/admin/*` | | admin-only (role guard) |
+| `/api/delivery/*` | | delivery-only (role guard) |
+
+---
+
+## 8. Resetting to a clean state
+
+```bash
+# wipe your local DB collections and re-seed
+mongosh localhost:27017/foodhub --eval "db.dropDatabase()"
+npm run seed
+```
+
+*Enjoy your food! 🎉*
