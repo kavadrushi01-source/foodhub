@@ -35,7 +35,7 @@ const ensureOtp = (order) => {
  * Calculate order totals from items + settings (delivery, packaging, tax)
  * and optional coupon. Returns breakdown used by both checkout and preview.
  */
-const calculateTotals = async (items, { couponCode, userId } = {}) => {
+const calculateTotals = async (items, { couponCode, userId, paymentMethod } = {}) => {
   const settings = await Settings.getSettings();
 
   const foodIds = items.map((i) => i.food);
@@ -62,7 +62,10 @@ const calculateTotals = async (items, { couponCode, userId } = {}) => {
   }
   subTotal = round2(subTotal);
 
-  const deliveryCharge = subTotal >= settings.delivery.freeDeliveryThreshold ? 0 : settings.delivery.baseCharge;
+  // Free delivery for online payments (razorpay/UPI) + above the threshold.
+  const isOnline = paymentMethod === 'razorpay' || paymentMethod === 'upi';
+  const freeOnlineDelivery = (settings.delivery.freeDeliveryViaOnlinePayment ?? true) && isOnline;
+  const deliveryCharge = freeOnlineDelivery || subTotal >= settings.delivery.freeDeliveryThreshold ? 0 : settings.delivery.baseCharge;
   const packagingCharge = round2(settings.charges.packagingCharge || 0);
   const tax = round2((subTotal * (settings.charges.taxPercent || 0)) / 100);
 
@@ -83,8 +86,8 @@ const calculateTotals = async (items, { couponCode, userId } = {}) => {
 };
 
 export const previewCheckout = async (req, res) => {
-  const { items, couponCode } = req.body;
-  const b = await calculateTotals(items, { couponCode, userId: req.user?._id });
+  const { items, couponCode, paymentMethod } = req.body;
+  const b = await calculateTotals(items, { couponCode, userId: req.user?._id, paymentMethod });
   return res.status(200).json({
     success: true, status: 200,
     data: {
@@ -92,6 +95,7 @@ export const previewCheckout = async (req, res) => {
       packagingCharge: b.packagingCharge, tax: b.tax, discount: b.discount,
       grandTotal: b.grandTotal, couponCode: b.coupon?.code || '',
       freeDeliveryThreshold: b.settings.delivery.freeDeliveryThreshold,
+      freeDeliveryMessage: b.settings.delivery.freeDeliveryMessage || 'Free delivery on online payments & orders above ₹' + b.settings.delivery.freeDeliveryThreshold,
     },
   });
 };
@@ -129,7 +133,7 @@ export const createOrder = async (req, res) => {
     throw new ValidationError('A delivery address is required');
   }
 
-  const b = await calculateTotals(items, { couponCode, userId: req.user._id });
+  const b = await calculateTotals(items, { couponCode, userId: req.user._id, paymentMethod });
 
   // Reject online payment methods when the gateway isn't configured, so an
   // order is never left stuck in "pending" that can't actually be paid.

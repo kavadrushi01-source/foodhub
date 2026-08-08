@@ -81,6 +81,22 @@ export default function Menu() {
             ))}
           </div>
         )}
+
+        {/* Category chips — scrollable on mobile, picky premium look */}
+        {categories.length > 0 && (
+          <div className="flex overflow-x-auto gap-2 mt-4 -mx-1 px-1 pb-1 hide-scrollbar">
+            <button onClick={() => updateParam('category', '')}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${!category ? 'bg-brand-gradient text-white border-transparent shadow-glow' : 'bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 text-ink-600 dark:text-ink-300 hover:border-brand-400'}`}>
+              All
+            </button>
+            {categories.map((c) => (
+              <button key={c._id} onClick={() => updateParam('category', c.slug)}
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${category === c.slug ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white border-transparent shadow-glow' : 'bg-white dark:bg-ink-900 border-ink-200 dark:border-ink-700 text-ink-600 dark:text-ink-300 hover:border-brand-400'}`}>
+                {c.icon} {c.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-[230px_1fr] gap-6">

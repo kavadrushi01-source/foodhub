@@ -9,7 +9,7 @@ const FREE_DELIVERY = 299;
 const STATS = [
   { value: '2.5k+', label: 'Happy customers', icon: Star },
   { value: '30 min', label: 'Avg. delivery', icon: Clock },
-  { value: '120+', label: 'Dishes', icon: UtensilsCrossed },
+  { value: '150+', label: 'Dishes', icon: UtensilsCrossed },
 ];
 
 export default function Home() {
@@ -59,7 +59,7 @@ export default function Home() {
 
             <div className="mt-8 flex flex-wrap gap-6 text-sm text-ink-600 dark:text-ink-300 animate-fade-in-up delay-500">
               <span className="flex items-center gap-2"><Clock size={18} className="text-brand-500" /> 30 min delivery</span>
-              <span className="flex items-center gap-2"><Truck size={18} className="text-brand-500" /> Free delivery over ₹299</span>
+              <span className="flex items-center gap-2"><Truck size={18} className="text-brand-500" /> Free delivery over ₹299 & on online payments</span>
               <span className="flex items-center gap-2"><MapPin size={18} className="text-brand-500" /> 2.5k+ restaurants</span>
             </div>
           </div>
@@ -175,7 +175,7 @@ export default function Home() {
           <div className="relative flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
             <div className="max-w-lg">
               <h2 className="font-display font-bold text-2xl lg:text-4xl leading-tight">Fresh food, delivered fast to your door.</h2>
-              <p className="text-white/90 mt-3">Order now and get your favorites within 30 minutes — free delivery on orders over ₹{FREE_DELIVERY}.</p>
+              <p className="text-white/90 mt-3">Order now and get your favorites within 30 minutes — free delivery on orders over ₹{FREE_DELIVERY}, or pay online (UPI/Card) and delivery is always on us.</p>
             </div>
             <Link to="/menu" className="inline-flex items-center gap-2 bg-white text-brand-700 font-semibold px-8 py-4 rounded-none rounded-xl hover:bg-orange-50 hover:scale-[1.03] transition-all shadow-lg shrink-0 group">
               Start Ordering <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />

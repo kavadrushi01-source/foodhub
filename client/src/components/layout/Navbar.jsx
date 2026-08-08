@@ -124,9 +124,9 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-2 ml-1">
-              <Link to="/login" className="btn-ghost text-sm">Login</Link>
-              <Link to="/register" className="btn-primary text-sm">Sign Up</Link>
+            <div className="flex items-center gap-1 sm:gap-2 ml-1">
+              <Link to="/login" className="btn-ghost text-xs sm:text-sm px-2.5 sm:px-4 py-2">Login</Link>
+              <Link to="/register" className="btn-primary text-xs sm:text-sm px-2.5 sm:px-4 py-2 hidden sm:inline-flex">Sign Up</Link>
             </div>
           )}
         </div>

@@ -46,7 +46,7 @@ export default function Checkout() {
     }
     setLoadingPreview(true);
     try {
-      const res = await orderApi.preview({ items: items.map((i) => ({ food: i.food._id, quantity: i.quantity })), couponCode: coupon?.code || '' });
+      const res = await orderApi.preview({ items: items.map((i) => ({ food: i.food._id, quantity: i.quantity })), couponCode: coupon?.code || '', paymentMethod });
       setPreview(res.data);
     } catch (err) {
       console.error('Failed to load preview:', err);
@@ -74,7 +74,7 @@ export default function Checkout() {
       .finally(() => setLoadingPayment(false));
   }, [isAuthenticated]);
 
-  useEffect(() => { loadPreview(); }, [items, coupon]);
+  useEffect(() => { loadPreview(); }, [items, coupon, paymentMethod]);
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
@@ -157,6 +157,8 @@ export default function Checkout() {
   const discount = preview?.discount || 0;
   const total = preview?.grandTotal ?? subtotal + deliveryFee - discount;
   const isEmpty = !items.length;
+  const isOnline = paymentMethod === 'upi' || paymentMethod === 'razorpay';
+  const deliveryFree = isOnline || (preview && deliveryFee === 0);
 
   if (isEmpty) {
     return (
@@ -269,6 +271,9 @@ export default function Checkout() {
                   UPI / Card are available after the store owner configures Razorpay keys. Cash on Delivery works now.
                 </p>
               )}
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                <ShieldCheck size={14} /> Save on delivery — paying online (UPI/Card) is always FREE delivery.
+              </p>
             </div>
           </div>
         </div>
@@ -289,9 +294,17 @@ export default function Checkout() {
             </div>
             <div className="border-t pt-3 space-y-2 text-sm">
               <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
-              <div className="flex justify-between"><span>Delivery Fee</span><span>{deliveryFee ? formatCurrency(deliveryFee) : '--'}</span></div>
+              <div className="flex justify-between">
+                <span>Delivery Fee</span>
+                {deliveryFree ? <span className="font-semibold text-emerald-600 flex items-center gap-1"><ShieldCheck size={14} /> FREE</span> : <span>{formatCurrency(deliveryFee)}</span>}
+              </div>
               {discount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-{formatCurrency(discount)}</span></div>}
             </div>
+            {deliveryFree && (
+              <p className="mt-3 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 flex items-center gap-1.5">
+                <ShieldCheck size={14} /> {isOnline ? 'Free delivery via online payment applied' : `Free delivery — order above ${formatCurrency(preview?.freeDeliveryThreshold)}`}
+              </p>
+            )}
             <button disabled={placing || !selectedAddress} onClick={placeOrder} className="w-full mt-4 bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
               {placing ? 'Placing Order...' : `Pay ${formatCurrency(total)}`}
             </button>

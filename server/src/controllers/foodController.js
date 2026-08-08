@@ -84,10 +84,22 @@ export const getFoodBySlug = async (req, res) => {
   });
 };
 
-/** Public: list categories. */
+/** Public: list categories with live food counts + a representative image. */
 export const getCategories = async (req, res) => {
-  const categories = await Category.find({ isActive: true }).sort({ displayOrder: 1, name: 1 }).lean();
-  return res.status(200).json({ success: true, status: 200, data: { categories } });
+  const [categories, counts] = await Promise.all([
+    Category.find({ isActive: true }).sort({ displayOrder: 1, name: 1 }).lean(),
+    Food.aggregate([
+      { $match: { isAvailable: true } },
+      { $group: { _id: '$category', count: { $sum: 1 }, image: { $first: '$primaryImage' } } },
+    ]),
+  ]);
+  const countMap = new Map(counts.map((c) => [String(c._id), c]));
+  const enriched = categories.map((c) => ({
+    ...c,
+    foodCount: countMap.get(String(c._id))?.count || 0,
+    image: c.image || countMap.get(String(c._id))?.image || '',
+  }));
+  return res.status(200).json({ success: true, status: 200, data: { categories: enriched } });
 };
 
 /** Public: get bestsellers / new arrivals for home page. */

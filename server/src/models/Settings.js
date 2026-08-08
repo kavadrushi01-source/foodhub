@@ -12,6 +12,8 @@ const settingsSchema = new mongoose.Schema(
       baseCharge: { type: Number, default: 30 },
       perKmCharge: { type: Number, default: 5 },
       freeDeliveryThreshold: { type: Number, default: 299 },
+      freeDeliveryViaOnlinePayment: { type: Boolean, default: true },
+      freeDeliveryMessage: { type: String, default: 'Free delivery on online payments & orders above ₹299' },
       maxDeliveryRadiusKm: { type: Number, default: 10 },
       estimatedPrepTimeMin: { type: Number, default: 15 },
       estimatedDeliveryTimeMin: { type: Number, default: 30 },

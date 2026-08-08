@@ -89,6 +89,9 @@ function FreeDeliveryBar({ progress, remaining }) {
         <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5, ease: 'easeOut' }}
           className={`h-full rounded-full ${unlocked ? 'bg-green-500' : 'bg-brand-gradient'}`} />
       </div>
+      <p className="text-[11px] text-ink-400 dark:text-ink-500 mt-1.5 flex items-center gap-1">
+        <Truck size={12} /> Or pay online (UPI/Card) at checkout for instant free delivery
+      </p>
     </div>
   );
 }
