@@ -15,10 +15,10 @@ jobs:
         ports:
           - 27017:27017
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -28,6 +28,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --prefix client && npm install --prefix server
+
+      - name: Lint client
+        run: npm run lint --prefix client
 
       - name: Syntax-check server
         run: |

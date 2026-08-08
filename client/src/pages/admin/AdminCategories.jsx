@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { adminApi } from '../../api';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';

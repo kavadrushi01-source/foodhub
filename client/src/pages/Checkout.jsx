@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MapPin, Banknote, CreditCard, ShieldCheck, Plus, Loader2 } from 'lucide-react';
+import { Banknote, CreditCard, ShieldCheck, Plus, Loader2 } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import { orderApi, foodApi, paymentApi } from '../api';
 import { openRazorpayCheckout } from '../utils/razorpay';
 import { formatCurrency } from '../utils/format';
-import Button from '../components/ui/Button';
 import toast from 'react-hot-toast';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, clearCart, coupon } = useCartStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [isNewAddress, setIsNewAddress] = useState(false);
@@ -255,7 +254,7 @@ export default function Checkout() {
                 { id: 'razorpay', label: 'Credit / Debit Card & Net Banking', icon: CreditCard, desc: 'Visa, Mastercard, RuPay via Razorpay', enabled: paymentConfig?.methods?.includes('razorpay') },
               ]
                 .filter((o) => o.enabled)
-                .map(({ id, label, icon: Icon, desc, enabled }) => (
+                .map(({ id, label, icon: Icon, desc }) => (
                   <label key={id} className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer ${paymentMethod === id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
                     <input type="radio" name="payment" value={id} checked={paymentMethod === id} onChange={() => setPaymentMethod(id)} className="hidden" />
                     <Icon className="text-emerald-600" size={22} />

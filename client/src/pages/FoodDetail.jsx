@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart, Plus, Minus, Clock, ChevronRight, Leaf, Flame, Droplets } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Heart, Plus, Minus, Clock, ChevronRight, Flame, Droplets } from 'lucide-react';
 import { foodApi } from '../api';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
@@ -14,7 +14,6 @@ import toast from 'react-hot-toast';
 
 export default function FoodDetail() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);

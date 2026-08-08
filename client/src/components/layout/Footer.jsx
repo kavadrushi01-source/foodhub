@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Instagram, Twitter, Mail, Phone, MapPin, Send, ChevronRight } from 'lucide-react';
+import { Instagram, Twitter, Send, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Footer() {

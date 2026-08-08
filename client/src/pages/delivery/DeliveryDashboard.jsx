@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wallet, Package, Star, Truck, ChevronRight, BellRing } from 'lucide-react';
+import { Wallet, Package, Truck, ChevronRight, BellRing } from 'lucide-react';
 import { deliveryApi } from '../../api';
 import { formatCurrency, timeAgo } from '../../utils/format';
 import Badge from '../../components/ui/Badge';

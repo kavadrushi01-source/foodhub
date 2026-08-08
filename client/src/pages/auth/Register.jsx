@@ -18,7 +18,7 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await register(form);
+      await register(form);
       toast.success('Account created! Check your email to verify.');
       navigate(form.role === 'delivery' ? '/delivery' : '/', { replace: true });
     } catch {} finally {

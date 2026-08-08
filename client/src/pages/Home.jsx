@@ -157,7 +157,7 @@ export default function Home() {
             { icon: Search, title: 'Explore & pick', desc: 'Browse thousands of dishes and add your favorites to the cart in one tap.' },
             { icon: Zap, title: 'We prepare fresh', desc: 'Kitchens cook it fresh, right when you order — quality you can taste.' },
             { icon: Truck, title: 'Fast doorstep delivery', desc: 'Your rider gets it to your door in ~30 minutes, track it live.' },
-          ].map((s, i) => (
+          ].map((s) => (
             <div key={s.title} className="relative card p-7 text-center hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-24 rounded-b-full bg-brand-gradient" />
               <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-glow mb-4 animate-fade-in-up"><s.icon size={24} /></div>

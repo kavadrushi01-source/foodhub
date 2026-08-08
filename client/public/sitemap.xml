@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/menu</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/categories</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/cart</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/login</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://foodhub-seven-gules.vercel.app/register</loc>
+    <priority>0.5</priority>
+  </url>
+</urlset>
