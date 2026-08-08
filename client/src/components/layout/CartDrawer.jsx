@@ -83,14 +83,14 @@ function FreeDeliveryBar({ progress, remaining }) {
   return (
     <div className="px-5 py-3 border-b border-ink-100 dark:border-ink-800 bg-brand-50/60 dark:bg-brand-900/10">
       <p className={`text-xs font-medium flex items-center gap-1.5 mb-1.5 ${unlocked ? 'text-green-600 dark:text-green-400' : 'text-ink-600 dark:text-ink-300'}`}>
-        {unlocked ? <><PartyPopper size={14} /> You've unlocked FREE delivery!</> : <><Truck size={14} /> Add {formatCurrency(remaining)} more for free delivery</>}
+        {unlocked ? <><PartyPopper size={14} /> You've unlocked FREE delivery!</> : <><Truck size={14} /> Free delivery on online payments — no minimum order</>}
       </p>
       <div className="h-1.5 rounded-full bg-ink-200/70 dark:bg-ink-800 overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5, ease: 'easeOut' }}
           className={`h-full rounded-full ${unlocked ? 'bg-green-500' : 'bg-brand-gradient'}`} />
       </div>
       <p className="text-[11px] text-ink-400 dark:text-ink-500 mt-1.5 flex items-center gap-1">
-        <Truck size={12} /> Or pay online (UPI/Card) at checkout for instant free delivery
+        <Truck size={12} /> Pay online (UPI/Card) at checkout for always-free delivery
       </p>
     </div>
   );

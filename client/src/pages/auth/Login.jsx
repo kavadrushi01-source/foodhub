@@ -23,7 +23,9 @@ export default function Login() {
     try {
       const res = await login(form);
       toast.success(`Welcome back, ${res.data.user.name}!`);
-      navigate(from, { replace: true });
+      const role = res.data.user?.role;
+      const fallback = role === 'admin' ? '/admin' : role === 'delivery' ? '/delivery' : '/';
+      navigate(from && from !== '/' ? from : fallback, { replace: true });
     } catch {} finally {
       setLoading(false);
     }

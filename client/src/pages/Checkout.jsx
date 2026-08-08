@@ -66,9 +66,14 @@ export default function Checkout() {
       .then((res) => {
         const cfg = res.data;
         setPaymentConfig(cfg);
-        if (cfg.methods.length && !cfg.methods.includes(paymentMethod)) {
-          setPaymentMethod(cfg.methods[0]);
-        }
+        // Default to an online method so free delivery applies right away;
+        // fall back to whatever the gateway offers (e.g. cod).
+        const next = cfg.methods.includes('upi')
+          ? 'upi'
+          : cfg.methods.includes('razorpay')
+            ? 'razorpay'
+            : cfg.methods[0] || 'cod';
+        setPaymentMethod(next);
       })
       .catch(() => {})
       .finally(() => setLoadingPayment(false));

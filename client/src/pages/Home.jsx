@@ -116,10 +116,21 @@ export default function Home() {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {data?.categories?.map((c) => (
               <Link key={c._id} to={`/menu?category=${c.slug}`}
-                className="group card p-4 text-center hover:border-brand-300 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
-                <div className="h-14 w-14 mx-auto rounded-2xl bg-brand-50 dark:bg-ink-800 flex items-center justify-center text-3xl mb-2.5 group-hover:bg-brand-gradient group-hover:scale-110 transition-all duration-300">{c.icon}</div>
-                <p className="font-medium text-sm text-ink-800 dark:text-ink-100 leading-tight">{c.name}</p>
-                <p className="text-xs text-ink-400 mt-1 line-clamp-1">{c.description || 'Delicious picks'}</p>
+                className="group card overflow-hidden rounded-2xl hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 relative aspect-[4/5]">
+                <div className="absolute inset-0 overflow-hidden">
+                  {c.image ? (
+                    <img src={c.image} alt={c.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100 dark:from-ink-800 dark:to-ink-900 text-5xl">{c.icon}</div>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5 group-hover:from-black/90 transition-colors duration-300" />
+                <div className="relative flex flex-col justify-end items-center h-full p-3">
+                  <span className="absolute top-2 right-2 bg-white/90 dark:bg-ink-900/80 text-ink-700 dark:text-ink-200 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur">{c.foodCount} items</span>
+                  <span className="text-3xl mb-1 drop-shadow group-hover:scale-110 transition-transform duration-300">{c.icon}</span>
+                  <p className="font-bold text-sm text-white leading-tight drop-shadow">{c.name}</p>
+                  <p className="text-[11px] text-white/80 mt-1 line-clamp-1 drop-shadow">{c.description || 'Delicious picks'}</p>
+                </div>
               </Link>
             ))}
           </div>

@@ -38,9 +38,9 @@ export default function FoodCard({ food }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}
-      className="card group overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col">
+      className="card gradient-border group overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col">
       <Link to={`/food/${food.slug}`} className="block relative">
-        <div className="relative h-48 overflow-hidden bg-ink-100 dark:bg-ink-800">
+        <div className="group-shine relative h-48 overflow-hidden bg-ink-100 dark:bg-ink-800">
           <img src={food.primaryImage || food.images?.[0]} alt={food.name} loading="lazy" onError={imgFallback} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">

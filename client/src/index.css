@@ -93,4 +93,68 @@
   .animation-delay-150 { animation-delay: 150ms; }
   .animation-delay-300 { animation-delay: 300ms; }
   .animation-delay-500 { animation-delay: 500ms; }
+  .ease-spring { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+}
+
+/* ============ Extra premium keyframes & helpers ============ */
+@keyframes pop-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop-in { animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float-y { animation: float-y 5s ease-in-out infinite; }
+
+@keyframes shimmer-sweep {
+  100% { transform: translateX(200%); }
+}
+
+/* Card image shine on hover */
+.group-shine {
+  position: relative;
+  overflow: hidden;
+}
+.group-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.28) 50%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+.group:hover .group-shine::after, .group-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Soft drop shadow for text over images */
+.drop-shadow-soft {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Premium gradient border on hover for featured cards */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.gradient-border:hover::before {
+  opacity: 1;
 }
