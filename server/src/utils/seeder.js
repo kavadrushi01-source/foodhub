@@ -24,6 +24,25 @@ const categories = [
   { name: 'Shakes', slug: 'shakes', icon: '🍹', description: 'Creamy thick shakes', displayOrder: 13 },
 ];
 
+// Curated cover photos per category (verified working Unsplash URLs). Kept
+// separate from the category objects so the seeder can backfill existing
+// categories that were seeded before images were added.
+const CATEGORY_IMAGES = {
+  burgers: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600',
+  pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
+  biryani: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600',
+  'street-food': 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=600',
+  starters: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600',
+  chinese: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600',
+  desserts: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600',
+  beverages: 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=600',
+  salads: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600',
+  pasta: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600',
+  sushi: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=600',
+  sandwiches: 'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=600',
+  shakes: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600',
+};
+
 const foods = [
   { name: 'Classic Veg Burger', slug: 'classic-veg-burger', category: 'Burgers', price: 149, discountPrice: 119, isBestseller: true, isVeg: true, cuisine: 'American', prepTime: 15, stock: 50,
     description: 'A crispy potato patty topped with fresh lettuce, tomatoes, onions, and our signature tangy mayo, all hugged by a toasted brioche bun.',
@@ -226,6 +245,18 @@ export const seedIfEmpty = async () => {
     }
   }
   if (imageFixes) logger.info(`🖼️ Fixed ${imageFixes} foods with empty/broken images`);
+
+  // Categories: backfill the curated cover photo for every category (covers
+  // both newly inserted categories and pre-existing ones seeded before images
+  // were added). Idempotent and safe to run on every boot.
+  let catImageFixes = 0;
+  for (const c of categories) {
+    const url = CATEGORY_IMAGES[c.slug] || c.image;
+    if (!url) continue;
+    const res = await Category.updateOne({ slug: c.slug, $or: [{ image: { $in: ['', null] } }, { image: { $exists: false } }] }, { $set: { image: url } });
+    if (res.modifiedCount || res.upsertedCount) catImageFixes += 1;
+  }
+  if (catImageFixes) logger.info(`🖼️ Added category cover images (${catImageFixes})`);
 
   const settings = await Settings.findOne({ key: 'store' });
   if (!settings) {
