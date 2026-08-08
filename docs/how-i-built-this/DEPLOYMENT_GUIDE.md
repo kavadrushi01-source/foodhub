@@ -9,7 +9,7 @@ step-by-step path from the laptop to the internet.
 
 | Part | Host | URL |
 |------|------|-----|
-| **Frontend** (React SPA) | **Vercel** | <https://foodhub-vignette-gules.vercel.app> |
+| **Frontend** (React SPA) | **Vercel** | <https://foodhub-seven-gules.vercel.app> |
 | **Backend** (Express API) | **Render** | <https://foodhub-api-u3oy.onrender.com> |
 | **Database** | MongoDB **Atlas** (cloud cluster) | connection string stored in Render env |
 | **Email** | **Resend** (SMTP) | sandbox/test mode for now |
@@ -44,7 +44,7 @@ JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 COOKIE_SECURE=true            # production must be secure-only cookies
 COOKIE_SAMESITE=lax
-CLIENT_URL=https://foodhub-gules.vercel.app
+CLIENT_URL=https://foodhub-seven-gules.vercel.app
 API_URL=https://foodhub-api-u3oy.onrender.com
 GOOGLE_CLIENT_ID=<...>        # Google OAuth
 GOOGLE_CLIENT_SECRET=<...>
