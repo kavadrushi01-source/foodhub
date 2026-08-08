@@ -1,8 +1,26 @@
 # 🍔 FoodHub — Website & User Guide
 
 This guide explains **how the website works and how to use it** — as a customer,
-as a delivery partner, and as the admin. It assumes you have followed *Getting Started*
-in the README and the site is running at `http://localhost:5173`.
+as a delivery partner, and as the admin.
+
+---
+
+## 0. Live Website
+
+> 🚀 **The live site is deployed** — no need to run it locally to try it.
+
+| What | Where |
+|------|-------|
+| **Website (frontend)** | <https://foodhub-seven-gules.vercel.app> |
+| **API (backend)** | <https://foodhub-api-u3oy.onrender.com> |
+| API health check | <https://foodhub-api-u3oy.onrender.com/health> |
+
+- The **frontend** is hosted on **Vercel**, the **backend API** on **Render** (free tier —
+  it may take a few seconds to wake up after being idle).
+- All demo credentials below work on the live site too.
+
+For **local development** (after following *Getting Started* in the README), the site
+runs at `http://localhost:5173` with the API on `http://localhost:5000`.
 
 ---
 
