@@ -2,6 +2,11 @@
 
 A practical walkthrough of how this food-delivery MERN project was designed, built, and shipped — written for learning, and to explain the whole journey step by step.
 
+> 📁 **In this folder:**
+> - [`README.md`](./README.md) — this full build story (idea → code → ship)
+> - [`BUG_FIXES_LOG.md`](./BUG_FIXES_LOG.md) — every bug we hit and how we fixed it
+> - [`DEPLOYMENT_GUIDE.md`](./DEPLOYMENT_GUIDE.md) — where it's deployed and how
+
 ---
 
 ## 1. The idea
