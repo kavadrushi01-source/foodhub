@@ -130,11 +130,7 @@ CORS is configured so the Vercel frontend is the only allowed origin.
 - **Email SMTP added** (Resend) + code timeout fix so email never hangs the app
 
 ### 🔴 Must-do (blockers before full production)
-1. **Razorpay LIVE keys** — ✅ **APPROVED 2026-08-08** (`https://foodhub-seven-gules.vercel.app`). To activate:
-   - Generate **LIVE** keys in the Razorpay dashboard (Account & Settings → Websites & API keys) → they start `rzp_live_...`.
-   - Set them on Render: `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` → Render auto-deploys.
-   - Toggle the website from **Test → Live** in the Razorpay dashboard.
-   - No code change required (server reads env vars; client gets the live key dynamically).
+1. **Razorpay LIVE keys** — ✅ **DONE & VERIFIED 2026-08-08**: LIVE `rzp_live_...` keys set in Render; `/api/payments/config` → `razorpayConfigured: true`, [`cod`, `upi`, `razorpay`]. Online payments work in production.
 2. **Email SMTP delivery** — Resend is in **sandbox** mode, so emails only send to your verified/test email. **Decision: no domain purchased → email stays sandbox (free).** To send to real users you'd later buy a domain, verify it in Resend, and update `EMAIL_FROM`:
    - Resend: https://resend.com → Domains → add + verify domain
    - Then Render `EMAIL_FROM`: `FoodHub <noreply@yourdomain.com>`
@@ -230,6 +226,9 @@ npm run build          # -> client/dist
   - **Build/syntax:** `npm run build` compiles clean; `node --check` passes on every server+client file; CI workflow `.github/workflows/ci.yml` valid.
   - **Result: zero bugs/errors found this session.** No code changes required.
 - 2026-08-08 (push): Code + docs pushed to `kavadrushi01-source/foodhub` (main). `WEBSITE_SUMMARY.md` updated. The only un-pushed item is `.github/workflows/ci.yml`, blocked by missing GitHub `workflow` scope (see item #14).
+- 2026-08-08 (payments): **Razorpay LIVE keys ACTIVATED & VERIFIED** — approved for `https://foodhub-seven-gules.vercel.app`, `rzp_live_...` set in Render, `/api/payments/config` now returns `razorpayConfigured: true`, `methods: [cod, upi, razorpay]`. Online payments (UPI/Card) work in production.
+- 2026-08-08 (polish): ESLint lint step (flat config, `no-unused-vars` cleanup across pages) + CI integration; `robots.txt` + `sitemap.xml`; SEO/OG meta + `og:image`; `preconnect` to Render API; CI actions bumped to **v5**. CI verified green.
+- 2026-08-08 (CI): Pushed `.github/workflows/ci.yml` after refreshing the OAuth token with `gh auth refresh -s workflow`; workflow runs green (install → lint → syntax-check → build → boot/health).
 - *(Next session: append here.)*
 
 *Maintained by the agent as the single source of truth for FoodHub status.*
