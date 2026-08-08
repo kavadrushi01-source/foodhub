@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import MobileSidebar from './MobileSidebar';
 import CartDrawer from './CartDrawer';
+import ChatWidget from '../chat/ChatWidget';
 import useUIStore from '../../store/uiStore';
 import useAuthStore from '../../store/authStore';
 
@@ -30,6 +31,7 @@ export default function Layout() {
       <Navbar />
       <MobileSidebar />
       <CartDrawer />
+      <ChatWidget />
       <main className="flex-1">
         <Outlet />
       </main>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Clock, Truck, UtensilsCrossed, MapPin, Star, Zap, Search } from 'lucide-react';
+import { ArrowRight, Clock, Truck, UtensilsCrossed, MapPin, Star, Zap, Search, Sparkles } from 'lucide-react';
 import { foodApi } from '../api';
 import FoodCard from '../components/food/FoodCard';
 import { SkeletonCard } from '../components/ui/Skeleton';
@@ -30,6 +30,26 @@ export default function Home() {
 
   return (
     <div className="overflow-x-clip">
+      {/* ===== OFFER TICKER ===== */}
+      <section className="bg-ink-950 dark:bg-black text-white overflow-hidden border-b border-ink-800/50">
+        <div className="flex animate-marquee whitespace-nowrap w-max">
+          {[0, 1].map((i) => (
+            <div key={i} className="flex items-center gap-10 px-5 py-2 text-xs font-semibold tracking-wide uppercase text-white/90">
+              <span className="flex items-center gap-2"><Sparkles size={14} className="text-amber-400" /> Free delivery on online payments</span>
+              <span className="flex items-center gap-2">🍕 New: Momos, Oreo Shake &amp; more</span>
+              <span className="flex items-center gap-2">⚡ 30-min doorstep delivery</span>
+              <span className="flex items-center gap-2">💳 UPI · Cards · COD accepted</span>
+              <span className="flex items-center gap-2">🤖 AI Foodie help 24/7</span>
+              <span className="flex items-center gap-2"><Sparkles size={14} className="text-amber-400" /> Free delivery on online payments</span>
+              <span className="flex items-center gap-2">🍕 New: Momos, Oreo Shake &amp; more</span>
+              <span className="flex items-center gap-2">⚡ 30-min doorstep delivery</span>
+              <span className="flex items-center gap-2">💳 UPI · Cards · COD accepted</span>
+              <span className="flex items-center gap-2">🤖 AI Foodie help 24/7</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ===== HERO ===== */}
       <section className="relative bg-brand-soft dark:bg-ink-900/40 noise">
         <div className="absolute inset-0 bg-mesh-dark animate-fade-in" aria-hidden />

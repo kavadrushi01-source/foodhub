@@ -92,3 +92,7 @@ export const paymentApi = {
   createOrder: (orderId) => api.post('/payments/order', { orderId }),
   verify: (data) => api.post('/payments/verify', data),
 };
+
+export const chatApi = {
+  ask: (message) => api.post('/chatbot/ask', { message }),
+};

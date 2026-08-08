@@ -18,6 +18,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import deliveryRoutes from './routes/deliveryRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import chatbotRoutes from './routes/chatbotRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/error.js';
 
@@ -87,6 +88,9 @@ app.get('/health', (_req, res) => {
 
 // ============ ROUTES ============
 app.use('/api/auth', authLimiter, authRoutes);
+// Chatbot is public (stateless knowledge engine) — must be mounted before the
+// food router, whose blanket `router.use(protect)` would gate guests.
+app.use('/api/chatbot', chatbotRoutes);
 app.use('/api', foodRoutes);          // /api/foods, /api/categories, /api/reviews, /api/wishlist, /api/addresses
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);

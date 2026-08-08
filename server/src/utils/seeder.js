@@ -20,6 +20,8 @@ const categories = [
   { name: 'Salads', slug: 'salads', icon: '🥗', description: 'Fresh healthy bowls', displayOrder: 9 },
   { name: 'Pasta', slug: 'pasta', icon: '🍝', description: 'Italian classics', displayOrder: 10 },
   { name: 'Sushi', slug: 'sushi', icon: '🍣', description: 'Fresh sushi & rolls', displayOrder: 11 },
+  { name: 'Sandwiches', slug: 'sandwiches', icon: '🥪', description: 'Toasted & club sandwiches', displayOrder: 12 },
+  { name: 'Shakes', slug: 'shakes', icon: '🍹', description: 'Creamy thick shakes', displayOrder: 13 },
 ];
 
 const foods = [
@@ -77,7 +79,7 @@ const foods = [
     nutrition: { calories: 410, protein: 6, carbs: 44, fat: 24, fiber: 2 }, tags: ['dessert', 'chocolate'] },
   { name: 'Gulab Jamun (2 pcs)', slug: 'gulab-jamun-2pcs', category: 'Desserts', price: 99, isVeg: true, cuisine: 'Indian', prepTime: 10, stock: 50,
     description: 'Soft, syrupy khoya dumplings flavoured with cardamom and rose water. A timeless Indian sweet.',
-    images: ['https://images.unsplash.com/photo-1628524239134-cd1c37b8aed8?w=800'], ingredients: ['Khoya', 'Sugar', 'Cardamom', 'Rose water'], allergens: ['Dairy'], nutrition: { calories: 280, protein: 4, carbs: 48, fat: 9, fiber: 0 }, tags: ['dessert', 'sweet'] },
+    images: ['https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800'], ingredients: ['Khoya', 'Sugar', 'Cardamom', 'Rose water'], allergens: ['Dairy'], nutrition: { calories: 280, protein: 4, carbs: 48, fat: 9, fiber: 0 }, tags: ['dessert', 'sweet'] },
   { name: 'Fresh Lime Soda', slug: 'fresh-lime-soda', category: 'Beverages', price: 79, isVeg: true, cuisine: 'Indian', prepTime: 5, stock: 80,
     description: 'Tangy lime juice mixed with sweet or salted soda. The perfect refreshing companion to any meal.',
     images: ['https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800'], nutrition: { calories: 90, protein: 0, carbs: 23, fat: 0, fiber: 0 }, tags: ['refreshing'] },
@@ -96,6 +98,21 @@ const foods = [
   { name: 'California Roll (8 pcs)', slug: 'california-roll-8pcs', category: 'Sushi', price: 299, isVeg: false, cuisine: 'Japanese', prepTime: 16, stock: 12,
     description: 'Crab, avocado and cucumber rolled in nori and sushi rice, topped with toasted sesame and tobiko.',
     images: ['https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800'], ingredients: ['Crab', 'Avocado', 'Cucumber', 'Sushi rice', 'Sesame'], allergens: ['Fish', 'Soy'], nutrition: { calories: 280, protein: 14, carbs: 40, fat: 8, fiber: 3 }, tags: ['fresh', 'roll'] },
+  { name: 'Grilled Veg Sandwich', slug: 'grilled-veg-sandwich', category: 'Sandwiches', price: 129, discountPrice: 109, isVeg: true, cuisine: 'Continental', prepTime: 12, stock: 45, isBestseller: true,
+    description: 'Toasted sourdough stacked with spiced potatoes, cucumber, tomato and zingy mint chutney. Grilled to golden perfection.',
+    images: ['https://images.unsplash.com/photo-1553909489-cd47e0907980?w=800'], ingredients: ['Sourdough', 'Potato', 'Cucumber', 'Tomato', 'Mint chutney'], allergens: ['Gluten'], nutrition: { calories: 380, protein: 12, carbs: 52, fat: 14, fiber: 6 }, tags: ['veg', 'grilled'] },
+  { name: 'Oreo Crunch Shake', slug: 'oreo-crunch-shake', category: 'Shakes', price: 149, discountPrice: 129, isVeg: true, cuisine: 'American', prepTime: 6, stock: 40, isNewArrival: true,
+    description: 'Thick vanilla shake blended with crushed Oreo cookies and topped with whipped cream and more cookie crumbs.',
+    images: ['https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800'], ingredients: ['Vanilla ice cream', 'Milk', 'Oreo', 'Whipped cream'], allergens: ['Dairy'], nutrition: { calories: 480, protein: 8, carbs: 68, fat: 21, fiber: 1 }, tags: ['shake', 'sweet'] },
+  { name: 'Fresh Mango Shake', slug: 'fresh-mango-shake', category: 'Shakes', price: 139, isVeg: true, cuisine: 'Indian', prepTime: 6, stock: 60,
+    description: 'Alphonso mango blended with chilled milk and a hint of cardamom — summer in a glass.',
+    images: ['https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=800'], ingredients: ['Mango', 'Milk', 'Sugar', 'Cardamom'], allergens: ['Dairy'], nutrition: { calories: 300, protein: 6, carbs: 54, fat: 8, fiber: 2 }, tags: ['shake', 'fruit'] },
+  { name: 'Steamed Chicken Momos', slug: 'steamed-chicken-momos', category: 'Street Food', price: 129, isVeg: false, cuisine: 'Tibetan', prepTime: 18, stock: 45, isNewArrival: true,
+    description: 'Ten soft steamed momos stuffed with juicy minced chicken, served with spicy tomato chutney.',
+    images: ['https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800'], ingredients: ['Chicken', 'Flour', 'Onion', 'Garlic', 'Tomato chutney'], allergens: ['Gluten'], nutrition: { calories: 350, protein: 18, carbs: 45, fat: 12, fiber: 2 }, tags: ['non-veg', 'street'] },
+  { name: 'Family Feast Platter', slug: 'family-feast-platter', category: 'Starters', price: 399, discountPrice: 349, isBestseller: true, isVeg: false, cuisine: 'Mixed', prepTime: 25, stock: 15,
+    description: 'A shareable platter of chicken tikka, kebab, paneer bites, fries and two dips — feast for 2–3.',
+    images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'], ingredients: ['Chicken tikka', 'Kebab', 'Paneer', 'Fries', 'Dips'], allergens: ['Dairy'], nutrition: { calories: 720, protein: 34, carbs: 55, fat: 38, fiber: 5 }, tags: ['non-veg', 'shareable'] },
 ];
 
 const coupons = [
@@ -166,6 +183,49 @@ export const seedIfEmpty = async () => {
     await Food.deleteMany({ _id: { $in: cloneIds } });
     logger.info(`🧹 Removed ${cloneIds.length} duplicate seed clones`);
   }
+
+  // --- Image health pass ---------------------------------------------
+  // 1) Known-broken URLs (hotlinks that 404 / need auth) -> working ones.
+  const imageFixups = {
+    'pizza-nrcp': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800', // was media.istockphoto.com (400)
+  };
+  // Verified working representative images used when a food has an empty or
+  // non-Unsplash image, keyed by category name.
+  const UNSPLASH = 'images.unsplash.com';
+  for (const [slug, url] of Object.entries(imageFixups)) {
+    const hit = await Food.findOneAndUpdate({ slug }, { $set: { primaryImage: url, images: [url] } });
+    if (hit) logger.info(`🖼️ Image fix applied: ${slug}`);
+  }
+  // Any food still with an empty image or an image hosted elsewhere gets a
+  // working dish photo from its own category.
+  const broken = await Food.find().lean();
+  const catDefaults = new Map();
+  for (const f of broken) {
+    if (!catDefaults.has(String(f.category))) {
+      const img = f.primaryImage || f.images?.[0] || '';
+      if (img.includes(UNSPLASH)) catDefaults.set(String(f.category), img);
+    }
+  }
+  if (!catDefaults.size) {
+    const catWithImg = await Food.findOne({}, 'category primaryImage images').lean();
+    if (catWithImg) {
+      const img = catWithImg.primaryImage || catWithImg.images?.[0] || '';
+      if (img) catDefaults.set(String(catWithImg.category), img);
+    }
+  }
+  let imageFixes = 0;
+  for (const f of broken) {
+    const current = f.primaryImage || f.images?.[0] || '';
+    const needsFix = !current || !current.includes('images.unsplash.com');
+    if (needsFix && catDefaults.size) {
+      const img = catDefaults.get(String(f.category)) || [...catDefaults.values()][0];
+      if (img) {
+        await Food.updateOne({ _id: f._id }, { $set: { primaryImage: img, images: img ? [img] : [] } });
+        imageFixes += 1;
+      }
+    }
+  }
+  if (imageFixes) logger.info(`🖼️ Fixed ${imageFixes} foods with empty/broken images`);
 
   const settings = await Settings.findOne({ key: 'store' });
   if (!settings) {
