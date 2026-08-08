@@ -135,13 +135,11 @@ export const seedIfEmpty = async () => {
 
   const existingCatSlugs = new Set((await Category.find().select('slug')).map((c) => c.slug));
   const newCatDocs = categories.filter((c) => !existingCatSlugs.has(c.slug));
-  let catDocs;
-  if (newCatDocs.length) {
-    catDocs = await Category.insertMany(newCatDocs);
-  } else {
-    catDocs = await Category.find().select('name slug').lean();
-  }
-  const catMap = new Map(catDocs.map((c) => [c.name, c._id]));
+  if (newCatDocs.length) await Category.insertMany(newCatDocs);
+  // Build the name→id map from ALL categories (existing + new) so foods that
+  // target pre-existing categories resolve correctly.
+  const allCats = await Category.find().select('name').lean();
+  const catMap = new Map(allCats.map((c) => [c.name, c._id]));
 
   const existingFoodSlugs = new Set((await Food.find().select('slug')).map((f) => f.slug));
   const foodDocs = foods
