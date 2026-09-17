@@ -38,7 +38,7 @@ answers questions instantly on any page.
 
 | Role | Email | Password | What you get |
 |------|-------|----------|--------------|
-| Admin | `admin@foodhub.com` | `Admin@123`-- if you try in live site link it's not going to work | `/admin` dashboard after login |
+| Admin | `admin@foodhub.com` | `Admin@123`-- this password is wrong in live site i changed | `/admin` dashboard after login |
 | Customer | `user@foodhub.com` | `User@123` | normal shopping experience |
 | Delivery | `delivery@foodhub.com` | `Delivery@123` | delivery-partner app |
 
