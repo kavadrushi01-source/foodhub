@@ -21,7 +21,7 @@ jobs:
       - name: Push server/ contents to the HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_REPO: kavadrushi01-source/foodhub-api
+          HF_REPO: rushi126/foodhub-api
         run: |
           if [ -z "$HF_TOKEN" ]; then
             echo "::error::HF_TOKEN secret is not set. Create a write token at https://huggingface.co/settings/tokens/new and add it as a repository secret named HF_TOKEN."
@@ -31,7 +31,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           rm -rf space
-          git clone --depth 1 "https://kavadrushi01-source:${HF_TOKEN}@huggingface.co/spaces/${HF_REPO}" space
+          git clone --depth 1 "https://rushi126:${HF_TOKEN}@huggingface.co/spaces/${HF_REPO}" space
 
           # Copy server/ to the Space root. .env / node_modules / logs are
           # excluded so secrets and junk never reach the (public) Space repo.

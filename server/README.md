@@ -37,7 +37,7 @@ vars at runtime; `.env` is never baked into the image):
 | `JWT_ACCESS_SECRET` | long random string (32+ chars) |
 | `JWT_REFRESH_SECRET` | long random string (32+ chars) |
 | `CLIENT_URL` | `https://foodhub-seven-gules.vercel.app` |
-| `API_URL` | `https://kavadrushi01-source-foodhub-api.hf.space` |
+| `API_URL` | `https://rushi126-foodhub-api.hf.space` |
 | `COOKIE_SECURE` | `true` |
 
 ## Endpoints

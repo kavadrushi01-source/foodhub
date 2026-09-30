@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://kavadrushi01-source-foodhub-api.hf.space/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://rushi126-foodhub-api.hf.space/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
