@@ -54,10 +54,9 @@ const app = express();
 // Render/Vercel sit behind proxies — needed for Secure cookies + correct IPs
 app.set('trust proxy', 1);
 
-// Sentry request tracking (no-op when no DSN configured)
-if (config.sentry.dsn) {
-  app.use(Sentry.Handlers.requestHandler());
-}
+// Sentry request metadata is handled by Sentry.init() + the SDK's own
+// request middleware in @sentry/node v8+ (the legacy Sentry.Handlers API
+// was removed and throws if referenced — keep this block empty).
 
 // ============ SECURITY MIDDLEWARE ============
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -180,10 +179,13 @@ app.use('/api/payments', dbReady, paymentRoutes);
 
 // ============ ERROR HANDLING ============
 app.use(notFound);
-app.use(errorHandler);
-// Sentry error reporting must be the outermost error middleware (no-op when no DSN)
+// Sentry must capture errors BEFORE our errorHandler responds (its handler
+// records the error then calls next(error) to pass it down the chain).
+// Uses the @sentry/node v8+ API — Sentry.Handlers was removed in v8 and
+// throws a TypeError at module load when SENTRY_DSN is set (no-op without DSN).
 if (config.sentry.dsn) {
-  app.use(Sentry.Handlers.errorHandler());
+  Sentry.setupExpressErrorHandler(app);
 }
+app.use(errorHandler);
 
 export default app;
