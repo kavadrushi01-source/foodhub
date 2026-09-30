@@ -29,7 +29,7 @@ export default function Home() {
         if (cancelled) return;
         setData({ featured: featured.data, categories: categories.data.categories });
         setApiDown(false);
-      } catch (err) {
+      } catch {
         // Error toast already shown by the axios interceptor (deduped).
         // Keep the page usable: hero + static sections still render, and the
         // empty grids show a friendly "server waking up" retry card instead
