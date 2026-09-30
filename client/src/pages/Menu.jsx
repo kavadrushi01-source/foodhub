@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { foodApi } from '../api';
+import ApiDownCard from '../components/ui/ApiDownCard';
 import FoodCard from '../components/food/FoodCard';
 import { SkeletonCard } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
@@ -21,6 +22,7 @@ export default function Menu() {
   const [categories, setCategories] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiDown, setApiDown] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const search = params.get('search') || '';
@@ -30,7 +32,7 @@ export default function Menu() {
   const page = Number(params.get('page')) || 1;
 
   const loadCategories = async () => {
-    try { const res = await foodApi.getCategories(); setCategories(res.data.categories); } catch {}
+    try { const res = await foodApi.getCategories(); setCategories(res.data.categories); setApiDown(false); } catch { setApiDown(true); }
   };
 
   const loadFoods = async () => {
@@ -43,7 +45,8 @@ export default function Menu() {
       const res = await foodApi.getFoods(query);
       setFoods(res.data.items);
       setMeta(res.data.meta);
-    } catch {} finally { setLoading(false); }
+      setApiDown(false);
+    } catch { setApiDown(true); } finally { setLoading(false); }
   };
 
   const updateParam = (key, value) => {
@@ -135,6 +138,8 @@ export default function Menu() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
             </div>
+          ) : apiDown && foods.length === 0 ? (
+            <ApiDownCard onRetry={() => loadFoods()} />
           ) : foods.length === 0 ? (
             <EmptyState title="No items found" description="No foods match your current filters. Try adjusting your search." />
           ) : (

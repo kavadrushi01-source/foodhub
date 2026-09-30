@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, Truck, UtensilsCrossed, MapPin, Star, Zap, Search, Sparkles } from 'lucide-react';
 import { foodApi } from '../api';
 import FoodCard from '../components/food/FoodCard';
+import ApiDownCard from '../components/ui/ApiDownCard';
 import { SkeletonCard } from '../components/ui/Skeleton';
 
 const FREE_DELIVERY = 299;
@@ -15,28 +16,34 @@ const STATS = [
 export default function Home() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [apiDown, setApiDown] = useState(false);
   const navigate = useNavigate();
   const [heroSearch, setHeroSearch] = useState('');
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer = null;
     const load = async (isRetry = false) => {
       try {
         const [featured, categories] = await Promise.all([foodApi.getFeatured(), foodApi.getCategories()]);
-        if (!cancelled) setData({ featured: featured.data, categories: categories.data.categories });
-      } catch {
-        // Error toast already shown by the axios interceptor (once — the
-        // interceptor dedupes network-error toasts). Page still renders the
-        // hero instead of hanging on skeletons.
+        if (cancelled) return;
+        setData({ featured: featured.data, categories: categories.data.categories });
+        setApiDown(false);
+      } catch (err) {
+        // Error toast already shown by the axios interceptor (deduped).
+        // Keep the page usable: hero + static sections still render, and the
+        // empty grids show a friendly "server waking up" retry card instead
+        // of blank space.
+        if (!cancelled) setApiDown(true);
       } finally { if (!cancelled) setLoading(false); }
-      // Retry once after 4s — Render free tier sleeps and the first request
-      // often fails while it wakes up.
+      // Retry while the API is unreachable — Render free tier sleeps and the
+      // first request often fails while it wakes up.
       if (!isRetry) {
-        setTimeout(() => { if (!cancelled) load(true); }, 4000);
+        retryTimer = setTimeout(() => { if (!cancelled) load(true); }, 5000);
       }
     };
     load();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; if (retryTimer) clearTimeout(retryTimer); };
   }, []);
 
   return (
@@ -143,6 +150,8 @@ export default function Home() {
         </div>
         {loading ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">{[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}</div>
+        ) : apiDown && !data ? (
+          <ApiDownCard onRetry={() => window.location.reload()} compact />
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {data?.categories?.map((c) => (
@@ -181,6 +190,8 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
+        ) : apiDown && !data ? (
+          <ApiDownCard onRetry={() => window.location.reload()} />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
             {data?.featured?.bestsellers?.map((food) => <FoodCard key={food._id} food={food} />)}

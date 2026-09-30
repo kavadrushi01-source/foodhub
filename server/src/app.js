@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import passport from './config/oauth.js';
 
+import mongoose from 'mongoose';
 import config from './config/index.js';
 import logger from './config/logger.js';
 import Sentry from './config/sentry.js';
@@ -108,6 +109,9 @@ const authLimiter = rateLimit({
 });
 
 // ============ ROOT / HEALTH CHECK ============
+// NOTE: these must answer even when MongoDB is down — Render uses them to
+// decide if the service is alive. DB-backed routes will 503 with a clear
+// message until the connection is ready (see dbReady middleware below).
 app.get('/', (_req, res) => {
   res.status(200).json({ success: true, status: 200, message: 'FoodHub API is running', data: { service: 'foodhub-api', env: config.env, docs: '/api/foods', health: '/health', time: new Date().toISOString() } });
 });
@@ -116,16 +120,36 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, status: 200, message: 'OK', data: { service: 'foodhub-api', env: config.env, time: new Date().toISOString() } });
 });
 
+// Readiness probe: tells the frontend whether the DB is up yet.
+app.get('/ready', (_req, res) => {
+  const ready = mongoose.connection.readyState === 1;
+  res.status(ready ? 200 : 503).json({
+    success: ready, status: ready ? 200 : 503,
+    message: ready ? 'ready' : 'database connecting — please retry in a few seconds',
+  });
+});
+
+// Gate DB-backed routes: return a clear 503 instead of hanging when Atlas
+// is still connecting (cold start) instead of mysterious "Network error".
+const dbReady = (_req, res, next) => {
+  if (mongoose.connection.readyState === 1) return next();
+  return res.status(503).json({
+    success: false, status: 503, code: 'DB_NOT_READY',
+    message: 'Server is waking up — please retry in a few seconds.',
+  });
+};
+
 // ============ ROUTES ============
-app.use('/api/auth', authLimiter, authRoutes);
-// Chatbot is public (stateless knowledge engine) — must be mounted before the
-// food router, whose blanket `router.use(protect)` would gate guests.
+// Chatbot answers from a local knowledge engine (no DB) — keep public + ungated.
 app.use('/api/chatbot', chatbotRoutes);
-app.use('/api', foodRoutes);          // /api/foods, /api/categories, /api/reviews, /api/wishlist, /api/addresses
-app.use('/api/orders', orderRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/delivery', deliveryRoutes);
-app.use('/api/payments', paymentRoutes);
+// All data routes need MongoDB — gate them so cold starts return a clear
+// 503 ("waking up") instead of hanging until the client times out.
+app.use('/api/auth', authLimiter, dbReady, authRoutes);
+app.use('/api', dbReady, foodRoutes);          // /api/foods, /api/categories, /api/reviews, /api/wishlist, /api/addresses
+app.use('/api/orders', dbReady, orderRoutes);
+app.use('/api/admin', dbReady, adminRoutes);
+app.use('/api/delivery', dbReady, deliveryRoutes);
+app.use('/api/payments', dbReady, paymentRoutes);
 
 // ============ ERROR HANDLING ============
 app.use(notFound);

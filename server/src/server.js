@@ -8,12 +8,17 @@ import { initSentry } from './config/sentry.js';
 const start = async () => {
   try {
     initSentry();
-    await connectDB();
-    await seedIfEmpty();
+    // Listen FIRST so Render's health check + /health pass even while
+    // MongoDB Atlas is still waking / connecting. DB + seed continue in bg.
     const server = app.listen(config.port, () => {
       logger.info(`🚀 FoodHub API running in ${config.env} mode on port ${config.port}`);
       logger.info(`🌐 CORS origin: ${config.clientUrl}`);
     });
+
+    // Connect + seed in background (non-blocking for health checks)
+    connectDB()
+      .then(() => seedIfEmpty())
+      .catch((err) => logger.error('DB/seed background init failed (server still up):', err.message));
 
     const shutdown = (signal) => {
       logger.info(`${signal} received. Shutting down gracefully...`);
