@@ -35,7 +35,20 @@ export const protect = async (req, res, next) => {
       const user = await User.findById(refreshDecoded.sub).select('-password');
       if (!user || !user.isActive) throw new UnauthorizedError('Account not found or disabled');
       const newAccessToken = signAccessToken(buildTokenPayload(user));
-      res.cookie('accessToken', newAccessToken, { httpOnly: true, sameSite: 'lax', path: '/' });
+      const crossSiteRefresh = (() => {
+        try {
+          const client = String(process.env.CLIENT_URL || '').split(',')[0].trim();
+          return Boolean(client) && !client.includes('localhost');
+        } catch {
+          return process.env.NODE_ENV === 'production';
+        }
+      })();
+      res.cookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        secure: crossSiteRefresh ? true : false,
+        sameSite: crossSiteRefresh ? 'none' : 'lax',
+        path: '/',
+      });
       decoded = { sub: refreshDecoded.sub, role: refreshDecoded.role };
     }
 

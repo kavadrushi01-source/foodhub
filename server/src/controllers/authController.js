@@ -13,6 +13,24 @@ import config from '../config/index.js';
 
 const buildVerifyUrl = (token) => `${config.clientUrl}/verify-email?token=${token}`;
 const buildResetUrl = (token) => `${config.clientUrl}/reset-password?token=${token}`;
+
+// Mirror server/src/utils/cookie.js so refresh rotation keeps the same
+// SameSite/Secure attributes as login (required for cross-site cookies).
+const getCookieOptionsSafe = () => {
+  const client = String(config.clientUrl || '');
+  const api = String(config.apiUrl || '');
+  try {
+    const firstHost = new URL(client.split(',')[0].trim()).hostname;
+    const apiUrl = api.startsWith('http') ? api : `http://localhost:${config.port}`;
+    const apiHost = new URL(apiUrl).hostname;
+    if (firstHost && apiHost && firstHost !== apiHost) {
+      return { secure: true, sameSite: 'none' };
+    }
+  } catch {
+    if (config.isProd) return { secure: true, sameSite: 'none' };
+  }
+  return { secure: config.cookie.secure, sameSite: config.cookie.sameSite };
+};
 const sha256 = async (token) => (await import('crypto')).createHash('sha256').update(token).digest('hex');
 
 export const register = async (req, res) => {
@@ -61,7 +79,8 @@ export const refresh = async (req, res) => {
   const user = await User.findById(decoded.sub);
   if (!user || !user.isActive) throw new UnauthorizedError('Account not found or disabled');
   const accessToken = signAccessToken(buildTokenPayload(user));
-  res.cookie('accessToken', accessToken, { httpOnly: true, sameSite: 'lax', path: '/' });
+  const baseOptions = getCookieOptionsSafe();
+  res.cookie('accessToken', accessToken, { httpOnly: true, ...baseOptions, path: '/' });
   return res.status(200).json({ success: true, status: 200, message: 'Token refreshed', data: { accessToken } });
 };
 

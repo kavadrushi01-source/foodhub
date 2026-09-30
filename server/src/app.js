@@ -24,6 +24,9 @@ import { errorHandler, notFound } from './middlewares/error.js';
 
 const app = express();
 
+// Render/Vercel sit behind proxies — needed for Secure cookies + correct IPs
+app.set('trust proxy', 1);
+
 // Sentry request tracking (no-op when no DSN configured)
 if (config.sentry.dsn) {
   app.use(Sentry.Handlers.requestHandler());
@@ -33,7 +36,34 @@ if (config.sentry.dsn) {
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(
   cors({
-    origin: config.isProd ? config.clientUrl : /http:\/\/localhost:\d+/,
+    origin: (origin, callback) => {
+      // Allow same-origin / non-browser requests (no Origin header)
+      if (!origin) return callback(null, true);
+      const normalize = (v) => {
+        let s = String(v || '').trim();
+        while (s.endsWith('/')) s = s.slice(0, -1);
+        return s;
+      };
+      const allowed = String(config.clientUrl || '')
+        .split(',')
+        .map((s) => normalize(s))
+        .filter(Boolean);
+      // Always allow local dev origins too
+      allowed.push('http://localhost:5173', 'http://127.0.0.1:5173');
+      if (allowed.includes(normalize(origin))) return callback(null, true);
+      // In dev, allow any localhost port
+      if (!config.isProd) {
+        let hostOk = false;
+        try {
+          const u = new URL(normalize(origin));
+          hostOk = u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+        } catch {
+          hostOk = false;
+        }
+        if (hostOk) return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

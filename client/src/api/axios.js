@@ -2,7 +2,13 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { getAccessToken, setAccessToken, clearTokens } from '../utils/authStorage';
 
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+export const baseURL = (() => {
+  let v = (import.meta.env.VITE_API_URL || '').trim();
+  while (v.endsWith('/')) v = v.slice(0, -1);
+  if (!v) return '/api';
+  if (v === '/api' || v.endsWith('/api')) return v;
+  return `${v}/api`;
+})();
 
 const api = axios.create({
   baseURL,

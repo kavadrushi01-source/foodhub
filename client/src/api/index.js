@@ -1,4 +1,4 @@
-import api from './axios.js';
+import api, { baseURL } from './axios.js';
 
 export const authApi = {
   register: (data) => api.post('/auth/register', data),
@@ -18,7 +18,7 @@ export const authApi = {
 
 // Relative in dev (Vite proxies /api); absolute in production when
 // VITE_API_URL points at a separate API domain.
-export const getOAuthUrl = (provider) => `${import.meta.env.VITE_API_URL || '/api'}/auth/${provider}`;
+export const getOAuthUrl = (provider) => `${baseURL}/auth/${provider}`;
 
 export const foodApi = {
   getFeatured: () => api.get('/featured'),
