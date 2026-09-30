@@ -1,7 +1,7 @@
 import config from '../config/index.js';
 
 const getCookieOptions = () => {
-  // Cross-site deployment (Vercel frontend + Render backend) requires
+  // Cross-site deployment (frontend and API on different Vercel domains) requires
   // SameSite=None + Secure=true, otherwise browsers silently drop cookies.
   const client = String(config.clientUrl || '');
   const api = String(config.apiUrl || '');

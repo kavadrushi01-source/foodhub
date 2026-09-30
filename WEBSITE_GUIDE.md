@@ -12,11 +12,11 @@ as a delivery partner, and as the admin.
 | What | Where |
 |------|-------|
 | **Website (frontend)** | <https://foodhub-seven-gules.vercel.app> |
-| **API (backend)** | <https://foodhub-api-u3oy.onrender.com> |
-| API health check | <https://foodhub-api-u3oy.onrender.com/health> |
+| **API (backend)** | <https://foodhub-api.vercel.app> |
+| API health check | <https://foodhub-api.vercel.app/health> |
 
-- The **frontend** is hosted on **Vercel**, the **backend API** on **Render** (free tier —
-  it may take a few seconds to wake up after being idle).
+- The **frontend and the backend API are both hosted on Vercel** (free tier) — the API is
+  a serverless function, so it never sleeps and there's no wake-up wait.
 - All demo credentials below work on the live site too.
 
 For **local development** (after following *Getting Started* in the README), the site

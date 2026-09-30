@@ -9,8 +9,8 @@ RUN npm ci --omit=dev
 COPY src ./src
 
 ENV NODE_ENV=production
-# HF Spaces Docker requires the app on port 7860.
-# Our config respects $PORT, so compose/Koyeb/Render can still override it.
+# Default port 7860 (HF Spaces convention); config respects $PORT so
+# compose/Koyeb/Render can still override it.
 ENV PORT=7860
 EXPOSE 7860
 

@@ -36,8 +36,8 @@ export default function Home() {
         // of blank space.
         if (!cancelled) setApiDown(true);
       } finally { if (!cancelled) setLoading(false); }
-      // Retry while the API is unreachable — Render free tier sleeps and the
-      // first request often fails while it wakes up.
+      // Retry while the API is unreachable — the first request can still fail
+      // on a serverless cold start or transient network error.
       if (!isRetry) {
         retryTimer = setTimeout(() => { if (!cancelled) load(true); }, 5000);
       }

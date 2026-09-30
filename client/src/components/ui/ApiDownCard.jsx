@@ -3,7 +3,7 @@ import { CloudOff, RefreshCw } from 'lucide-react';
 
 /**
  * Friendly "server waking up / unreachable" card shown instead of blank
- * grids when the Render backend can't be reached (sleeping, cold start,
+ * grids when the API can't be reached (cold start, offline,
  * or 503). Gives the user a retry action instead of silent emptiness.
  */
 export default function ApiDownCard({ onRetry, compact = false }) {

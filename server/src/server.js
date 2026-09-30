@@ -1,24 +1,18 @@
 import app from './app.js';
 import config from './config/index.js';
-import { connectDB } from './config/database.js';
 import logger from './config/logger.js';
-import { seedIfEmpty } from './utils/seeder.js';
-import { initSentry } from './config/sentry.js';
 
 const start = async () => {
   try {
-    initSentry();
-    // Listen FIRST so Render's health check + /health pass even while
-    // MongoDB Atlas is still waking / connecting. DB + seed continue in bg.
+    // NOTE: importing app.js runs the full bootstrap (Sentry + MongoDB +
+    // seed) so the app also works when Vercel uses it directly as the
+    // serverless entry — here we only need to listen.
+    // Listen FIRST so health checks pass even while MongoDB Atlas is still
+    // connecting (DB + seed continue in the background).
     const server = app.listen(config.port, () => {
       logger.info(`🚀 FoodHub API running in ${config.env} mode on port ${config.port}`);
       logger.info(`🌐 CORS origin: ${config.clientUrl}`);
     });
-
-    // Connect + seed in background (non-blocking for health checks)
-    connectDB()
-      .then(() => seedIfEmpty())
-      .catch((err) => logger.error('DB/seed background init failed (server still up):', err.message));
 
     const shutdown = (signal) => {
       logger.info(`${signal} received. Shutting down gracefully...`);

@@ -11,7 +11,9 @@ import passport from './config/oauth.js';
 import mongoose from 'mongoose';
 import config from './config/index.js';
 import logger from './config/logger.js';
-import Sentry from './config/sentry.js';
+import Sentry, { initSentry } from './config/sentry.js';
+import { connectDB } from './config/database.js';
+import { seedIfEmpty } from './utils/seeder.js';
 
 import authRoutes from './routes/authRoutes.js';
 import foodRoutes from './routes/foodRoutes.js';
@@ -22,6 +24,30 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/error.js';
+
+// ============ BOOTSTRAP (module scope = once per warm instance) ============
+// This file doubles as the Vercel serverless entry (zero-config Express
+// accepts app.js / index.js / server.js), so all startup happens here rather
+// than in server.js:
+//   - Sentry init (no-op without SENTRY_DSN)
+//   - MongoDB connect + idempotent seed in the background (routes are gated
+//     by dbReady below, so /health answers instantly during a cold start)
+//   - a failed attempt clears bootPromise, so the next request retries
+let bootPromise = null;
+const ensureBoot = () => {
+  if (!bootPromise) {
+    initSentry();
+    bootPromise = connectDB()
+      .then(() => seedIfEmpty())
+      .then(() => logger.info('✅ Bootstrap complete: DB connected, seed synced'))
+      .catch((err) => {
+        bootPromise = null;
+        logger.error('DB/seed bootstrap failed (will retry on next request):', err.message);
+      });
+  }
+  return bootPromise;
+};
+ensureBoot();
 
 const app = express();
 
@@ -109,9 +135,9 @@ const authLimiter = rateLimit({
 });
 
 // ============ ROOT / HEALTH CHECK ============
-// NOTE: these must answer even when MongoDB is down — Render uses them to
-// decide if the service is alive. DB-backed routes will 503 with a clear
-// message until the connection is ready (see dbReady middleware below).
+// NOTE: these must answer even when MongoDB is down — the host's health
+// checks use them to decide if the service is alive. DB-backed routes will
+// 503 with a clear message until the connection is ready (see dbReady below).
 app.get('/', (_req, res) => {
   res.status(200).json({ success: true, status: 200, message: 'FoodHub API is running', data: { service: 'foodhub-api', env: config.env, docs: '/api/foods', health: '/health', time: new Date().toISOString() } });
 });
@@ -133,6 +159,7 @@ app.get('/ready', (_req, res) => {
 // is still connecting (cold start) instead of mysterious "Network error".
 const dbReady = (_req, res, next) => {
   if (mongoose.connection.readyState === 1) return next();
+  ensureBoot(); // retry a previously failed bootstrap (self-healing)
   return res.status(503).json({
     success: false, status: 503, code: 'DB_NOT_READY',
     message: 'Server is waking up — please retry in a few seconds.',

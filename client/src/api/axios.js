@@ -6,7 +6,7 @@ export const baseURL = (() => {
   let v = (import.meta.env.VITE_API_URL || '').trim();
   while (v.endsWith('/')) v = v.slice(0, -1);
   // No env var (e.g. Vercel env missing) -> use same-origin '/api',
-  // which vercel.json proxies to the Render backend. This is what kills
+  // which client/vercel.json proxies to the API project. This is what kills
   // the "Network error" toasts when VITE_API_URL isn't set at build time.
   if (!v) return '/api';
   if (v === '/api' || v.endsWith('/api')) return v;

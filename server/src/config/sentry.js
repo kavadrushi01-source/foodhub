@@ -5,10 +5,13 @@ import config from './index.js';
  * Initialize Sentry error tracking when a DSN is configured.
  * Safe no-op when SENTRY_DSN is empty (e.g. local dev / CI).
  */
+let initialized = false;
+
 export const initSentry = () => {
-  if (!config.sentry.dsn) {
+  if (!config.sentry.dsn || initialized) {
     return;
   }
+  initialized = true;
   Sentry.init({
     dsn: config.sentry.dsn,
     environment: config.sentry.env,
