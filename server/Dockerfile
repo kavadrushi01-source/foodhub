@@ -9,11 +9,12 @@ RUN npm ci --omit=dev
 COPY src ./src
 
 ENV NODE_ENV=production
-ENV PORT=8000
-EXPOSE 8000
+# HF Spaces Docker requires the app on port 7860.
+# Our config respects $PORT, so compose/Koyeb/Render can still override it.
+ENV PORT=7860
+EXPOSE 7860
 
-# Koyeb sets $PORT automatically; our config already respects it.
-# Health check used by Koyeb to know the service is alive.
+# Health check used by hosts to know the service is alive.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget -qO- http://localhost:$PORT/health || exit 1
 
