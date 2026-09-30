@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 import config from './config/index.js';
 import logger from './config/logger.js';
 import Sentry, { initSentry } from './config/sentry.js';
-import { connectDB } from './config/database.js';
+import { connectDB, getDBError } from './config/database.js';
 import { seedIfEmpty } from './utils/seeder.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -151,6 +151,7 @@ app.get('/ready', (_req, res) => {
   res.status(ready ? 200 : 503).json({
     success: ready, status: ready ? 200 : 503,
     message: ready ? 'ready' : 'database connecting — please retry in a few seconds',
+    ...(ready ? {} : { data: { db: getDBError() } }),
   });
 });
 

@@ -7,6 +7,7 @@ import logger from '../config/logger.js';
 // as long as the process does).
 let connectPromise = null;
 let listenersBound = false;
+let lastError = null;
 
 /**
  * Connect to MongoDB with sensible defaults (pooling, 10s selection timeout).
@@ -41,13 +42,22 @@ export const connectDB = async () => {
       })
       .catch((err) => {
         connectPromise = null;
-        logger.error('❌ MongoDB connection failed:', err.message);
+        lastError = err;
+        // Template literal on purpose: logger.error('label:', err.message)
+        // makes winston treat err.message as an interpolation arg and it gets
+        // dropped from the output, which hid the real cause of connect
+        // failures on Vercel.
+        logger.error(`❌ MongoDB connection failed: ${err.message}`);
         throw err;
       });
   }
 
   return connectPromise;
 };
+
+/** Last connection failure (exposed by /ready so deploys can be diagnosed). */
+export const getDBError = () =>
+  lastError ? { name: lastError.name, message: lastError.message } : null;
 
 export const disconnectDB = async () => {
   if (mongoose.connection.readyState === 0) return;
