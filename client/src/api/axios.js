@@ -5,6 +5,9 @@ import { getAccessToken, setAccessToken, clearTokens } from '../utils/authStorag
 export const baseURL = (() => {
   let v = (import.meta.env.VITE_API_URL || '').trim();
   while (v.endsWith('/')) v = v.slice(0, -1);
+  // No env var (e.g. Vercel env missing) -> use same-origin '/api',
+  // which vercel.json proxies to the Render backend. This is what kills
+  // the "Network error" toasts when VITE_API_URL isn't set at build time.
   if (!v) return '/api';
   if (v === '/api' || v.endsWith('/api')) return v;
   return `${v}/api`;
@@ -13,7 +16,7 @@ export const baseURL = (() => {
 const api = axios.create({
   baseURL,
   withCredentials: true,
-  timeout: 20000,
+  timeout: 45000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -91,6 +94,17 @@ api.interceptors.response.use(
       error?.response?.data?.message ||
       error?.message ||
       'Something went wrong. Please try again.';
+
+    // Dedupe network-error toasts: Home fires featured+categories in
+    // parallel, so one outage = one toast, not a stack of identical red bars.
+    // Global 5s window shared across all concurrent requests.
+    if (!status) {
+      const now = Date.now();
+      if (now - (window.__lastNetworkToastAt || 0) < 5000) {
+        return Promise.reject(error?.response?.data || { message });
+      }
+      window.__lastNetworkToastAt = now;
+    }
 
     // Show toast for client errors (but not 401 handled above)
     if (status && status >= 400 && status !== 401) {

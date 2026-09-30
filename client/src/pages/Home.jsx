@@ -19,13 +19,24 @@ export default function Home() {
   const [heroSearch, setHeroSearch] = useState('');
 
   useEffect(() => {
-    const load = async () => {
+    let cancelled = false;
+    const load = async (isRetry = false) => {
       try {
         const [featured, categories] = await Promise.all([foodApi.getFeatured(), foodApi.getCategories()]);
-        setData({ featured: featured.data, categories: categories.data.categories });
-      } catch {} finally { setLoading(false); }
+        if (!cancelled) setData({ featured: featured.data, categories: categories.data.categories });
+      } catch {
+        // Error toast already shown by the axios interceptor (once — the
+        // interceptor dedupes network-error toasts). Page still renders the
+        // hero instead of hanging on skeletons.
+      } finally { if (!cancelled) setLoading(false); }
+      // Retry once after 4s — Render free tier sleeps and the first request
+      // often fails while it wakes up.
+      if (!isRetry) {
+        setTimeout(() => { if (!cancelled) load(true); }, 4000);
+      }
     };
     load();
+    return () => { cancelled = true; };
   }, []);
 
   return (
