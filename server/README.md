@@ -10,7 +10,10 @@ entry; `app.js` bootstraps Sentry + MongoDB + seed at import time and exports
 the app, so warm invocations reuse the pooled connection).
 
 - **Project settings:** Root Directory = `server/`, framework = Express.
-  Project name `foodhub-api` → <https://foodhub-api.vercel.app>.
+  Project name `foodhub-api`; the `vercel.app` subdomain actually assigned to
+  this project is <https://foodhub-pearl-tau.vercel.app> (the shorter
+  `foodhub-api.vercel.app` name is claimed by a different Vercel account, so it
+  cannot be used here — check `/health` on the domain above).
 - **Auto-deploys** on every push to `main` (Vercel Git integration) — no
   GitHub Actions deploy workflow and no keep-alive cron needed; serverless
   functions never sleep.
@@ -29,7 +32,7 @@ Set these in the Vercel project → **Settings → Environment Variables**
 | `JWT_ACCESS_SECRET` | long random string (32+ chars) (Secret) |
 | `JWT_REFRESH_SECRET` | long random string (32+ chars) (Secret) |
 | `CLIENT_URL` | `https://foodhub-seven-gules.vercel.app` |
-| `API_URL` | `https://foodhub-api.vercel.app` |
+| `API_URL` | `https://foodhub-pearl-tau.vercel.app` |
 | `COOKIE_SECURE` | `true` |
 
 > ⚠️ **MongoDB Atlas → Network Access must allow `0.0.0.0/0`** — Vercel's

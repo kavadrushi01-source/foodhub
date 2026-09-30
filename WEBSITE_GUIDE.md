@@ -12,8 +12,8 @@ as a delivery partner, and as the admin.
 | What | Where |
 |------|-------|
 | **Website (frontend)** | <https://foodhub-seven-gules.vercel.app> |
-| **API (backend)** | <https://foodhub-api.vercel.app> |
-| API health check | <https://foodhub-api.vercel.app/health> |
+| **API (backend)** | <https://foodhub-pearl-tau.vercel.app> |
+| API health check | <https://foodhub-pearl-tau.vercel.app/health> |
 
 - The **frontend and the backend API are both hosted on Vercel** (free tier) — the API is
   a serverless function, so it never sleeps and there's no wake-up wait.
