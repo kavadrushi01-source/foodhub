@@ -3,13 +3,10 @@ import config from '../config/index.js';
 const getCookieOptions = () => {
   // Cross-site deployment (frontend and API on different Vercel domains) requires
   // SameSite=None + Secure=true, otherwise browsers silently drop cookies.
-  const client = String(config.clientUrl || '');
-  const api = String(config.apiUrl || '');
   const crossSite = (() => {
     try {
-      const firstHost = new URL(client.split(',')[0].trim()).hostname;
-      const apiUrl = api.startsWith('http') ? api : `http://localhost:${config.port}`;
-      const apiHost = new URL(apiUrl).hostname;
+      const firstHost = new URL(config.clientUrl).hostname;
+      const apiHost = new URL(config.apiUrl).hostname;
       return Boolean(firstHost) && Boolean(apiHost) && firstHost !== apiHost;
     } catch {
       return config.isProd;
@@ -22,6 +19,8 @@ const getCookieOptions = () => {
     path: '/',
   };
 };
+
+export { getCookieOptions };
 
 export const setAuthCookies = (res, { accessToken, refreshToken }) => {
   const baseOptions = getCookieOptions();

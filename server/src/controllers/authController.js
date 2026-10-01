@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 import { getAuthTokens, buildTokenPayload, signAccessToken, verifyRefreshToken } from '../utils/jwt.js';
-import { setAuthCookies, clearAuthCookies } from '../utils/cookie.js';
+import { setAuthCookies, clearAuthCookies, getCookieOptions } from '../utils/cookie.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/emailService.js';
 import {
   AppError,
@@ -14,23 +14,9 @@ import config from '../config/index.js';
 const buildVerifyUrl = (token) => `${config.clientUrl}/verify-email?token=${token}`;
 const buildResetUrl = (token) => `${config.clientUrl}/reset-password?token=${token}`;
 
-// Mirror server/src/utils/cookie.js so refresh rotation keeps the same
-// SameSite/Secure attributes as login (required for cross-site cookies).
-const getCookieOptionsSafe = () => {
-  const client = String(config.clientUrl || '');
-  const api = String(config.apiUrl || '');
-  try {
-    const firstHost = new URL(client.split(',')[0].trim()).hostname;
-    const apiUrl = api.startsWith('http') ? api : `http://localhost:${config.port}`;
-    const apiHost = new URL(apiUrl).hostname;
-    if (firstHost && apiHost && firstHost !== apiHost) {
-      return { secure: true, sameSite: 'none' };
-    }
-  } catch {
-    if (config.isProd) return { secure: true, sameSite: 'none' };
-  }
-  return { secure: config.cookie.secure, sameSite: config.cookie.sameSite };
-};
+// Refresh rotation must reuse the EXACT SameSite/Secure attributes that login
+// used, otherwise the browser keeps the old cookie and the user is logged out.
+const getCookieOptionsSafe = () => getCookieOptions();
 const sha256 = async (token) => (await import('crypto')).createHash('sha256').update(token).digest('hex');
 
 export const register = async (req, res) => {

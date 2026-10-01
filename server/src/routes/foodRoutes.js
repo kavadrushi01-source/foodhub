@@ -17,18 +17,21 @@ router.get('/foods/:slug', asyncHandler(food.getFoodBySlug));
 router.get('/reviews/:foodId', asyncHandler(food.getReviews));
 
 // Authenticated: reviews + wishlist + addresses
-router.use(protect);
+// NOTE: `protect` is applied per-route rather than via `router.use(protect)`.
+// A router-level middleware also runs for UNMATCHED paths, so any typo'd URL
+// (e.g. /api/banners) fell through to `protect` and returned 401 instead of
+// the correct 404.
 
-router.post('/reviews', validate(reviewSchema), asyncHandler(food.addReview));
-router.post('/reviews/:id/helpful', asyncHandler(food.markReviewHelpful));
+router.post('/reviews', protect, validate(reviewSchema), asyncHandler(food.addReview));
+router.post('/reviews/:id/helpful', protect, asyncHandler(food.markReviewHelpful));
 
-router.get('/wishlist', asyncHandler(user.getWishlist));
-router.post('/wishlist/:foodId', asyncHandler(user.toggleWishlist));
+router.get('/wishlist', protect, asyncHandler(user.getWishlist));
+router.post('/wishlist/:foodId', protect, asyncHandler(user.toggleWishlist));
 
-router.get('/addresses', asyncHandler(user.getAddresses));
-router.post('/addresses', validate(userAddressSchema), asyncHandler(user.addAddress));
-router.patch('/addresses/:id', validate(userAddressSchema.partial()), asyncHandler(user.updateAddress));
-router.delete('/addresses/:id', asyncHandler(user.deleteAddress));
-router.patch('/addresses/:id/default', asyncHandler(user.setDefaultAddress));
+router.get('/addresses', protect, asyncHandler(user.getAddresses));
+router.post('/addresses', protect, validate(userAddressSchema), asyncHandler(user.addAddress));
+router.patch('/addresses/:id', protect, validate(userAddressSchema.partial()), asyncHandler(user.updateAddress));
+router.delete('/addresses/:id', protect, asyncHandler(user.deleteAddress));
+router.patch('/addresses/:id/default', protect, asyncHandler(user.setDefaultAddress));
 
 export default router;

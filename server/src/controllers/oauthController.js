@@ -79,7 +79,14 @@ export const handleOAuthCallback = (provider) => async (req, res) => {
 
 /** Which social providers are configured and ready to use. */
 export const providers = async (_req, res) => {
-  res.status(200).json({ success: true, status: 200, data: oauthEnabled });
+  res.status(200).json({
+    success: true,
+    status: 200,
+    // `callbackUrl` is echoed back so a `redirect_uri_mismatch` from Google can
+    // be diagnosed without guessing: it MUST be added verbatim to the OAuth
+    // client's "Authorized redirect URIs" in the Google Cloud console.
+    data: { ...oauthEnabled, callbackUrl: config.oauth.google.callbackURL },
+  });
 };
 
 /** Exchange a one-time handoff code for real JWT tokens. */

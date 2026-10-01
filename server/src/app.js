@@ -70,10 +70,7 @@ app.use(
         while (s.endsWith('/')) s = s.slice(0, -1);
         return s;
       };
-      const allowed = String(config.clientUrl || '')
-        .split(',')
-        .map((s) => normalize(s))
-        .filter(Boolean);
+      const allowed = config.clientUrlList.map(normalize).filter(Boolean);
       // Always allow local dev origins too
       allowed.push('http://localhost:5173', 'http://127.0.0.1:5173');
       if (allowed.includes(normalize(origin))) return callback(null, true);

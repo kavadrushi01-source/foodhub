@@ -7,6 +7,28 @@ const bool = (v, def = false) => {
   return v === 'true' || v === '1' || v === 'yes';
 };
 
+/**
+ * CLIENT_URL is a comma-separated allow-list (frontend + local dev). Building a
+ * redirect/link from the raw value would produce garbage like
+ * "https://a.app,https://b.app/oauth-callback", so anything that needs ONE
+ * absolute URL must go through this helper.
+ */
+const firstUrl = (value, fallback) => {
+  const first = String(value || '')
+    .split(',')[0]
+    .trim();
+  return first || fallback;
+};
+
+const stripTrailingSlash = (v) => String(v || '').trim().replace(/\/+$/, '');
+
+const clientUrlList = String(process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((s) => stripTrailingSlash(s))
+  .filter(Boolean);
+
+const apiUrl = stripTrailingSlash(process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`);
+
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '5000', 10),
@@ -28,8 +50,25 @@ const config = {
     sameSite: process.env.COOKIE_SAMESITE || 'lax',
   },
 
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  apiUrl: process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`,
+  // Comma-separated allow-list of browser origins (CORS + cookie decisions).
+  clientUrlList,
+  // The ONE canonical frontend origin. Use this for redirects and links.
+  clientUrl: firstUrl(process.env.CLIENT_URL, 'http://localhost:5173'),
+  apiUrl,
+
+  oauth: {
+    google: {
+      clientID: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      // Explicit override wins; otherwise derive from the live API origin.
+      // This MUST exactly match an "Authorized redirect URI" in the Google
+      // Cloud console, otherwise Google rejects the request with
+      // `redirect_uri_mismatch` (HTTP 400).
+      callbackURL:
+        stripTrailingSlash(process.env.GOOGLE_CALLBACK_URL) ||
+        `${apiUrl}/api/auth/google/callback`,
+    },
+  },
 
   email: {
     host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
@@ -37,14 +76,6 @@ const config = {
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
     from: process.env.EMAIL_FROM || 'FoodHub <no-reply@foodhub.local>',
-  },
-
-  oauth: {
-    google: {
-      clientID: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackURL: `${process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`}/api/auth/google/callback`,
-    },
   },
 
   payments: {
