@@ -23,7 +23,14 @@ export const connectDB = async () => {
     mongoose.set('strictQuery', true);
     connectPromise = mongoose
       .connect(config.db.uri, {
-        serverSelectionTimeoutMS: 10000,
+        // Vercel serverless runs in US-East while Atlas may sit in another
+        // region (e.g. ap-south-1/Mumbai). Cross-region TLS + auth handshakes
+        // easily exceed the default 5-10s selection window, so give it room.
+        serverSelectionTimeoutMS: 30000,
+        connectTimeoutMS: 20000,
+        // Force IPv4: Node's autoSelectFamily/Happy-Eyeballs can stall against
+        // Atlas SRV records inside serverless sandboxes with no IPv6 route.
+        family: 4,
         maxPoolSize: 10,
       })
       .then(() => {

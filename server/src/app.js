@@ -157,12 +157,22 @@ app.get('/ready', (_req, res) => {
 
 // Gate DB-backed routes: return a clear 503 instead of hanging when Atlas
 // is still connecting (cold start) instead of mysterious "Network error".
-const dbReady = (_req, res, next) => {
+const dbReady = async (req, res, next) => {
   if (mongoose.connection.readyState === 1) return next();
-  ensureBoot(); // retry a previously failed bootstrap (self-healing)
+  // A connect attempt is usually already in flight (kicked off by ensureBoot at
+  // module scope). Wait for it instead of failing instantly — on a cold start
+  // the first visitor should get data, not a 503.
+  const attempt = ensureBoot();
+  await Promise.race([
+    attempt,
+    new Promise((resolve) => setTimeout(resolve, 30000)),
+  ]);
+  if (mongoose.connection.readyState === 1) return next();
+  ensureBoot(); // kick off a fresh attempt for the next request (self-healing)
   return res.status(503).json({
     success: false, status: 503, code: 'DB_NOT_READY',
     message: 'Server is waking up — please retry in a few seconds.',
+    ...(getDBError() ? { data: { db: getDBError() } } : {}),
   });
 };
 
