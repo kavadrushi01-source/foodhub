@@ -145,7 +145,13 @@ export default function Checkout() {
         toast.success('Payment successful! Order confirmed.');
         navigate('/orders/' + order.orderNumber);
       } catch (payErr) {
-        const msg = payErr?.response?.data?.message || 'Payment could not be completed.';
+        // Razorpay failures arrive as a plain Error (script/network/OTP) while
+        // our own API failures arrive as an axios error. Show whichever message
+        // is actually present instead of a generic "could not be completed".
+        const msg =
+          payErr?.response?.data?.message ||
+          payErr?.message ||
+          'Payment could not be completed.';
         toast.error(`${msg} Your order is saved as pending — you can retry from My Orders.`);
         navigate('/orders/' + order.orderNumber, { replace: true });
       }

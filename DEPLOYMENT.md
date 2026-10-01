@@ -265,7 +265,65 @@ slipped through, and the `RAZORPAY_ALLOW_LIVE` escape hatch was dead code that
 didn't work. Since the requirement is test-only, the override was removed
 entirely rather than repaired.
 
-### 8. Deployment hygiene
+### 8. Seeder was silently DELETING real menu items (data loss)
+
+**Symptom:** the menu shrank over time. Live `GET /api/foods` reported totals that
+kept dropping, and the boot logs said `🧹 Removed N duplicate seed clones`.
+
+**Root cause:** the clone-dedupe pass ran on **every boot** and its "is this a
+clone?" test matched normal dishes. `cleanSlugs` was built with
+`/^[a-z0-9-]+$/`, which is true for **every** ordinary slug, so
+`cleanSlugs.has(nameToSlug(f.name))` was true for a food's *own* slug. Any dish
+whose slug ended in a 4-letter word deleted itself:
+
+```
+fresh-lime-soda   ("-soda")     paneer-tikka-wrap  ("-wrap")
+choco-lava-cake   ("-cake")     garlic-bread-roll  ("-roll")   ...
+```
+
+Worse, it was a delete/re-insert cycle: each boot re-inserted the missing dishes
+(new `_id`), then deleted them again — so those menu items got a **new id on
+every cold start**, breaking any cart, wishlist or order that referenced them.
+
+**Fix** (`server/src/utils/seeder.js`): only treat a food as a clone when
+**another food shares the exact same name**. A food that is the sole holder of
+its name is never deleted, whatever its slug looks like.
+
+**Verified** with a logic test over a realistic catalogue:
+
+| | Real dishes deleted | True duplicate removed |
+|---|---|---|
+| old logic | **4** (data loss) | yes |
+| new logic | **0** (safe) | yes |
+
+Production restored to **28 foods** (27 seeded + 1 legacy artifact) after deploy.
+
+### 9. Pagination `total` was capped at the page size
+
+**Symptom:** `GET /api/foods?limit=12` returned `meta.total: 12` and
+`meta.totalPages: 1` for a catalogue of 28 — so **pages 2 and 3 were
+unreachable** in the menu.
+
+**Root cause:** `paginate()` did `queryBuilder.skip(skip).limit(limit)` and then
+`queryBuilder.clone().countDocuments()`. `countDocuments()` honours the query's
+own `limit`/`skip`, so the clone counted at most `limit` documents.
+
+**Fix** (`server/src/utils/helpers.js`): clone the builder **before** applying
+`skip`/`limit`, then run both queries in parallel so the two round trips still
+overlap (important for cross-region Atlas latency).
+
+**Before → after** (live):
+
+| limit | before `total` | after `total` | `totalPages` |
+|---|---|---|---|
+| 1 | 1 | **28** | 28 |
+| 12 | 12 | **28** | **3** |
+| 50 | 28 | 28 | 1 |
+
+`?page=2&limit=12` now correctly returns 12 items with `hasPrev: true`,
+`hasNext: true`.
+
+### 10. Deployment hygiene
 
 - Deleted 6 stale `server/*.log` files (leftovers from an old working directory; not
   git-tracked, but still uploaded to Vercel on every deploy).

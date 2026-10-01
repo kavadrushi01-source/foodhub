@@ -76,7 +76,7 @@ export default function OrderDetail() {
       toast.success('Payment successful!');
       load();
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Payment could not be completed.');
+      toast.error(err?.response?.data?.message || err?.message || 'Payment could not be completed.');
     } finally { setPaying(false); }
   };
 

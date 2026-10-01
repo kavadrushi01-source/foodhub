@@ -1,23 +1,74 @@
 const SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
 
+// A <script> for checkout.js is appended to the page. We keep a handle on the
+// element we created so a failed load can be cleaned up — otherwise the tag
+// stays in the DOM and every later attempt short-circuits on the
+// `querySelector` check below, resolving immediately with `window.Razorpay`
+// still undefined.
 let scriptPromise = null;
+let scriptEl = null;
+
+const removeScript = () => {
+  scriptEl?.parentNode?.removeChild(scriptEl);
+  scriptEl = null;
+};
 
 /** Load the Razorpay checkout script once and cache the promise. */
 const loadRazorpayScript = () => {
   if (scriptPromise) return scriptPromise;
+
   scriptPromise = new Promise((resolve, reject) => {
     if (typeof window === 'undefined') return reject(new Error('Razorpay requires a browser'));
-    if (document.querySelector('script[src*="checkout.razorpay.com"]')) return resolve(true);
+
+    // Only short-circuit when checkout.js is present AND already finished
+    // loading; otherwise we would resolve before `window.Razorpay` exists.
+    if (window.Razorpay) return resolve(true);
+
+    const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+    if (existing && existing.dataset.rzpState === 'ready') return resolve(true);
+
+    // Guard against a network hang (blocked script, flaky connection) so the
+    // checkout button can't spin forever.
+    const timeout = setTimeout(() => {
+      scriptPromise = null;
+      removeScript();
+      reject(new Error('Payment gateway took too long to load. Check your connection and try again.'));
+    }, 20000);
+
+    const onReady = () => {
+      clearTimeout(timeout);
+      if (existing) existing.dataset.rzpState = 'ready';
+      if (window.Razorpay) return resolve(true);
+      // Loaded but did not register the global — treat as a failure so the
+      // next attempt re-injects the script.
+      scriptPromise = null;
+      removeScript();
+      reject(new Error('Payment gateway failed to initialise. Please try again.'));
+    };
+
+    const onFail = () => {
+      clearTimeout(timeout);
+      scriptPromise = null;
+      removeScript();
+      reject(new Error('Could not load the payment gateway. Check your connection or any ad-blocker.'));
+    };
+
+    if (existing) {
+      // Tag is in the DOM but not marked ready — reuse it and wait for load.
+      existing.addEventListener('load', onReady, { once: true });
+      existing.addEventListener('error', onFail, { once: true });
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = SCRIPT_URL;
     script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => {
-      scriptPromise = null;
-      reject(new Error('Could not load the payment gateway'));
-    };
+    scriptEl = script;
+    script.onload = onReady;
+    script.onerror = onFail;
     document.body.appendChild(script);
   });
+
   return scriptPromise;
 };
 
