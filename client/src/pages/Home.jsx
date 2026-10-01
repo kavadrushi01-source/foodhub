@@ -23,12 +23,14 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     let retryTimer = null;
-    const load = async (isRetry = false) => {
+    const load = async () => {
+      let ok = false;
       try {
         const [featured, categories] = await Promise.all([foodApi.getFeatured(), foodApi.getCategories()]);
         if (cancelled) return;
         setData({ featured: featured.data, categories: categories.data.categories });
         setApiDown(false);
+        ok = true;
       } catch {
         // Error toast already shown by the axios interceptor (deduped).
         // Keep the page usable: hero + static sections still render, and the
@@ -36,10 +38,12 @@ export default function Home() {
         // of blank space.
         if (!cancelled) setApiDown(true);
       } finally { if (!cancelled) setLoading(false); }
-      // Retry while the API is unreachable — the first request can still fail
-      // on a serverless cold start or transient network error.
-      if (!isRetry) {
-        retryTimer = setTimeout(() => { if (!cancelled) load(true); }, 5000);
+
+      // Only retry when the load actually FAILED. Previously a timer was armed
+      // unconditionally, so a successful visit fired a second duplicate pair of
+      // requests 5s later — pointless load on both the browser and the API.
+      if (!ok && !cancelled) {
+        retryTimer = setTimeout(() => { if (!cancelled) load(); }, 4000);
       }
     };
     load();

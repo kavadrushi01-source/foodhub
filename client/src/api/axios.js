@@ -72,6 +72,18 @@ api.interceptors.response.use(
       return api(originalRequest);
     }
 
+    // Retry transient NETWORK failures (ECONNRESET / socket hang up / timeout).
+    // These happen regularly because the API is reached through the Vercel
+    // rewrite and a function can be recycled mid-flight. No request status
+    // means the server never answered, so nothing was processed — safe to retry.
+    const netRetries = originalRequest._netRetries || 0;
+    const isTransientNetworkError = !status && ['ECONNRESET', 'ETIMEDOUT', 'ECONNABORTED', 'EPIPE'].some((c) => String(error?.code || error?.message || '').includes(c));
+    if (isTransientNetworkError && netRetries < 2) {
+      originalRequest._netRetries = netRetries + 1;
+      await new Promise((r) => setTimeout(r, 600 * (netRetries + 1)));
+      return api(originalRequest);
+    }
+
     // Only try to refresh/rotate the session if we actually hold credentials.
     // A 401 with no stored token just means the user is browsing as a guest —
     // forcing a hard redirect to /login would break all public pages.

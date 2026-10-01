@@ -6,15 +6,21 @@ import { protect } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
 import { reviewSchema } from '../validators/adminValidators.js';
 import { addressSchema as userAddressSchema } from '../validators/authValidators.js';
+import { cachePublic } from '../utils/helpers.js';
 
 const router = Router();
 
-// Public catalog
-router.get('/featured', asyncHandler(food.getFeatured));
-router.get('/categories', asyncHandler(food.getCategories));
-router.get('/foods', asyncHandler(food.getFoods));
-router.get('/foods/:slug', asyncHandler(food.getFoodBySlug));
-router.get('/reviews/:foodId', asyncHandler(food.getReviews));
+// Public catalog.
+//
+// These are the highest-traffic reads and the slowest (each costs a cross-region
+// Atlas round trip), so they get a short server-side cache + edge/browser
+// Cache-Control. The catalogue only changes when an admin edits it, so a 30s
+// window is invisible to users and removes the ~500ms wait on every navigation.
+router.get('/featured', cachePublic(30000, 30), asyncHandler(food.getFeatured));
+router.get('/categories', cachePublic(60000, 60), asyncHandler(food.getCategories));
+router.get('/foods', cachePublic(30000, 30), asyncHandler(food.getFoods));
+router.get('/foods/:slug', cachePublic(60000, 60), asyncHandler(food.getFoodBySlug));
+router.get('/reviews/:foodId', cachePublic(30000, 30), asyncHandler(food.getReviews));
 
 // Authenticated: reviews + wishlist + addresses
 // NOTE: `protect` is applied per-route rather than via `router.use(protect)`.
