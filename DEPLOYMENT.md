@@ -1,7 +1,7 @@
-# FoodHub — Deployment & Changelog
+# FoodHub — Setup & Deployment Guide
 
-Everything you need to know about **where the site is live**, **what we changed**, and
-**what still needs doing**. Single source of truth for deployment.
+How to **run it locally or deploy your own copy**: environment variables, Google OAuth
+setup, Razorpay test-mode configuration, and a record of every fix we made.
 
 ---
 
@@ -23,8 +23,9 @@ wake up (the client retries automatically, so no manual refresh is needed).
 
 | Guide | What it covers |
 |-------|----------------|
+| **[HOW_TO_USE.md](./HOW_TO_USE.md)** | **Using the live site** — logins, demo order, test card/OTP, netbanking |
+| **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)** | Admin panel in depth: every screen, order status pipeline |
 | **[WEBSITE_GUIDE.md](./WEBSITE_GUIDE.md)** | Every customer/admin/delivery screen, FAQ, API endpoints |
-| **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)** | Admin sign-in, all 8 admin sections, testing Razorpay payments |
 
 ### Architecture
 

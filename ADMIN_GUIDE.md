@@ -87,6 +87,14 @@ real money can ever be charged. Payments are simulated.
 
 Also valid: **`4111 1111 1111 1111`** (Visa, domestic).
 
+### ⚡ Fastest way to demo a payment: Netbanking
+
+Skip the card and OTP entirely — pick **Netbanking**, choose **any bank**, and Razorpay
+shows a mock page with **Success** / **Failure** buttons. No OTP, no card number, no real
+bank login. **Wallets** work the same way.
+
+See **[HOW_TO_USE.md](./HOW_TO_USE.md)** for the full walkthrough.
+
 ### The OTP step — read this, it trips everyone up
 
 1. Razorpay shows a **"Securely saving your card"** screen and asks for an OTP.

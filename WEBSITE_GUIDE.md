@@ -87,6 +87,12 @@ The site sends you to your correct area after login based on your role
   Razorpay/UPI if keys are configured. Online payment qualifies for **free delivery**.
 - Review order summary (subtotal, delivery charge, tax, coupon, grand total) and **Place Order**.
 
+#### ⚡ Fastest way to test payment — Netbanking
+
+Skip the card and OTP: pick **Netbanking**, choose **any bank**, then click **Success**
+(or **Failure** to test the failure path) on the mock bank page. No OTP, no card number,
+no real bank login. **Wallets** work the same way. Cash on Delivery needs no gateway at all.
+
 #### 💳 Testing online payment on the demo site
 
 The live site runs Razorpay in **test mode** — no real money moves. To try it:
