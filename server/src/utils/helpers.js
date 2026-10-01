@@ -91,17 +91,24 @@ export const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 10
 
 /**
  * Paginate a Mongoose query using page/limit.
- * Returns a query cursor (await later) plus pagination meta.
+ * Returns the page of documents plus pagination meta.
+ *
+ * NOTE: `countDocuments()` honours the query's own `limit`/`skip`. The count
+ * query is therefore cloned BEFORE those modifiers are applied — cloning after
+ * `.limit(l)` silently capped `total` at the page size (and pinned
+ * `totalPages` to 1), which made every page but the first unreachable.
  */
 export const paginate = async (queryBuilder, { page = 1, limit = 12 } = {}) => {
   const p = Math.max(1, parseInt(page, 10) || 1);
   const l = Math.min(100, Math.max(1, parseInt(limit, 10) || 12));
   const skip = (p - 1) * l;
 
-  const [items, total] = await Promise.all([
-    queryBuilder.skip(skip).limit(l).exec(),
-    queryBuilder.clone().countDocuments(),
-  ]);
+  // Build BOTH queries before awaiting: `clone()` must happen while the builder
+  // still has no limit/skip, and both can then run in parallel (the two round
+  // trips overlap, which matters for cross-region Atlas latency).
+  const countQuery = queryBuilder.clone().countDocuments();
+  const itemsQuery = queryBuilder.skip(skip).limit(l).exec();
+  const [total, items] = await Promise.all([countQuery, itemsQuery]);
 
   return {
     items,
