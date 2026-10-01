@@ -63,14 +63,14 @@ export default function DeliveryOrderDetail() {
         </div>
       </section>
 
-      <div className="grid lg:grid-cols-[1fr_360px] gap-6">
-        <div className="space-y-6">
-          <section className="card p-6">
+      <div className="grid lg:grid-cols-[1fr_360px] gap-5 sm:gap-6">
+        <div className="space-y-4 sm:space-y-6">
+          <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg mb-3"><MapPin size={20} className="text-brand-500 inline mr-1" /> Delivery Address</h2>
             <p className="text-sm">{order.address.line1}, {order.address.city}, {order.address.state} - {order.address.pincode}</p>
           </section>
 
-          <section className="card p-6">
+          <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg mb-3"><Package size={20} className="text-brand-500 inline mr-1" /> Items</h2>
             <div className="divide-y divide-ink-100 dark:divide-ink-800">
               {order.items.map((item, idx) => (
@@ -83,7 +83,7 @@ export default function DeliveryOrderDetail() {
           </section>
 
           {order.tracking?.length > 0 && (
-            <section className="card p-6">
+            <section className="card p-4 sm:p-6">
               <h2 className="font-display font-bold text-lg mb-3">Tracking</h2>
               <ul className="space-y-2">
                 {[...order.tracking].reverse().map((t, i) => (
@@ -94,8 +94,8 @@ export default function DeliveryOrderDetail() {
           )}
         </div>
 
-        <aside className="space-y-6">
-          <section className="card p-6">
+        <aside className="space-y-4 sm:space-y-6">
+          <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg mb-3">Payment</h2>
             <p className="text-sm">Total: <span className="font-bold">{formatCurrency(order.grandTotal)}</span></p>
             <p className="text-sm text-ink-500 mt-1 capitalize">{order.payment?.method} • {order.payment?.status}</p>
@@ -103,7 +103,7 @@ export default function DeliveryOrderDetail() {
 
           {/* Verify Delivery OTP */}
           {order.status === 'out_for_delivery' && (
-            <section className="card p-6">
+            <section className="card p-4 sm:p-6">
               <h2 className="font-display font-bold text-lg flex items-center gap-2 mb-3"><KeyRound size={20} className="text-brand-500" /> Verify Delivery OTP</h2>
               <form onSubmit={verifyOtp} className="flex gap-2">
                 <input className="input text-center font-mono tracking-widest" placeholder="OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength="6" required />

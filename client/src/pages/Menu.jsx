@@ -161,7 +161,7 @@ export default function Menu() {
         {/* Food grid */}
         <div>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : apiDown && foods.length === 0 ? (
@@ -170,7 +170,7 @@ export default function Menu() {
             <EmptyState title="No items found" description="No foods match your current filters. Try adjusting your search." />
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
                 {foods.map((food) => <FoodCard key={food._id} food={food} />)}
               </div>
               {meta && meta.totalPages > 1 && <Pagination meta={meta} onPage={(p) => updateParam('page', String(p))} />}

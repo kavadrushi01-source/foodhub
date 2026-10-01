@@ -26,15 +26,15 @@ export default function Profile() {
   };
 
   return (
-    <div className="container-app py-10 max-w-3xl">
-      <h1 className="font-display font-bold text-3xl text-ink-900 dark:text-ink-100 mb-8">My Profile</h1>
+    <div className="container-app py-6 sm:py-10 max-w-3xl">
+      <h1 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 mb-5 sm:mb-8">My Profile</h1>
 
-      <div className="card p-6 mb-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="h-16 w-16 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold text-2xl">{user?.name?.charAt(0).toUpperCase()}</div>
-          <div>
-            <h2 className="font-semibold text-lg text-ink-900 dark:text-ink-100">{user?.name}</h2>
-            <p className="text-sm text-ink-500 flex items-center gap-1"><Mail size={14} /> {user?.email}</p>
+      <div className="card p-4 sm:p-6 mb-5 sm:mb-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold text-xl sm:text-2xl">{user?.name?.charAt(0).toUpperCase()}</div>
+          <div className="min-w-0">
+            <h2 className="font-semibold text-base sm:text-lg text-ink-900 dark:text-ink-100 truncate">{user?.name}</h2>
+            <p className="text-sm text-ink-500 flex items-center gap-1 min-w-0"><Mail size={14} className="shrink-0" /> <span className="truncate">{user?.email}</span></p>
             <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 capitalize mt-1">{user?.role}</span>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function Profile() {
         </form>
       </div>
 
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <h2 className="font-display font-bold text-lg mb-4"><KeyRound size={20} className="text-brand-500 inline mr-1" /> Change Password</h2>
         <form onSubmit={handlePassword} className="grid sm:grid-cols-2 gap-4">
           <div>

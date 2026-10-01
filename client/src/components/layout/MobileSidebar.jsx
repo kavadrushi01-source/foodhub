@@ -23,7 +23,7 @@ export default function MobileSidebar() {
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-      <aside className="absolute left-0 top-0 h-full w-72 bg-white dark:bg-ink-900 shadow-2xl flex flex-col animate-fade-in-up">
+      <aside className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white dark:bg-ink-900 shadow-2xl flex flex-col animate-fade-in-up">
         <div className="flex items-center justify-between p-4 border-b border-ink-100 dark:border-ink-800">
           <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5">
             <span className="h-9 w-9 rounded-xl bg-brand-gradient flex items-center justify-center text-xl shadow-glow">🍔</span>

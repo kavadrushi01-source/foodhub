@@ -32,12 +32,12 @@ export default function AdminSettings() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Store Settings</h1>
         <Button onClick={save} isLoading={saving}><Save size={16} /> Save Changes</Button>
       </div>
       <div className="space-y-6">
-        <section className="card p-6">
+        <section className="card p-4 sm:p-6">
           <h2 className="font-display font-bold text-lg mb-4">Delivery Charges</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="block text-sm"><span className="text-ink-600 dark:text-ink-300 mb-1 block">Base Charge (₹)</span><input type="number" className="input" value={settings.delivery.baseCharge} onChange={(e) => setNested('delivery', 'baseCharge', num(e.target.value))} /></label>
@@ -48,7 +48,7 @@ export default function AdminSettings() {
             <label className="block text-sm"><span className="text-ink-600 dark:text-ink-300 mb-1 block">Estimated Delivery (min)</span><input type="number" className="input" value={settings.delivery.estimatedDeliveryTimeMin} onChange={(e) => setNested('delivery', 'estimatedDeliveryTimeMin', num(e.target.value))} /></label>
           </div>
         </section>
-        <section className="card p-6">
+        <section className="card p-4 sm:p-6">
           <h2 className="font-display font-bold text-lg mb-4">Charges & Tax</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="block text-sm"><span className="text-ink-600 dark:text-ink-300 mb-1 block">Packaging Charge (₹)</span><input type="number" className="input" value={settings.charges.packagingCharge} onChange={(e) => setNested('charges', 'packagingCharge', num(e.target.value))} /></label>
@@ -56,7 +56,7 @@ export default function AdminSettings() {
           </div>
         </section>
 
-        <section className="card p-6">
+        <section className="card p-4 sm:p-6">
           <h2 className="font-display font-bold text-lg mb-4">Payment Methods</h2>
           <div className="flex flex-wrap gap-6">
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={settings.features.codEnabled} onChange={(e) => setNested('features', 'codEnabled', e.target.checked)} /> Cash on Delivery</label>
@@ -65,7 +65,7 @@ export default function AdminSettings() {
           </div>
         </section>
 
-        <section className="card p-6">
+        <section className="card p-4 sm:p-6">
           <h2 className="font-display font-bold text-lg mb-4">Contact Info</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="block text-sm"><span className="text-ink-600 dark:text-ink-300 mb-1 block">Phone</span><input className="input" value={settings.contact.phone} onChange={(e) => setNested('contact', 'phone', e.target.value)} /></label>

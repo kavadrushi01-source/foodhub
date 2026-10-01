@@ -30,13 +30,13 @@ export default function AdminCategories() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Categories</h1>
         <Button onClick={() => setShowForm((s) => !s)}><Plus size={16} /> New Category</Button>
       </div>
 
       {showForm && (
-        <form onSubmit={save} className="card p-6 mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <form onSubmit={save} className="card p-4 sm:p-6 mb-5 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <input className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           <input className="input" placeholder="Icon (emoji)" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} />
           <input className="input" placeholder="Display order" type="number" value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: e.target.value })} />

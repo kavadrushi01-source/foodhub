@@ -87,11 +87,11 @@ export default function OrderDetail() {
   const cancelled = order.status === 'cancelled' || order.status === 'refunded';
 
   return (
-    <div className="container-app py-10">
-      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-ink-500 hover:text-brand-600 text-sm mb-5"><ChevronLeft size={16} /> Back</button>
+    <div className="container-app py-6 sm:py-10">
+      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-ink-500 hover:text-brand-600 text-sm mb-4 sm:mb-5"><ChevronLeft size={16} /> Back</button>
 
       {/* Order summary header */}
-      <section className="relative overflow-hidden rounded-3xl bg-brand-gradient p-6 sm:p-8 shadow-glow mb-8">
+      <section className="relative overflow-hidden rounded-3xl bg-brand-gradient p-4 sm:p-6 lg:p-8 shadow-glow mb-5 sm:mb-8">
         <div className="noise absolute inset-0 opacity-40" />
         <div className="relative flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -111,8 +111,8 @@ export default function OrderDetail() {
       </section>
 
       {!cancelled ? (
-        <section className="card p-6 mb-6">
-          <h2 className="font-display font-bold text-lg mb-6">Order Status</h2>
+        <section className="card p-4 sm:p-6 mb-5 sm:mb-6">
+          <h2 className="font-display font-bold text-lg mb-5 sm:mb-6">Order Status</h2>
           <ol className="flex items-center gap-0 overflow-x-auto">
             {STATUS_STEPS.map((step, i) => {
               const completed = i <= stepIndex;
@@ -140,11 +140,11 @@ export default function OrderDetail() {
           )}
         </section>
       ) : (
-        <div className="card p-6 mb-6 flex items-center gap-3 text-red-600"><XCircle size={24} /> This order was {order.status.replace(/_/g, ' ')} {order.cancelReason ? `(${order.cancelReason})` : ''}</div>
+        <div className="card p-4 sm:p-6 mb-5 sm:mb-6 flex items-start sm:items-center gap-3 text-red-600"><XCircle size={24} className="shrink-0" /> This order was {order.status.replace(/_/g, ' ')} {order.cancelReason ? `(${order.cancelReason})` : ''}</div>
       )}
-      <div className="grid lg:grid-cols-[1fr_360px] gap-6">
-        <div className="space-y-6">
-          <section className="card p-6">
+      <div className="grid lg:grid-cols-[1fr_360px] gap-5 sm:gap-6">
+        <div className="space-y-4 sm:space-y-6">
+          <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg mb-4">Items</h2>
             <div className="divide-y divide-ink-100 dark:divide-ink-800">
               {order.items.map((item, idx) => (
@@ -160,14 +160,14 @@ export default function OrderDetail() {
             </div>
           </section>
 
-          <section className="card p-6">
+          <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg flex items-center gap-2 mb-3"><MapPin size={20} className="text-brand-500" /> Delivery Address</h2>
             <p className="text-sm text-ink-600 dark:text-ink-300">{order.address.line1}, {order.address.city}, {order.address.state} - {order.address.pincode}</p>
             <p className="text-sm text-ink-500 mt-1">{order.address.phone}</p>
           </section>
 
           {order.tracking?.length > 0 && (
-            <section className="card p-6">
+            <section className="card p-4 sm:p-6">
               <h2 className="font-display font-bold text-lg mb-4">Tracking History</h2>
               <ul className="space-y-3">
                 {[...order.tracking].reverse().map((t, i) => (
@@ -184,7 +184,7 @@ export default function OrderDetail() {
           )}
         </div>
 
-        <aside className="card p-6 h-fit lg:sticky lg:top-24">
+        <aside className="card p-4 sm:p-6 h-fit lg:sticky lg:top-24">
           <h2 className="font-display font-bold text-lg mb-4"><Banknote size={20} className="text-brand-500 inline mr-1" /> Payment Summary</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink-600 dark:text-ink-400"><span>Subtotal</span><span>{formatCurrency(order.subTotal)}</span></div>
@@ -193,7 +193,7 @@ export default function OrderDetail() {
             <div className="flex justify-between text-ink-600 dark:text-ink-400"><span>Tax</span><span>{formatCurrency(order.tax)}</span></div>
             {order.discount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-{formatCurrency(order.discount)}</span></div>}
             <div className="flex justify-between font-bold text-lg pt-3 border-t border-ink-100 dark:border-ink-800"><span>Total</span><span className="text-brand-600">{formatCurrency(order.grandTotal)}</span></div>
-            <div className="flex justify-between pt-1"><span className="text-ink-500">Payment</span><span className="capitalize">{PAYMENT_LABELS[order.payment?.method] || order.payment?.method} • {PAYMENT_STATUS_LABELS[order.payment?.status] || order.payment?.status}</span></div>
+            <div className="flex justify-between gap-2 pt-1"><span className="text-ink-500 shrink-0">Payment</span><span className="capitalize text-right">{PAYMENT_LABELS[order.payment?.method] || order.payment?.method} • {PAYMENT_STATUS_LABELS[order.payment?.status] || order.payment?.status}</span></div>
           </div>
           {order.payment?.method !== 'cod' && order.payment?.status === 'pending' && (
             <Button onClick={handleRetryPayment} isLoading={paying} className="w-full mt-5">Complete Payment</Button>

@@ -106,28 +106,28 @@ export default function Home() {
         <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-brand-400/20 blur-3xl animate-pulse-soft" aria-hidden />
         <div className="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-rose-400/20 blur-3xl animate-pulse-soft animation-delay-300" aria-hidden />
 
-        <div className="container-app relative py-14 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container-app relative py-10 sm:py-14 lg:py-24 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div>
             <span className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-ink-900/60 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-ink-700 mb-6 shadow-sm animate-fade-in-up">
               <Zap size={14} className="text-brand-500" /> Fresh. Fast. Delicious.
             </span>
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-ink-900 dark:text-white animate-fade-in-up animation-delay-150">
+            <h1 className="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl leading-[1.1] sm:leading-[1.05] tracking-tight text-ink-900 dark:text-white animate-fade-in-up animation-delay-150 text-balance">
               Hungry? <span className="text-gradient">We've got you</span> covered.
             </h1>
-            <p className="mt-5 text-lg text-ink-600 dark:text-ink-300 max-w-lg animate-fade-in-up delay-300">
+            <p className="mt-4 sm:mt-5 text-[15px] sm:text-lg text-ink-600 dark:text-ink-300 max-w-lg animate-fade-in-up delay-300">
               Order mouth-watering meals from the best kitchens and get them delivered to your doorstep in minutes.
             </p>
 
             {/* Search pill */}
             <form
               onSubmit={(e) => { e.preventDefault(); navigate(heroSearch.trim() ? `/menu?search=${encodeURIComponent(heroSearch.trim())}` : '/menu'); }}
-              className="relative max-w-lg mt-8 animate-fade-in-up delay-500">
+              className="relative max-w-lg mt-6 sm:mt-8 animate-fade-in-up delay-500">
               <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-ink-400" />
-              <input value={heroSearch} onChange={(e) => setHeroSearch(e.target.value)} placeholder="Craving something? Search it now..." className="input pl-14 py-4 pr-40 rounded-2xl shadow-lg bg-white/80 dark:bg-ink-900/80 backdrop-blur border-0 focus:ring-brand-500/25" />
-              <button type="submit" className="btn-primary absolute right-2 top-1/2 -translate-y-1/2 !py-2.5 text-sm">Explore</button>
+              <input value={heroSearch} onChange={(e) => setHeroSearch(e.target.value)} placeholder="Craving something? Search it now..." className="input pl-12 sm:pl-14 py-3.5 sm:py-4 pr-28 sm:pr-40 text-sm sm:text-base rounded-2xl shadow-lg bg-white/80 dark:bg-ink-900/80 backdrop-blur border-0 focus:ring-brand-500/25" />
+              <button type="submit" className="btn-primary absolute right-2 top-1/2 -translate-y-1/2 !py-2 text-xs sm:!py-2.5 sm:text-sm px-3 sm:px-4 whitespace-nowrap">Explore</button>
             </form>
 
-            <div className="mt-8 flex flex-wrap gap-6 text-sm text-ink-600 dark:text-ink-300 animate-fade-in-up delay-500">
+            <div className="mt-6 sm:mt-8 flex flex-wrap gap-x-4 gap-y-2 sm:gap-6 text-xs sm:text-sm text-ink-600 dark:text-ink-300 animate-fade-in-up delay-500">
               <span className="flex items-center gap-2"><Clock size={18} className="text-brand-500" /> 30 min delivery</span>
               <span className="flex items-center gap-2"><Truck size={18} className="text-brand-500" /> Free delivery over ₹299 & on online payments</span>
               <span className="flex items-center gap-2"><MapPin size={18} className="text-brand-500" /> 2.5k+ restaurants</span>
@@ -135,14 +135,14 @@ export default function Home() {
           </div>
 
           {/* Floating showcase */}
-          <div className="hidden lg:flex relative items-center justify-center">
+          <div className="flex relative items-center justify-center mt-2 lg:mt-0">
             <div className="relative">
-              <div className="w-80 h-80 rounded-full bg-brand-400/30 blur-3xl absolute inset-0 animate-pulse-soft" aria-hidden />
-          <img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Gourmet burger" className="relative rounded-3xl shadow-float w-80 h-80 object-cover rotate-2 hover:rotate-0 transition-transform duration-500" />
-          <img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300" alt="Pizza" className="absolute -left-16 top-6 w-28 h-28 rounded-2xl object-cover shadow-float border-4 border-white dark:border-ink-900 animate-float" />
-          <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300" alt="Dessert" className="absolute -right-12 bottom-8 w-24 h-24 rounded-2xl object-cover shadow-float border-4 border-white dark:border-ink-900 animate-float animation-delay-500" />
+              <div className="w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 rounded-full bg-brand-400/30 blur-3xl absolute inset-0 animate-pulse-soft" aria-hidden />
+          <img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600" alt="Gourmet burger" className="relative rounded-3xl shadow-float w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 object-cover rotate-2 hover:rotate-0 transition-transform duration-500" />
+          <img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300" alt="Pizza" className="absolute -left-5 sm:-left-16 top-4 sm:top-6 w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl object-cover shadow-float border-4 border-white dark:border-ink-900 animate-float" />
+          <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300" alt="Dessert" className="absolute -right-4 sm:-right-12 bottom-6 sm:bottom-8 w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl object-cover shadow-float border-4 border-white dark:border-ink-900 animate-float animation-delay-500" />
 
-              <div className="absolute -left-20 bottom-6 glass rounded-2xl px-4 py-3 shadow-float animate-fade-in-up">
+              <div className="hidden sm:block absolute -left-6 sm:-left-12 lg:-left-20 bottom-6 glass rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-float animate-fade-in-up">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-brand-gradient flex items-center justify-center"><Truck size={18} className="text-white" /></div>
                   <div>
@@ -158,13 +158,13 @@ export default function Home() {
 
       {/* ===== STATS STRIP ===== */}
       <section className="container-app -mt-6 relative z-10">
-        <div className="glass rounded-2xl px-6 py-4 grid grid-cols-3 gap-4 shadow-card border-t border-white/60">
+        <div className="glass rounded-2xl px-3 sm:px-6 py-3 sm:py-4 grid grid-cols-3 gap-2 sm:gap-4 shadow-card border-t border-white/60">
           {STATS.map((s) => (
-            <div key={s.label} className="flex items-center justify-center gap-3 text-center">
-              <div className="hidden sm:flex h-10 w-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 items-center justify-center"><s.icon size={20} className="text-brand-500" /></div>
-              <div>
-                <p className="font-display font-extrabold text-xl text-ink-900 dark:text-white leading-none">{s.value}</p>
-                <p className="text-xs text-ink-500 mt-1">{s.label}</p>
+            <div key={s.label} className="flex items-center justify-center gap-2 sm:gap-3 text-center min-w-0">
+              <div className="hidden sm:flex h-10 w-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 items-center justify-center shrink-0"><s.icon size={20} className="text-brand-500" /></div>
+              <div className="min-w-0">
+                <p className="font-display font-extrabold text-[15px] sm:text-xl text-ink-900 dark:text-white leading-none">{s.value}</p>
+                <p className="text-[10px] sm:text-xs text-ink-500 mt-1 truncate">{s.label}</p>
               </div>
             </div>
           ))}
@@ -172,8 +172,8 @@ export default function Home() {
       </section>
 
       {/* ===== CATEGORIES ===== */}
-      <section className="container-app py-12">
-        <div className="flex items-end justify-between mb-6">
+      <section className="container-app py-8 sm:py-12">
+        <div className="flex items-end justify-between mb-5 sm:mb-6 gap-4">
           <div>
             <span className="text-sm font-semibold text-brand-600 uppercase tracking-widest">Menu</span>
             <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-white mt-1">Browse by Category</h2>
@@ -219,21 +219,21 @@ export default function Home() {
           <Link to="/menu?sort=popular" className="text-brand-600 font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">View all <ArrowRight size={16} /></Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : apiDown && !data ? (
           <ApiDownCard onRetry={() => window.location.reload()} />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             {data?.featured?.bestsellers?.map((food) => <FoodCard key={food._id} food={food} />)}
           </div>
         )}
       </section>
 
       {/* ===== HOW IT WORKS ===== */}
-      <section className="container-app py-12">
-        <div className="text-center mb-10">
+      <section className="container-app py-8 sm:py-12">
+        <div className="text-center mb-6 sm:mb-10">
           <span className="text-sm font-semibold text-brand-600 uppercase tracking-widest">Simple</span>
           <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-white mt-1">How FoodHub works</h2>
         </div>
@@ -243,7 +243,7 @@ export default function Home() {
             { icon: Zap, title: 'We prepare fresh', desc: 'Kitchens cook it fresh, right when you order — quality you can taste.' },
             { icon: Truck, title: 'Fast doorstep delivery', desc: 'Your rider gets it to your door in ~30 minutes, track it live.' },
           ].map((s) => (
-            <div key={s.title} className="relative card p-7 text-center hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div key={s.title} className="relative card p-5 sm:p-7 text-center hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-24 rounded-b-full bg-brand-gradient" />
               <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-glow mb-4 animate-fade-in-up"><s.icon size={24} /></div>
               <p className="text-sm font-bold text-brand-500 mb-1">{s.title}</p>
@@ -254,8 +254,8 @@ export default function Home() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="container-app py-12">
-        <div className="relative overflow-hidden rounded-3xl bg-brand-gradient text-white p-8 lg:p-14 shadow-glow-lg noise">
+      <section className="container-app py-8 sm:py-12">
+        <div className="relative overflow-hidden rounded-3xl bg-brand-gradient text-white p-6 sm:p-8 lg:p-14 shadow-glow-lg noise">
           <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/20 blur-3xl" aria-hidden />
           <div className="relative flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
             <div className="max-w-lg">

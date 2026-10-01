@@ -25,9 +25,9 @@ export default function AdminUsers() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Users & Roles</h1>
-        <select className="input !w-48 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
+        <select className="input !w-40 sm:!w-48 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="">All Roles</option><option value="user">User</option><option value="admin">Admin</option><option value="delivery">Delivery</option>
         </select>
       </div>

@@ -56,13 +56,13 @@ export default function AdminFoods() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="font-display font-bold text-2xl">Food Items</h1>
-        <div className="flex items-center gap-3">
-          <input className="input !py-2 w-48" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <div className="flex flex-wrap items-center gap-3">
+          <input className="input !py-2 w-40 sm:w-48" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
           <Button onClick={() => startEdit(null)}><Plus size={16} /> Add Food</Button>
         </div>
       </div>
       {editing && (
-        <div className="card p-6 mb-6">
+        <div className="card p-4 sm:p-6 mb-5 sm:mb-6">
           <h2 className="font-display font-bold text-lg mb-4">{editing === 'new' ? 'Add New Food' : `Edit: ${editing.name}`}</h2>
           <form onSubmit={save} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <input className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />

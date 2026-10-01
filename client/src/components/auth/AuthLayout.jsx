@@ -9,7 +9,7 @@ const PERKS = [
 
 export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
-    <div className="min-h-[calc(100vh-64px)] grid lg:grid-cols-2 bg-cream dark:bg-ink-950">
+    <div className="min-h-[calc(100dvh-64px)] grid lg:grid-cols-2 bg-cream dark:bg-ink-950">
       {/* Brand showcase */}
       <div className="hidden lg:flex relative overflow-hidden bg-brand-gradient noise p-12 text-white flex-col justify-between">
         <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/20 blur-3xl" aria-hidden />
@@ -46,7 +46,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
       </div>
 
       {/* Form side */}
-      <div className="flex items-center justify-center px-4 py-12">
+      <div className="flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md animate-fade-in-up">
           <div className="lg:hidden text-center mb-8">
             <span className="inline-flex h-14 w-14 rounded-2xl bg-brand-gradient items-center justify-center text-3xl shadow-glow">🍔</span>

@@ -61,21 +61,21 @@ export default function FoodCard({ food }) {
         </div>
       </Link>
 
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-3 sm:p-4 flex flex-col flex-1">
         <Link to={`/food/${food.slug}`}>
-          <h3 className="font-semibold text-ink-800 dark:text-ink-100 line-clamp-1 hover:text-brand-600 transition-colors">{food.name}</h3>
+          <h3 className="font-semibold text-sm sm:text-base text-ink-800 dark:text-ink-100 line-clamp-1 hover:text-brand-600 transition-colors">{food.name}</h3>
         </Link>
-        <div className="flex items-center gap-2 mt-0.5 text-xs text-ink-400">
-          <span className="flex items-center gap-1"><Clock size={12} /> {food.prepTime} min</span>
+        <div className="flex items-center gap-2 mt-0.5 text-[11px] sm:text-xs text-ink-400 min-w-0">
+          <span className="inline-flex items-center gap-1 shrink-0"><Clock size={12} /> {food.prepTime} min</span>
           {food.categoryName && <span className="text-ink-300 dark:text-ink-600">•</span>}
-          {food.categoryName && <span>{food.categoryName}</span>}
+          {food.categoryName && <span className="truncate">{food.categoryName}</span>}
         </div>
-        <p className="text-sm text-ink-500 dark:text-ink-400 line-clamp-2 mt-1.5 flex-1">{food.shortDescription || food.description}</p>
+        <p className="text-xs sm:text-sm text-ink-500 dark:text-ink-400 line-clamp-2 mt-1.5 flex-1">{food.shortDescription || food.description}</p>
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-ink-100 dark:border-ink-800">
-          <div className="flex items-baseline gap-1.5 leading-none">
-            <span className="font-bold text-lg text-ink-900 dark:text-white">{formatCurrency(getEffectivePrice(food))}</span>
-            {discountPercent > 0 && <span className="text-xs text-ink-400 line-through">{formatCurrency(food.price)}</span>}
+        <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t border-ink-100 dark:border-ink-800">
+          <div className="flex items-baseline gap-1.5 leading-none min-w-0">
+            <span className="font-bold text-base sm:text-lg text-ink-900 dark:text-white">{formatCurrency(getEffectivePrice(food))}</span>
+            {discountPercent > 0 && <span className="text-[11px] sm:text-xs text-ink-400 line-through">{formatCurrency(food.price)}</span>}
           </div>
           <div className="flex items-center gap-1">
             {isAuthenticated && (

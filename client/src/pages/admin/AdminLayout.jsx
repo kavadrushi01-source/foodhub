@@ -73,7 +73,7 @@ export default function AdminLayout() {
         {mobileOpen && (
           <div className="md:hidden fixed inset-0 z-50">
             <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-            <div className="absolute left-0 top-0 h-full w-72 bg-ink-900 text-ink-300 shadow-2xl flex flex-col">
+            <div className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-ink-900 text-ink-300 shadow-2xl flex flex-col">
               <div className="flex items-center justify-between p-4 border-b border-ink-800">
                 <span className="font-display font-bold text-white">🍔 FoodHub Admin</span>
                 <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-ink-800" aria-label="Close menu"><X size={22} /></button>

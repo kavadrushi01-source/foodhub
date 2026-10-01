@@ -57,7 +57,7 @@ export default function FoodDetail() {
   const discountPercent = food.discountPrice && food.discountPrice < food.price ? Math.round(((food.price - food.discountPrice) / food.price) * 100) : 0;
 
   return (
-    <div className="container-app py-8">
+    <div className="container-app py-5 sm:py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-ink-500 dark:text-ink-400 mb-6">
         <Link to="/" className="hover:text-brand-600">Home</Link>
@@ -70,7 +70,7 @@ export default function FoodDetail() {
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Image */}
         <div className="card overflow-hidden h-fit">
-          <div className="relative aspect-square overflow-hidden bg-ink-100 dark:bg-ink-800">
+          <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-ink-100 dark:bg-ink-800">
             <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-full w-full object-cover" loading="eager" />
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
               {discountPercent > 0 && <Badge tone="red" className="font-bold">-{discountPercent}%</Badge>}
@@ -84,7 +84,7 @@ export default function FoodDetail() {
 
         {/* Info */}
         <div>
-          <h1 className="font-display font-extrabold text-3xl text-ink-900 dark:text-ink-100">{food.name}</h1>
+          <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 text-balance">{food.name}</h1>
           <div className="flex items-center gap-4 mt-3 flex-wrap">
             <Rating value={food.rating?.average || 0} count={food.rating?.count} showCount />
             <span className="flex items-center gap-1 text-ink-500 dark:text-ink-400 text-sm"><Clock size={16} /> {food.prepTime} min</span>
@@ -92,20 +92,20 @@ export default function FoodDetail() {
           </div>
 
           <div className="mt-5 flex items-baseline gap-3">
-            <span className="font-bold text-3xl text-brand-600 dark:text-brand-400">{formatCurrency(getEffectivePrice(food))}</span>
+            <span className="font-bold text-2xl sm:text-3xl text-brand-600 dark:text-brand-400">{formatCurrency(getEffectivePrice(food))}</span>
             {discountPercent > 0 && <span className="text-lg text-ink-400 line-through">{formatCurrency(food.price)}</span>}
           </div>
 
           <p className="mt-5 text-ink-600 dark:text-ink-300 leading-relaxed">{food.description}</p>
 
           {/* Quantity + Add to cart */}
-          <div className="mt-6 flex items-center gap-4 flex-wrap">
-            <div className="flex items-center border border-ink-200 dark:border-ink-700 rounded-xl overflow-hidden">
+          <div className="mt-6 flex items-center gap-3 sm:gap-4 flex-wrap">
+            <div className="flex items-center border border-ink-200 dark:border-ink-700 rounded-xl overflow-hidden shrink-0">
               <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-3 hover:bg-ink-100 dark:hover:bg-ink-800" aria-label="Decrease quantity"><Minus size={18} /></button>
               <span className="w-12 text-center font-bold">{quantity}</span>
               <button onClick={() => setQuantity((q) => q + 1)} className="p-3 hover:bg-ink-100 dark:hover:bg-ink-800" aria-label="Increase quantity"><Plus size={18} /></button>
             </div>
-            <button onClick={handleAdd} className="btn-primary !px-8 !py-3">Add to Cart • {formatCurrency(getEffectivePrice(food) * quantity)}</button>
+            <button onClick={handleAdd} className="btn-primary !px-5 sm:!px-8 !py-3 text-sm sm:text-base min-w-0 flex-1 sm:flex-none whitespace-nowrap">Add to Cart • {formatCurrency(getEffectivePrice(food) * quantity)}</button>
             <button onClick={handleWishlist} className={`btn-secondary !px-3 !py-3 ${inWishlist ? 'text-red-500' : ''}`} aria-label="Toggle wishlist">
               <Heart size={20} className={inWishlist ? 'fill-red-500' : ''} />
             </button>
@@ -113,7 +113,7 @@ export default function FoodDetail() {
 
           {/* Nutrition */}
           {(food.nutrition?.calories || food.ingredients?.length) && (
-            <div className="card mt-8 p-5">
+            <div className="card mt-6 sm:mt-8 p-4 sm:p-5">
               <h2 className="font-display font-bold text-lg mb-4">Nutrition Facts</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <NutriStat icon={Flame} label="Calories" value={`${food.nutrition?.calories || 0} kcal`} />
@@ -147,8 +147,8 @@ export default function FoodDetail() {
       </div>
 
       {/* Reviews */}
-      <section className="mt-12">
-        <h2 className="font-display font-bold text-2xl mb-6">Customer Reviews ({reviews?.length || 0})</h2>
+      <section className="mt-8 sm:mt-12">
+        <h2 className="font-display font-bold text-xl sm:text-2xl mb-4 sm:mb-6">Customer Reviews ({reviews?.length || 0})</h2>
         {reviews?.length === 0 ? (
           <p className="text-ink-500 dark:text-ink-400">No reviews yet. Be the first to review this item!</p>
         ) : (
@@ -162,7 +162,7 @@ export default function FoodDetail() {
 
       {/* Related items */}
       {related?.length > 0 && (
-        <section className="mt-12">
+        <section className="mt-8 sm:mt-12">
           <div className="relative overflow-hidden rounded-3xl bg-brand-gradient p-6 sm:p-8 mb-6 shadow-glow">
             <div className="noise absolute inset-0 opacity-40" />
             <div className="relative flex items-center justify-between flex-wrap gap-4">
@@ -173,7 +173,7 @@ export default function FoodDetail() {
               <Link to="/menu" className="btn-primary !bg-white !text-brand-600 hover:!bg-white/90 shadow-none font-semibold">View Menu</Link>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {related.map((foodItem) => <FoodCard key={foodItem._id} food={foodItem} />)}
           </div>
         </section>

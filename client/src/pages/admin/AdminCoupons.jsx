@@ -33,13 +33,13 @@ export default function AdminCoupons() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Coupons</h1>
         <Button onClick={() => setShowForm((s) => !s)}><Plus size={16} /> New Coupon</Button>
       </div>
 
       {showForm && (
-        <form onSubmit={save} className="card p-6 mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <form onSubmit={save} className="card p-4 sm:p-6 mb-5 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <input className="input" placeholder="CODE" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} required />
           <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
             <option value="percentage">Percentage</option><option value="fixed">Fixed amount</option>

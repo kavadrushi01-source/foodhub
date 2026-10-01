@@ -196,13 +196,13 @@ export default function Checkout() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+    <div className="max-w-6xl mx-auto py-6 sm:py-8 px-4">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Checkout</h1>
+      <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
+        <div className="md:col-span-2 space-y-5 sm:space-y-6">
           {/* Address */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Delivery Address</h2>
             {addresses.length === 0 && !isNewAddress ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 mb-4">No addresses saved</p>
@@ -238,13 +238,13 @@ export default function Checkout() {
             {isNewAddress && (
               <form onSubmit={handleSaveAddress} className="mt-4 space-y-3 border-t pt-4">
                 <h3 className="font-semibold">New Address</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input required placeholder="Label (Home/Work)" value={addressForm.label} onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })} className="border rounded-lg px-3 py-2" />
                   <input required placeholder="Phone" value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} className="border rounded-lg px-3 py-2" />
                 </div>
                 <input required placeholder="Address Line 1" value={addressForm.line1} onChange={(e) => setAddressForm({ ...addressForm, line1: e.target.value })} className="border rounded-lg px-3 py-2 w-full" />
                 <input placeholder="Address Line 2" value={addressForm.line2} onChange={(e) => setAddressForm({ ...addressForm, line2: e.target.value })} className="border rounded-lg px-3 py-2 w-full" />
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <input required placeholder="City" value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} className="border rounded-lg px-3 py-2" />
                   <input required placeholder="State" value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} className="border rounded-lg px-3 py-2" />
                   <input required placeholder="Pincode" value={addressForm.pincode} onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value })} className="border rounded-lg px-3 py-2" />
@@ -258,8 +258,8 @@ export default function Checkout() {
           </div>
 
           {/* Payment */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Payment Method</h2>
             <div className="space-y-3">
               {[
                 { id: 'cod', label: 'Cash on Delivery', icon: Banknote, desc: 'Pay when your order arrives', enabled: paymentConfig?.methods?.includes('cod') },
@@ -270,8 +270,8 @@ export default function Checkout() {
                 .map(({ id, label, icon: Icon, desc }) => (
                   <label key={id} className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer ${paymentMethod === id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
                     <input type="radio" name="payment" value={id} checked={paymentMethod === id} onChange={() => setPaymentMethod(id)} className="hidden" />
-                    <Icon className="text-emerald-600" size={22} />
-                    <div>
+                    <Icon className="text-emerald-600 shrink-0" size={22} />
+                    <div className="min-w-0">
                       <p className="font-medium">{label}</p>
                       <p className="text-sm text-gray-600">{desc}</p>
                     </div>
@@ -290,15 +290,15 @@ export default function Checkout() {
         </div>
         {/* Summary */}
         <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 sticky top-24">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Order Summary</h2>
             <div className="space-y-2 mb-4">
               {items.map((i) => {
                 const effectivePrice = getEffectivePrice(i.food);
                 return (
-                  <div key={i.food._id} className="flex justify-between text-sm">
-                    <span>{i.food.name} x{i.quantity}</span>
-                    <span>{formatCurrency(effectivePrice * i.quantity)}</span>
+                  <div key={i.food._id} className="flex justify-between items-start gap-2 text-sm">
+                    <span className="min-w-0 truncate">{i.food.name} x{i.quantity}</span>
+                    <span className="shrink-0">{formatCurrency(effectivePrice * i.quantity)}</span>
                   </div>
                 );
               })}

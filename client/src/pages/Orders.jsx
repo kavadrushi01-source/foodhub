@@ -30,8 +30,8 @@ export default function Orders() {
   useEffect(() => { load(); }, [page]);
 
   return (
-    <div className="container-app py-10">
-      <h1 className="font-display font-bold text-3xl text-ink-900 dark:text-ink-100 mb-8">My Orders</h1>
+    <div className="container-app py-6 sm:py-10">
+      <h1 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 mb-5 sm:mb-8">My Orders</h1>
       {loading ? (
         <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="skeleton h-28 w-full rounded-2xl" />)}</div>
       ) : orders.length === 0 ? (
@@ -40,8 +40,8 @@ export default function Orders() {
         <>
           <div className="space-y-3">
             {orders.map((o) => (
-              <Link key={o._id} to={`/orders/${o.orderNumber}`} className="card p-5 flex items-center gap-4 hover:shadow-card-hover transition-all group">
-                <div className="h-12 w-12 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
+              <Link key={o._id} to={`/orders/${o.orderNumber}`} className="card p-3.5 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-card-hover transition-all group">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center shrink-0">
                   <Package size={22} className="text-brand-600 dark:text-brand-400" />
                 </div>
                 <div className="flex-1 min-w-0">

@@ -44,14 +44,14 @@ export default function Navbar() {
 
   return (
     <header className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? 'glass shadow-card' : 'bg-cream/60 dark:bg-ink-950/40 backdrop-blur-lg border-b border-transparent'}`}>
-      <nav className="container-app flex items-center justify-between h-16 gap-3">
+      <nav className="container-app flex items-center justify-between h-16 gap-2 sm:gap-3">
         <button onClick={toggleSidebar} className="lg:hidden p-2 -ml-2 text-ink-600 dark:text-ink-300 hover:bg-ink-100/80 dark:hover:bg-ink-800 rounded-lg" aria-label="Open menu">
           <Menu size={22} />
         </button>
 
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
           <span className="h-9 w-9 rounded-xl bg-brand-gradient flex items-center justify-center text-xl shadow-glow group-hover:rotate-6 transition-transform duration-300">🍔</span>
-          <span className="font-display font-extrabold text-xl tracking-tight text-ink-900 dark:text-white">
+          <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight text-ink-900 dark:text-white">
             Food<span className="text-gradient">Hub</span>
           </span>
         </Link>
@@ -124,8 +124,8 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-1 sm:gap-2 ml-1">
-              <Link to="/login" className="btn-ghost text-xs sm:text-sm px-2.5 sm:px-4 py-2">Login</Link>
+            <div className="flex items-center gap-0.5 sm:gap-1 ml-1 min-w-0">
+              <Link to="/login" className="btn-ghost text-xs sm:text-sm px-2 sm:px-4 py-2 whitespace-nowrap">Login</Link>
               <Link to="/register" className="btn-primary text-xs sm:text-sm px-2.5 sm:px-4 py-2 hidden sm:inline-flex">Sign Up</Link>
             </div>
           )}

@@ -29,10 +29,10 @@ export default function Wishlist() {
   };
 
   return (
-    <div className="container-app py-10">
-      <h1 className="font-display font-bold text-3xl text-ink-900 dark:text-ink-100 mb-8">My Wishlist</h1>
+    <div className="container-app py-6 sm:py-10">
+      <h1 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 mb-5 sm:mb-8">My Wishlist</h1>
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : items.length === 0 ? (
@@ -43,7 +43,7 @@ export default function Wishlist() {
           action={<Link to="/menu" className="btn-primary">Browse Menu</Link>}
         />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {items.map((food) => (
             <div key={food._id} className="relative">
               <FoodCard food={food} />

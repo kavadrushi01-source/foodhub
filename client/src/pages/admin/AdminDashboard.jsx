@@ -52,27 +52,27 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Dashboard</h1>
         <div className="text-sm text-ink-500">Delivery Partners: {stats?.totalDeliveryPartners ?? <Bike size={14} className="inline" />}</div>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {cards.map((c) => (
-          <div key={c.label} className="card p-4">
-            <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${c.color}`}><c.icon size={20} /></div>
-            <p className="text-xl font-bold text-ink-900 dark:text-ink-100">{c.value}</p>
-            <p className="text-xs text-ink-500 mt-0.5">{c.label}</p>
+          <div key={c.label} className="card p-3 sm:p-4 min-w-0">
+            <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center mb-2 sm:mb-3 ${c.color}`}><c.icon size={20} /></div>
+            <p className="text-lg sm:text-xl font-bold text-ink-900 dark:text-ink-100 truncate">{c.value}</p>
+            <p className="text-[11px] sm:text-xs text-ink-500 mt-0.5 truncate">{c.label}</p>
           </div>
         ))}
       </div>
 
       {/* Quick actions */}
       <h2 className="font-display font-bold text-lg mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {actions.map((a) => (
-          <Link key={a.label} to={a.to} className="card p-4 flex items-center gap-3 hover:shadow-glow transition-all group">
+          <Link key={a.label} to={a.to} className="card p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 hover:shadow-glow transition-all group min-w-0">
             <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${a.color} flex items-center justify-center text-white shadow group-hover:scale-110 transition-transform shrink-0`}><a.icon size={20} /></div>
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate">{a.label}</p>
@@ -82,9 +82,9 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-6">
+      <div className="grid lg:grid-cols-5 gap-4 sm:gap-6">
         {/* Revenue trend */}
-        <div className="card p-5 lg:col-span-3">
+        <div className="card p-4 sm:p-5 lg:col-span-3">
           <h2 className="font-display font-bold text-lg mb-4">Revenue (Last 30 days)</h2>
           {revenue.length === 0 ? (
             <p className="text-sm text-ink-400">No sales data yet.</p>
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top foods */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-4 sm:p-5 lg:col-span-2">
           <h2 className="font-display font-bold text-lg mb-4">Top Selling</h2>
           {topFoods.length === 0 ? (
             <p className="text-sm text-ink-400">No data yet.</p>
@@ -133,12 +133,12 @@ export default function AdminDashboard() {
         ) : (
           <div className="card divide-y divide-ink-100 dark:divide-ink-800">
             {recent.map((o) => (
-              <div key={o._id} className="flex items-center gap-3 p-4">
-                <span className="font-semibold text-sm">#{o.orderNumber}</span>
+              <div key={o._id} className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3.5 sm:p-4">
+                <span className="font-semibold text-sm shrink-0">#{o.orderNumber}</span>
                 <Badge tone={STATUS_TONE[o.status] || 'gray'}>{o.status.replace(/_/g, ' ')}</Badge>
-                <div className="flex-1 min-w-0"><p className="text-sm text-ink-600 truncate">{o.user?.name} • {o.items?.length} item(s)</p></div>
+                <div className="flex-1 min-w-0 basis-40"><p className="text-sm text-ink-600 truncate">{o.user?.name} • {o.items?.length} item(s)</p></div>
                 <span className="text-sm text-ink-500 hidden sm:block">{formatDate(o.createdAt)}</span>
-                <span className="font-bold text-sm">{formatCurrency(o.grandTotal)}</span>
+                <span className="font-bold text-sm shrink-0">{formatCurrency(o.grandTotal)}</span>
                 <Link to="/admin/orders" className="text-brand-600 hover:text-brand-700 shrink-0"><ChevronRight size={18} /></Link>
               </div>
             ))}

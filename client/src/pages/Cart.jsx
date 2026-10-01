@@ -31,7 +31,7 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="container-app py-10">
+      <div className="container-app py-6 sm:py-10">
         <EmptyState icon={ShoppingBag} title="Your cart is empty" description="Looks like you haven't added anything to your cart yet."
           action={<Link to="/menu" className="btn-primary"><ShoppingBag size={18} /> Browse Menu</Link>} />
       </div>
@@ -39,21 +39,21 @@ export default function Cart() {
   }
 
   return (
-    <div className="container-app py-10">
-      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-ink-500 hover:text-brand-600 text-sm mb-5"><ArrowLeft size={16} /> Back</button>
-      <h1 className="font-display font-bold text-3xl text-ink-900 dark:text-ink-100 mb-8">Shopping Cart</h1>
+    <div className="container-app py-6 sm:py-10">
+      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-ink-500 hover:text-brand-600 text-sm mb-4 sm:mb-5"><ArrowLeft size={16} /> Back</button>
+      <h1 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 mb-5 sm:mb-8">Shopping Cart</h1>
 
-      <div className="grid lg:grid-cols-[1fr_360px] gap-6">
+      <div className="grid lg:grid-cols-[1fr_360px] gap-5 sm:gap-6">
         <div className="space-y-3">
           {items.map(({ food, quantity }) => (
-            <div key={food._id} className="card p-4 flex gap-4">
-              <Link to={`/food/${food.slug}`}>
-                <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-20 w-20 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" />
+            <div key={food._id} className="card p-3 sm:p-4 flex gap-3 sm:gap-4">
+              <Link to={`/food/${food.slug}`} className="shrink-0">
+                <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" />
               </Link>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <Link to={`/food/${food.slug}`}><h3 className="font-semibold text-ink-800 dark:text-ink-100 hover:text-brand-600">{food.name}</h3></Link>
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/food/${food.slug}`}><h3 className="font-semibold text-sm sm:text-base text-ink-800 dark:text-ink-100 hover:text-brand-600 line-clamp-2">{food.name}</h3></Link>
                     <p className="text-sm text-ink-500 dark:text-ink-400">{food.isVeg ? 'Vegetarian' : 'Non-Veg'} • {food.prepTime} min</p>
                     <p className="text-brand-600 dark:text-brand-400 font-semibold mt-1">{formatCurrency(getEffectivePrice(food))}</p>
                   </div>
@@ -73,7 +73,7 @@ export default function Cart() {
           <button onClick={clearCart} className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1"><Trash2 size={14} /> Clear cart</button>
         </div>
 
-        <aside className="card p-6 h-fit lg:sticky lg:top-24">
+        <aside className="card p-4 sm:p-6 h-fit lg:sticky lg:top-24">
           <h3 className="font-display font-bold text-lg mb-4">Order Summary</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink-600 dark:text-ink-400"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
@@ -82,8 +82,8 @@ export default function Cart() {
             <div className="flex justify-between font-bold text-lg pt-3 border-t border-ink-100 dark:border-ink-800"><span>Total</span><span className="text-brand-600">{formatCurrency(total)}</span></div>
           </div>
           <form onSubmit={applyCoupon} className="flex gap-2 mt-4">
-            <input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Coupon code" className="input py-2 text-sm flex-1" />
-            <button type="submit" disabled={loading} className="btn-secondary text-sm"><Tag size={15} /> Apply</button>
+            <input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Coupon code" className="input py-2 text-sm flex-1 min-w-0" />
+            <button type="submit" disabled={loading} className="btn-secondary text-sm whitespace-nowrap"><Tag size={15} /> Apply</button>
           </form>
           {coupon && <p className="text-xs text-green-600 dark:text-green-400 mt-2">✓ {coupon.code} applied</p>}
           <button onClick={() => navigate('/checkout')} className="btn-primary w-full mt-5">Proceed to Checkout</button>

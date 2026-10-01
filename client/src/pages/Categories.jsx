@@ -20,19 +20,19 @@ export default function Categories() {
   }, []);
 
   return (
-    <div className="container-app py-10">
-      <div className="mb-8">
-        <h1 className="font-display font-bold text-3xl text-ink-900 dark:text-ink-100 mb-2">Browse Categories</h1>
+    <div className="container-app py-6 sm:py-10">
+      <div className="mb-5 sm:mb-8">
+        <h1 className="font-display font-bold text-2xl sm:text-3xl text-ink-900 dark:text-ink-100 mb-2">Browse Categories</h1>
         <p className="text-ink-500 dark:text-ink-400">Explore our delicious menu by category — from street food to fine sushi</p>
       </div>
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : categories?.length === 0 ? (
         <EmptyState title="No categories yet" description="Categories will appear here soon." />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {categories.map((c) => (
             <Link key={c._id} to={`/menu?category=${c.slug}`} className="group card overflow-hidden rounded-2xl hover:shadow-card-hover hover:-translate-y-1 transition-all">
               <div className="relative h-32 sm:h-40 overflow-hidden">

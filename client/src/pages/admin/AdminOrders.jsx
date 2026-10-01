@@ -49,7 +49,7 @@ export default function AdminOrders() {
           <h1 className="font-display font-bold text-2xl">Orders</h1>
           <p className="text-sm text-ink-500 mt-0.5">Manage each item (food) in an order individually.</p>
         </div>
-        <select className="input !w-48 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
+        <select className="input !w-40 sm:!w-48 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="">All Statuses</option>
           {Object.keys(STATUS_TONE).map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
         </select>
@@ -92,7 +92,7 @@ export default function AdminOrders() {
                   const busy = busyItem === key;
                   const now = item.status || 'pending';
                   return (
-                    <div key={key} className="flex items-center gap-3 p-3.5 hover:bg-ink-50/50 dark:hover:bg-ink-800/30 transition-colors">
+                    <div key={key} className="flex flex-wrap items-center gap-3 p-3.5 hover:bg-ink-50/50 dark:hover:bg-ink-800/30 transition-colors">
                       <img src={item.image} alt={item.name} loading="lazy" onError={imgFallback} className="h-12 w-12 rounded-xl object-cover bg-ink-100 dark:bg-ink-800 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-ink-800 dark:text-ink-100 truncate">{item.name}</p>
@@ -101,13 +101,13 @@ export default function AdminOrders() {
                       <div className="hidden sm:block text-right shrink-0">
                         <p className="font-semibold text-sm">{formatCurrency(item.lineTotal)}</p>
                       </div>
-                      <Badge tone={STATUS_TONE[now] || 'gray'} className="shrink-0 w-fit">{now.replace(/_/g, ' ')}</Badge>
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge tone={STATUS_TONE[now] || 'gray'} className="shrink-0 w-fit ml-auto sm:ml-0">{now.replace(/_/g, ' ')}</Badge>
+                      <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
                         <select
                           value={now}
                           disabled={busy}
                           onChange={(e) => advanceItem(o, item, itemId, e.target.value)}
-                          className="input !py-1.5 !px-2 text-sm !rounded-lg w-36"
+                          className="input !py-1.5 !px-2 text-sm !rounded-lg flex-1 sm:flex-none sm:w-36 min-w-0"
                           aria-label={`Status for ${item.name}`}
                         >
                           {ITEM_STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}

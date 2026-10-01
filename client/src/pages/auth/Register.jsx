@@ -47,7 +47,7 @@ export default function Register() {
             <input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input pl-11" placeholder="you@example.com" autoComplete="email" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-ink-700 dark:text-ink-200 mb-1.5">Phone</label>
             <div className="relative">

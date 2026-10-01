@@ -16,7 +16,7 @@ export default function Footer() {
   return (
     <footer className="bg-ink-900 dark:bg-ink-950 text-ink-300 mt-16 relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/50 to-transparent" />
-      <div className="container-app py-14 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+      <div className="container-app py-10 sm:py-14 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8">
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <Link to="/" className="flex items-center gap-2.5 mb-4">

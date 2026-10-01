@@ -53,17 +53,17 @@ export default function DeliveryDashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <h1 className="font-display font-bold text-2xl">Delivery Dashboard</h1>
         <span className="badge bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"><Truck size={13} /> {deliveries.length} active orders</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {cards.map((c) => (
-          <div key={c.label} className="card p-4">
-            <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${c.color}`}><c.icon size={20} /></div>
-            <p className="text-xl font-bold text-ink-900 dark:text-ink-100">{c.value}</p>
-            <p className="text-xs text-ink-500 mt-0.5">{c.label}</p>
+          <div key={c.label} className="card p-3 sm:p-4 min-w-0">
+            <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center mb-2 sm:mb-3 ${c.color}`}><c.icon size={20} /></div>
+            <p className="text-lg sm:text-xl font-bold text-ink-900 dark:text-ink-100 truncate">{c.value}</p>
+            <p className="text-[11px] sm:text-xs text-ink-500 mt-0.5 truncate">{c.label}</p>
           </div>
         ))}
       </div>

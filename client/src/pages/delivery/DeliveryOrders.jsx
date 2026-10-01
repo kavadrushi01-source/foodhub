@@ -43,7 +43,7 @@ export default function DeliveryOrders() {
           <p className="text-sm text-ink-500 mt-0.5">Every new order shows up here instantly with its current status.</p>
         </div>
         <div className="flex items-center gap-2">
-          <select className="input !w-44 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <select className="input !w-40 sm:!w-44 !py-2" value={filter} onChange={(e) => setFilter(e.target.value)}>
             {FILTERS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
           </select>
           <button onClick={() => load()} className="btn-secondary !p-2" title="Refresh" aria-label="Refresh"><RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} /></button>
@@ -57,16 +57,16 @@ export default function DeliveryOrders() {
       ) : (
         <div className="space-y-3">
           {orders.map((o) => (
-            <Link key={o._id} to={`/delivery/orders/${o.orderNumber}`} className="card p-4 flex items-center gap-4 hover:shadow-card-hover transition-all group">
-              <div className="h-11 w-11 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center shrink-0"><Package size={20} className="text-brand-600" /></div>
+            <Link key={o._id} to={`/delivery/orders/${o.orderNumber}`} className="card p-3 sm:p-4 flex items-center gap-3 sm:gap-4 hover:shadow-card-hover transition-all group">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center shrink-0"><Package size={20} className="text-brand-600" /></div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold">#{o.orderNumber}</span>
+                  <span className="font-semibold shrink-0">#{o.orderNumber}</span>
                   <Badge tone={STATUS_TONE[o.status] || 'gray'}>{o.status.replace(/_/g, ' ')}</Badge>
                 </div>
-                <p className="text-sm text-ink-500 mt-0.5">{o.user?.name} • {o.items?.length} item(s) • {o.address?.city} • {timeAgo(o.createdAt)}</p>
+                <p className="text-xs sm:text-sm text-ink-500 mt-0.5 truncate">{o.user?.name} • {o.items?.length} item(s) • {o.address?.city} • {timeAgo(o.createdAt)}</p>
               </div>
-              <div className="text-right shrink-0"><p className="font-bold">{formatCurrency(o.grandTotal)}</p><ChevronRight size={18} className="ml-auto text-ink-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" /></div>
+              <div className="text-right shrink-0"><p className="font-bold text-sm sm:text-base">{formatCurrency(o.grandTotal)}</p><ChevronRight size={18} className="ml-auto text-ink-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" /></div>
             </Link>
           ))}
         </div>
