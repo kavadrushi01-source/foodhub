@@ -1,14 +1,32 @@
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import config from '../config/index.js';
+import logger from '../config/logger.js';
 
 let instance = null;
 
-/** True only when both Razorpay credentials are set in the environment. */
-export const isRazorpayConfigured = () =>
-  Boolean(config.payments.razorpayKeyId && config.payments.razorpayKeySecret);
+/**
+ * True only when a valid RAZORPAY *TEST* key pair is configured.
+ *
+ * Deliberately returns false for live keys: this project runs Razorpay in test
+ * mode only, so a live key must never enable real charging. The mode is derived
+ * from the key prefix in config (`rzp_test_` vs `rzp_live_`).
+ */
+export const isRazorpayConfigured = () => config.payments.razorpayEnabled;
 
-/** Lazily created singleton Razorpay client (null when not configured). */
+/** 'test' | 'live' | 'unknown' | 'none' — from the key prefix. */
+export const getRazorpayMode = () => config.payments.razorpayKeyMode;
+
+// Warn once per instance when a live key was supplied and refused, so a
+// misconfigured deploy is visible in the logs instead of failing silently.
+if (config.payments.razorpayLiveBlocked) {
+  logger.warn(
+    'Razorpay LIVE key detected and BLOCKED — this project is test-mode only. ' +
+      'Set RAZORPAY_KEY_ID to an rzp_test_… key. Online payments stay disabled.',
+  );
+}
+
+/** Lazily created singleton Razorpay client (null unless test keys are set). */
 const getClient = () => {
   if (!isRazorpayConfigured()) return null;
   if (!instance) {
@@ -22,7 +40,7 @@ const getClient = () => {
 
 /**
  * Create a Razorpay Order for a given amount (in rupees).
- * Returns the gateway order object, or null when Razorpay is not configured.
+ * Returns the gateway order object, or null when test mode is not configured.
  */
 export const createRazorpayOrder = async ({ amount, receipt, notes }) => {
   const client = getClient();
@@ -41,9 +59,13 @@ export const createRazorpayOrder = async ({ amount, receipt, notes }) => {
  * Verify a Razorpay payment signature (HMAC-SHA256 of
  * `${order_id}|${payment_id}` using the key secret).
  * Constant-time comparison guards against timing attacks.
+ *
+ * Refuses to verify anything when test mode is not configured, so a live secret
+ * can never be used to validate a payment.
  */
 export const verifyRazorpaySignature = ({ orderId, paymentId, signature }) => {
-  if (!orderId || !paymentId || !signature || !config.payments.razorpayKeySecret) return false;
+  if (!isRazorpayConfigured()) return false;
+  if (!orderId || !paymentId || !signature) return false;
   const expected = crypto
     .createHmac('sha256', config.payments.razorpayKeySecret)
     .update(`${orderId}|${paymentId}`)
@@ -53,4 +75,9 @@ export const verifyRazorpaySignature = ({ orderId, paymentId, signature }) => {
   return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(received, 'hex'));
 };
 
-export default { isRazorpayConfigured, createRazorpayOrder, verifyRazorpaySignature };
+export default {
+  isRazorpayConfigured,
+  getRazorpayMode,
+  createRazorpayOrder,
+  verifyRazorpaySignature,
+};

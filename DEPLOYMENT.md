@@ -74,7 +74,44 @@ curl https://foodhub-pearl-tau.vercel.app/api/auth/providers
 | `MONGODB_URI` | *Atlas connection string (secret)* |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | *secrets* |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | *Google OAuth* |
-| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | *payments* |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | **Test keys only** — see below |
+
+### 💳 Razorpay — TEST MODE ONLY
+
+This project runs Razorpay in **test mode only**. Live keys are **actively refused**
+by the server, so a production key can never charge a real card.
+
+| Key prefix | Behaviour |
+|---|---|
+| `rzp_test_…` | ✅ Allowed — online payments work |
+| `rzp_live_…` | ❌ **Always blocked** — logged as blocked, online payments stay off |
+| anything else | ❌ Treated as unknown — online payments stay off |
+| missing / partial pair | ❌ Online payments stay off (COD still works) |
+
+**Where to get test keys:** <https://dashboard.razorpay.com/app/keys> — switch the
+dashboard to **Test Mode** (toggle, top-right) and copy the `rzp_test_…` key id and
+secret. Test cards/payments never move real money.
+
+The mode is derived from the key prefix, and **both the id and the secret are
+checked** — a live secret pasted next to a test-looking id is still caught.
+
+Check the live state at any time (requires auth):
+
+```bash
+GET /api/payments/config
+# {
+#   "razorpayConfigured": true,
+#   "razorpayMode": "test",          // test | live | unknown | none
+#   "razorpayLiveBlocked": false,    // true => a live key was refused
+#   "methods": ["cod", "upi", "razorpay"]
+# }
+```
+
+> ⚠️ If you deploy a live key, `razorpayMode` becomes `"live"` and
+> `razorpayLiveBlocked` becomes `true`. Online payments turn off (COD keeps
+> working) and the server logs a clear warning. Replace it with an `rzp_test_…`
+> key to re-enable them.
+
 | `RESEND_API_KEY` | *transactional email* |
 
 `CLIENT_URL` accepts a comma-separated list — the **full list** is used for CORS and
@@ -181,7 +218,54 @@ query paid a cross-region round trip. Measured live (6 runs each):
 a *successful* load — firing a duplicate pair of requests 5 seconds after every
 successful visit. Now retries only when the load genuinely failed.
 
-### 6. Deployment hygiene
+### 7. Razorpay forced to TEST MODE (live keys removed)
+
+**Requirement:** use Razorpay in test mode only and remove real/live API usage.
+
+**Findings**
+
+- Local `server/.env` had **empty** keys (never contained real keys).
+- **No real key values were ever committed.** Git history references
+  `rzp_live_...` only with the value elided; the only literal key strings in
+  history are fake placeholders (`rzp_test_xyz`, `rzp_test_secret_abc123`) that
+  lived in a deleted test script.
+- The real keys lived in the **Vercel environment variables**, which is why
+  production reported `razorpayConfigured: true`.
+- `server/src/services/paymentService.js` was **dead duplicate code** — a second,
+  unused Razorpay implementation with zero references anywhere.
+
+**Changes**
+
+| File | Change |
+|------|--------|
+| `server/src/config/index.js` | Derive mode from the key prefix; refuse live keys; enable payments only for a well-formed `rzp_test_` pair. Also fixed the currency-symbol default, which was `'?'` instead of `'₹'` (mojibake) |
+| `server/src/services/razorpayService.js` | `isRazorpayConfigured()` now returns false for live keys; added `getRazorpayMode()`; signature verification refuses to run unless test mode is active; one-time blocked warning in the logs |
+| `server/src/controllers/paymentController.js` | Expose `razorpayMode` + `razorpayLiveBlocked`; error message now explains a blocked live key instead of a vague "not configured" |
+| `server/src/services/paymentService.js` | **Deleted** (dead code) |
+| `server/.env.example` | Rewritten with test-mode guidance |
+
+`orderController.js` needed no changes — it already gates online orders on
+`isRazorpayConfigured()` and verifies via `verifyRazorpaySignature()`, both of
+which now enforce test mode automatically.
+
+**Verified** — 7 key scenarios, all correct:
+
+| Input | Mode | Blocked | Payments |
+|---|---|---|---|
+| no keys | `none` | no | off |
+| `rzp_test_…` pair | `test` | no | **on** |
+| `rzp_live_…` pair | `live` | **yes** | off |
+| unknown prefix | `unknown` | no | off |
+| test id + **live secret** | `live` | **yes** | off |
+| **live id** + test secret | `live` | **yes** | off |
+| test id, no secret | `test` | no | off (partial pair) |
+
+Two bugs surfaced during testing and were fixed: a live *secret* originally
+slipped through, and the `RAZORPAY_ALLOW_LIVE` escape hatch was dead code that
+didn't work. Since the requirement is test-only, the override was removed
+entirely rather than repaired.
+
+### 8. Deployment hygiene
 
 - Deleted 6 stale `server/*.log` files (leftovers from an old working directory; not
   git-tracked, but still uploaded to Vercel on every deploy).
@@ -242,6 +326,13 @@ session. Anyone with that token can read and modify these deployments.
 - [ ] **Rotate production secrets:** MongoDB URI, JWT secrets, Google OAuth secret,
       Razorpay keys, Resend API key. Update in Vercel and redeploy.
 - [ ] **Check MongoDB Atlas IP access list** and audit logs for unfamiliar activity.
+- [ ] **Swap the Vercel Razorpay keys to test keys.** Production currently holds a
+      live key, which the new code refuses — so online payments are OFF and only
+      COD works until you set `RAZORPAY_KEY_ID=rzp_test_…` +
+      `RAZORPAY_KEY_SECRET=…` in the Vercel API project and redeploy. That is the
+      intended safe state, but it must be done deliberately.
+- [ ] **Rotate the Razorpay live keys in the Razorpay dashboard** — they were
+      exposed in an earlier session and are no longer used by this project.
 
 ### 🟡 Cleanup
 

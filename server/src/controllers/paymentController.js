@@ -3,6 +3,7 @@ import Settings from '../models/Settings.js';
 import config from '../config/index.js';
 import {
   isRazorpayConfigured,
+  getRazorpayMode,
   createRazorpayOrder,
   verifyRazorpaySignature,
 } from '../services/razorpayService.js';
@@ -20,7 +21,10 @@ const findOwnOrder = async (req, orderId) => {
 
 /**
  * Which payment methods are currently available, driven by admin settings and
- * whether Razorpay credentials are configured on the server.
+ * whether Razorpay TEST keys are configured on the server.
+ *
+ * `razorpayMode` / `razorpayLiveBlocked` are surfaced so a deploy that still
+ * holds live keys is obvious instead of silently disabling online payments.
  */
 export const getPaymentConfig = async (_req, res) => {
   const settings = await Settings.getSettings();
@@ -34,6 +38,10 @@ export const getPaymentConfig = async (_req, res) => {
       codEnabled: settings.features.codEnabled,
       razorpayConfigured: isRazorpayConfigured(),
       razorpayEnabled: online,
+      // 'test' | 'live' | 'unknown' | 'none'
+      razorpayMode: getRazorpayMode(),
+      // true => a LIVE key is set and was refused (test-mode-only project).
+      razorpayLiveBlocked: config.payments.razorpayLiveBlocked,
       methods,
       currency: settings.currency || 'INR',
       currencySymbol: settings.currencySymbol || '₹',
@@ -50,7 +58,14 @@ export const createRzpOrder = async (req, res) => {
   const order = await findOwnOrder(req, orderId);
 
   if (!isRazorpayConfigured()) {
-    throw new ValidationError('Online payments are not configured on the server yet');
+    // Distinguish "no keys" from "live key refused" — otherwise a deploy that
+    // still has live keys just looks broken with no explanation.
+    if (config.payments.razorpayLiveBlocked) {
+      throw new ValidationError(
+        'Online payments are disabled: a Razorpay LIVE key is configured but this project runs in test mode only. Set RAZORPAY_KEY_ID to an rzp_test_… key, or use Cash on Delivery.',
+      );
+    }
+    throw new ValidationError('Online payments are not configured on the server yet. Please use Cash on Delivery.');
   }
   if (order.payment.status === 'paid') {
     return res.status(200).json({

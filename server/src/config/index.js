@@ -29,6 +29,39 @@ const clientUrlList = String(process.env.CLIENT_URL || 'http://localhost:5173')
 
 const apiUrl = stripTrailingSlash(process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`);
 
+// ============ RAZORPAY: TEST MODE ONLY ============
+// This project uses Razorpay in TEST MODE ONLY. Real (live) keys are REFUSED so
+// a production key can never charge a real card. Razorpay key prefixes make the
+// mode unambiguous:
+//   rzp_test_********  -> test mode  (allowed)
+//   rzp_live_********  -> live mode  (ALWAYS BLOCKED)
+//
+// Both the id and the secret are checked: a live secret pasted next to a
+// test-looking id is still caught.
+const razorpayKeyId = String(process.env.RAZORPAY_KEY_ID || '').trim();
+const razorpayKeySecret = String(process.env.RAZORPAY_KEY_SECRET || '').trim();
+
+const razorpayLooksLive =
+  razorpayKeyId.startsWith('rzp_live_') || razorpayKeySecret.startsWith('rzp_live_');
+const razorpayLooksTest = razorpayKeyId.startsWith('rzp_test_');
+
+const razorpayKeyMode = razorpayLooksLive
+  ? 'live'
+  : razorpayLooksTest
+    ? 'test'
+    : razorpayKeyId || razorpayKeySecret
+      ? 'unknown'
+      : 'none';
+
+// Only a well-formed rzp_test_ id + secret pair turns on online payments.
+// Anything else (live, unknown prefix, partial pair) stays off — the safe
+// default matters more than convenience here.
+const razorpayReady =
+  Boolean(razorpayKeyId && razorpayKeySecret) && razorpayLooksTest && !razorpayLooksLive;
+
+// Kept as a named flag purely so the API/logs can explain WHY payments are off.
+const razorpayLiveBlocked = razorpayLooksLive;
+
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '5000', 10),
@@ -79,12 +112,18 @@ const config = {
   },
 
   payments: {
-    razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
-    razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
-    razorpayEnabled: Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
+    razorpayKeyId,
+    razorpayKeySecret,
+    // 'test' | 'live' | 'unknown' | 'none' — derived from the key prefix.
+    razorpayKeyMode,
+    // True when a live key was supplied and refused. Surfaced by
+    // GET /api/payments/config so a misconfigured deploy is obvious.
+    razorpayLiveBlocked,
+    // Test-mode only: a live key alone does NOT enable online payments.
+    razorpayEnabled: razorpayReady,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
     currency: process.env.CURRENCY || 'INR',
-    currencySymbol: process.env.CURRENCY_SYMBOL || '?',
+    currencySymbol: process.env.CURRENCY_SYMBOL || '\u20B9', // ₹
   },
 
   rateLimit: {
