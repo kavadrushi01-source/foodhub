@@ -22,6 +22,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+server/*.log
+client/*.log
+smoke-*.log
+server-local-*.log
 
 # Editor / OS
 .vscode/

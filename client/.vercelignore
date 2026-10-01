@@ -1,0 +1,30 @@
+# Files Vercel should NOT upload as part of the frontend deployment.
+#
+# Vercel ignores .gitignore, so node_modules/ and local build caches would
+# otherwise be uploaded on every deploy. Vercel builds from source with
+# `npm run build`, so the local dist/ is discarded and rebuilt anyway.
+
+node_modules
+dist
+build
+.cache
+.vercel
+
+# Local development noise
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Env files — production values are injected as Vercel env vars, not committed.
+.env
+.env.*
+!.env.example
+
+# Lint config is not needed to build
+eslint.config.js
+
+# Docs and repo metadata
+*.md
+.git
+.gitignore
+.github

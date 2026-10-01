@@ -1,0 +1,42 @@
+# Files Vercel should NOT upload as part of the API deployment.
+#
+# Vercel ignores .gitignore, so without this the local `node_modules/`,
+# `logs/`, Docker files and docs get uploaded on every deploy — wasted build
+# time and a larger function bundle for no runtime benefit.
+
+# Dependencies are installed by Vercel from package.json, not uploaded.
+node_modules
+.cache
+.vercel
+
+# Local development noise
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files — production secrets are injected as Vercel env vars.
+# The .env here is LOCAL dev only and must never reach the deployment.
+.env
+.env.*
+!.env.example
+
+# Docker / CI files — this project deploys to Vercel, not a container
+Dockerfile
+.dockerignore
+
+# Docs and repo metadata are not needed at runtime
+*.md
+README.md
+.git
+.gitignore
+.github
+
+# Tests and tooling configs not used at runtime
+.cache
+coverage
+.nyc_output
+**/*.test.js
+**/*.test.mjs
+eslint.config.js
