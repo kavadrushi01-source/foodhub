@@ -33,21 +33,71 @@ import { errorHandler, notFound } from './middlewares/error.js';
 //   - MongoDB connect + idempotent seed in the background (routes are gated
 //     by dbReady below, so /health answers instantly during a cold start)
 //   - a failed attempt clears bootPromise, so the next request retries
+//   - a resolved-but-now-disconnected connection also clears bootPromise, so a
+//     dropped Atlas connection can self-heal instead of pinning the instance
+//     into a permanent 503 (see the 'disconnected' listener below).
 let bootPromise = null;
+
+// Cold-start retry budget. Vercel keeps an instance alive only while it is
+// being used, so a short backoff window is enough to ride out a flaky Atlas or
+// DNS handshake without paying for a permanently warm instance.
+const MAX_BOOT_RETRIES = 4;
+const BOOT_RETRY_BASE_MS = 1000;
+const MAX_BOOT_RETRY_DELAY_MS = 8000;
+let bootRetries = 0;
+
+// If Mongo has dropped (readyState !== 1) but bootPromise is still holding an
+// already-resolved value, that promise is stale: awaiting it resolves instantly
+// and would make every later request fail with 503 forever, because ensureBoot
+// sees a non-null bootPromise and never reconnects. Clear it so the next call
+// actually retries the connection.
+const invalidateStaleBoot = () => {
+  if (bootPromise && mongoose.connection.readyState !== 1) {
+    bootPromise = null;
+  }
+};
+
 const ensureBoot = () => {
+  invalidateStaleBoot();
   if (!bootPromise) {
     initSentry();
     bootPromise = connectDB()
       .then(() => seedIfEmpty())
       .then(() => logger.info('✅ Bootstrap complete: DB connected, seed synced'))
       .catch((err) => {
+        // Retry with backoff instead of giving up. Atlas/DNS handshakes fail
+        // intermittently on a fresh Vercel instance, and a single transient
+        // failure would otherwise leave the instance answering 503 until
+        // Vercel recycles it.
+        bootRetries += 1;
         bootPromise = null;
-        logger.error('DB/seed bootstrap failed (will retry on next request):', err.message);
+        if (bootRetries > MAX_BOOT_RETRIES) {
+          logger.error(`DB/seed bootstrap failed ${bootRetries} times, giving up until next request: ${err.message}`);
+          return undefined;
+        }
+        const delay = Math.min(BOOT_RETRY_BASE_MS * bootRetries, MAX_BOOT_RETRY_DELAY_MS);
+        logger.warn(`DB bootstrap attempt ${bootRetries} failed (${err.message}); retrying in ${delay}ms`);
+        setTimeout(() => {
+          ensureBoot(); // fire-and-forget: the next request also awaits this
+        }, delay);
+        return undefined;
+      })
+      .then(() => {
+        // Reset the retry counter once we actually reach a good state, so a
+        // later cold start gets the full number of attempts again.
+        if (mongoose.connection.readyState === 1) bootRetries = 0;
       });
   }
   return bootPromise;
 };
 ensureBoot();
+
+// Atlas can drop an idle connection on a warm instance. Without this, bootPromise
+// stays resolved-but-useless and the instance 503s until Vercel recycles it.
+mongoose.connection.on('disconnected', () => {
+  logger.warn('MongoDB disconnected — bootstrap will re-run on the next request');
+  invalidateStaleBoot();
+});
 
 const app = express();
 
@@ -156,16 +206,18 @@ app.get('/ready', (_req, res) => {
 // is still connecting (cold start) instead of mysterious "Network error".
 const dbReady = async (req, res, next) => {
   if (mongoose.connection.readyState === 1) return next();
-  // A connect attempt is usually already in flight (kicked off by ensureBoot at
-  // module scope). Wait for it instead of failing instantly — on a cold start
-  // the first visitor should get data, not a 503.
-  const attempt = ensureBoot();
-  await Promise.race([
-    attempt,
-    new Promise((resolve) => setTimeout(resolve, 30000)),
-  ]);
+
+  // Poll instead of awaiting a single attempt: ensureBoot resolves immediately
+  // when it schedules a retry, so awaiting it once would resolve before the
+  // retried connection has had a chance to succeed.
+  const deadline = Date.now() + 30000;
+  while (mongoose.connection.readyState !== 1 && Date.now() < deadline) {
+    ensureBoot(); // no-op while a boot is in flight; restarts one otherwise
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
   if (mongoose.connection.readyState === 1) return next();
-  ensureBoot(); // kick off a fresh attempt for the next request (self-healing)
+
   return res.status(503).json({
     success: false, status: 503, code: 'DB_NOT_READY',
     message: 'Server is waking up — please retry in a few seconds.',

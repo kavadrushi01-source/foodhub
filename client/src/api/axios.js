@@ -61,6 +61,17 @@ api.interceptors.response.use(
     // Don't retry for login/register/refresh endpoints
     const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/auth/register') || originalRequest?.url?.includes('/auth/refresh');
 
+    // A cold Vercel instance answers 503 DB_NOT_READY while Atlas connects. The
+    // server rejects those in dbReady, BEFORE any route handler runs, so no
+    // side effects happened and retrying is safe even for POST/PATCH/DELETE.
+    const isDbNotReady = status === 503 && error?.response?.data?.code === 'DB_NOT_READY';
+    const dbRetries = originalRequest._dbRetries || 0;
+    if (isDbNotReady && dbRetries < 3) {
+      originalRequest._dbRetries = dbRetries + 1;
+      await new Promise((r) => setTimeout(r, 800 * (dbRetries + 1)));
+      return api(originalRequest);
+    }
+
     // Only try to refresh/rotate the session if we actually hold credentials.
     // A 401 with no stored token just means the user is browsing as a guest —
     // forcing a hard redirect to /login would break all public pages.
