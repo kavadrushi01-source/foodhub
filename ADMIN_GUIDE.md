@@ -71,6 +71,32 @@ pending  →  confirmed  →  preparing  →  out_for_delivery  →  delivered
 
 ---
 
+### Deleting an account (API)
+
+`DELETE /api/admin/users/:id` permanently removes a user **and their orders**, so no
+orders are left pointing at a deleted owner. Two guards apply:
+
+- an admin **cannot delete their own account** (that would lock everyone out)
+- the **last remaining admin** cannot be deleted
+
+To clear a demo deployment down to just the demo accounts, use the bulk reset:
+
+```bash
+curl -X POST https://foodhub-pearl-tau.vercel.app/api/admin/users/purge \
+  -H "Authorization: Bearer <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"keep":["admin@foodhub.com","user@foodhub.com","delivery@foodhub.com"]}'
+```
+
+It refuses to run if `keep` is empty, or if a listed account doesn't exist — so a typo
+can never wipe the demo accounts. It is **off unless `ADMIN_PURGE_ENABLED=true`** is set
+on the server, which is the recommended state for any real deployment.
+
+> ⚠️ Both operations are **permanent** — there is no undo. Take a database backup first
+> if the data matters.
+
+---
+
 ## 3. Testing online payments (Razorpay test mode)
 
 The site runs Razorpay in **TEST MODE ONLY** — the server *refuses* live keys, so no

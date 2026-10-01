@@ -388,8 +388,39 @@ the OTP procedure.
   `WEBSITE_GUIDE.md`; corrected the false claim that the API "never sleeps".
 - Added a payment-testing walkthrough to `WEBSITE_GUIDE.md`.
 
-> ⚠️ Because the repository is **public**, the admin credentials in these docs are
-> **shared demo credentials**. Rotate the password before any real use.
+### 13. Admin can now delete users, and the demo DB was cleaned
+
+**Problem:** the admin panel could only *deactivate* an account, so every test signup —
+and its email — stayed in the database permanently. 29 unwanted accounts had piled up
+on the live site, including four real Google logins.
+
+**Changes**
+
+| File | Change |
+|------|--------|
+| `server/src/controllers/adminController.js` | `deleteUser` (single, cascades orders) and `purgeUsers` (bulk, keeps a protected allowlist) |
+| `server/src/routes/adminRoutes.js` | `DELETE /users/:id`, `POST /users/purge` |
+| `server/.env.example` | Documented `ADMIN_PURGE_ENABLED` |
+
+**Guards** (a hard delete has no undo, so these matter):
+
+- an admin cannot delete **their own** account
+- the **last remaining admin** cannot be deleted
+- `purge` refuses an **empty or missing** `keep` list — it can never mean "wipe the table"
+- `purge` refuses if a `keep` email **doesn't exist**, so a typo can't delete a demo account
+- `purge` is **disabled unless `ADMIN_PURGE_ENABLED=true`** on the server
+
+Verified with a local-only test — **8/8 pass**, including that refused purges delete
+nothing and that a real purge keeps exactly the three demo accounts.
+
+**Live cleanup result:** 29 accounts removed (all `probe…`/`smoke…`/`uitest…`/`rt…`/`rz…`
+test signups plus the `kavadrushi01` / `kavadchirag11` / `abhishekvala52` / `kishor`
+Google logins) and 35 of their orders. Verified after: **3 users, 0 orphans** — the 28
+orders that remain all belong to the three kept accounts (14 customer, 11 admin,
+3 delivery), so the demo order history is preserved.
+
+> ⚠️ The per-user delete needs no flag and is available on any deployment. Rotate the
+> admin password if these credentials have ever been exposed.
 
 ---
 
