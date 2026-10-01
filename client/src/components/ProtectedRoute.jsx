@@ -15,7 +15,9 @@ import { Loader2 } from 'lucide-react';
  *   → renders the passed children.
  */
 export default function ProtectedRoute({ children, roles = null }) {
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const user = useAuthStore((s) => s.user);
   const location = useLocation();
 
   if (isLoading) {

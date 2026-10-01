@@ -29,7 +29,13 @@ export default function DeliveryDashboard() {
   };
 
   useEffect(() => { load(); }, []);
-  useEffect(() => { const t = setInterval(() => load(false), 12000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    const t = setInterval(() => {
+      // Skip polling while the tab is hidden — pointless network + re-renders
+      if (!document.hidden) load(false);
+    }, 12000);
+    return () => clearInterval(t);
+  }, []);
 
   if (loading) return <div className="space-y-4">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}</div>;
 

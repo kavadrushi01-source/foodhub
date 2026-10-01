@@ -15,7 +15,9 @@ const NAV_LINKS = [
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
   const itemCount = useCartStore((s) => s.getItemCount());
   const wishlistCount = useAuthStore((s) => s.wishlist.length);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
@@ -28,11 +30,24 @@ export default function Navbar() {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // rAF-throttled: at most one state check per frame while scrolling, and
+  // setScrolled bails out when the value hasn't flipped (React skips
+  // re-renders for identical state).
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setScrolled(window.scrollY > 8);
+      });
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const handleSearch = (e) => {
@@ -43,7 +58,11 @@ export default function Navbar() {
   const handleLogout = async () => { await logout(); navigate('/'); };
 
   return (
-    <header className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? 'glass shadow-card' : 'bg-cream/60 dark:bg-ink-950/40 backdrop-blur-lg border-b border-transparent'}`}>
+    // Constant backdrop-blur-md in both states: animating `transition-all`
+    // over a swapping blur radius (lg→xl) forced a full-width filter repaint
+    // on every scroll toggle — a major scroll-jank source on mobile. Blur is
+    // now static; only cheap properties transition.
+    <header className={`sticky top-0 z-40 backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-300 ${scrolled ? 'bg-white/70 dark:bg-ink-950/60 shadow-card border-b border-white/60 dark:border-ink-800/60' : 'bg-cream/60 dark:bg-ink-950/40 border-b border-transparent'}`}>
       <nav className="container-app flex items-center justify-between h-16 gap-2 sm:gap-3">
         <button onClick={toggleSidebar} className="lg:hidden p-2 -ml-2 text-ink-600 dark:text-ink-300 hover:bg-ink-100/80 dark:hover:bg-ink-800 rounded-lg" aria-label="Open menu">
           <Menu size={22} />

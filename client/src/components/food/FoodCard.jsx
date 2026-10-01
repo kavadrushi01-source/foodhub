@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Heart, Plus, Star, Check, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import useCartStore from '../../store/cartStore';
 import useAuthStore from '../../store/authStore';
 import useUIStore from '../../store/uiStore';
@@ -11,11 +10,17 @@ import { imgFallback } from '../../utils/imageFallback';
 import Badge from '../ui/Badge';
 import toast from 'react-hot-toast';
 
-export default function FoodCard({ food }) {
+/**
+ * Memoized so grid parents (Home hero typing, Menu filters) don't re-render
+ * every card on unrelated state changes. The wishlist selector returns a
+ * per-card boolean, so toggling a heart only re-renders that one card.
+ */
+function FoodCard({ food }) {
   const addItem = useCartStore((s) => s.addItem);
   const toggleCartDrawer = useUIStore((s) => s.toggleCartDrawer);
-  const { isAuthenticated, toggleWishlistLocal, wishlist } = useAuthStore();
-  const inWishlist = wishlist.includes(food._id);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const toggleWishlistLocal = useAuthStore((s) => s.toggleWishlistLocal);
+  const inWishlist = useAuthStore((s) => s.wishlist.includes(food._id));
   const [added, setAdded] = useState(false);
 
   const handleAdd = (e) => {
@@ -37,8 +42,7 @@ export default function FoodCard({ food }) {
     ? Math.round(((food.price - food.discountPrice) / food.price) * 100) : 0;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}
-      className="card gradient-border group overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div className="card gradient-border group overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-[transform,box-shadow] duration-300 flex flex-col animate-fade-in-up">
       <Link to={`/food/${food.slug}`} className="block relative">
         <div className="group-shine relative h-48 overflow-hidden bg-ink-100 dark:bg-ink-800">
           <img src={food.primaryImage || food.images?.[0]} alt={food.name} loading="lazy" onError={imgFallback} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -86,13 +90,15 @@ export default function FoodCard({ food }) {
             <button onClick={handleAdd} aria-label={`Add ${food.name} to cart`}
               className={`grid place-items-center h-9 w-9 rounded-xl transition-all duration-300 active:scale-90 ${
                 added ? 'bg-green-500 text-white' : 'bg-brand-gradient text-white shadow-glow hover:scale-105'}`}>
-              <motion.span key={added ? 'added' : 'add'} initial={{ scale: 0.6, rotate: -45, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ duration: 0.2 }}>
+              <span key={added ? 'added' : 'add'} className="inline-flex animate-pop-in">
                 {added ? <Check size={18} /> : <Plus size={18} />}
-              </motion.span>
+              </span>
             </button>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+export default memo(FoodCard);

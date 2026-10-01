@@ -11,58 +11,65 @@ import toast from 'react-hot-toast';
 
 const FREE_DELIVERY = 299;
 
+/**
+ * Thin shell that only subscribes to the open flag — while the drawer is
+ * closed it re-renders on nothing except open/close, not on every cart edit.
+ * All cart state lives in CartPanel, which mounts only when opened.
+ */
 export default function CartDrawer() {
   const navigate = useNavigate();
-  const { cartDrawerOpen, setCartDrawer } = useUIStore();
-  const { items, removeItem, updateQuantity, getSubtotal, clearCart, setCoupon, coupon } = useCartStore();
-  const [couponCode, setCouponCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const subtotal = getSubtotal();
-  const freeDeliveryProgress = Math.min(100, Math.round((subtotal / FREE_DELIVERY) * 100));
-  const remaining = FREE_DELIVERY - subtotal;
-
-  const applyCoupon = async (e) => {
-    e.preventDefault();
-    if (!couponCode.trim()) return;
-    setLoading(true);
-    try {
-      const res = await orderApi.applyCoupon({ code: couponCode, subTotal: subtotal });
-      setCoupon({ code: res.data.code, discount: res.data.discount });
-      toast.success(`Coupon applied! You saved ${formatCurrency(res.data.discount)}`);
-    } catch { setCoupon(null); } finally { setLoading(false); }
-  };
-
-  const discount = coupon?.discount || 0;
-  const total = Math.max(0, subtotal - discount);
-  const handleCheckout = () => {
-    setCartDrawer(false);
-    setTimeout(() => navigate('/checkout'), 100);
-  };
+  const cartDrawerOpen = useUIStore((s) => s.cartDrawerOpen);
+  const setCartDrawer = useUIStore((s) => s.setCartDrawer);
 
   return (
     <AnimatePresence>
       {cartDrawerOpen && (
         <div className="fixed inset-0 z-50">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm" onClick={() => setCartDrawer(false)} />
+          {/* Plain dark overlay (no backdrop-blur): blurring the whole page
+              behind an animated drawer repaints every frame on open/close. */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-ink-950/50" onClick={() => setCartDrawer(false)} />
           <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.28, ease: 'easeInOut' }} className="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-ink-900 shadow-float flex flex-col">
-            <CartHeader count={items.length} onClose={() => setCartDrawer(false)} />
-            {items.length === 0 ? (
-              <EmptyCart onBrowse={() => { setCartDrawer(false); navigate('/menu'); }} />
-            ) : (
-              <>
-                <FreeDeliveryBar progress={freeDeliveryProgress} remaining={remaining} />
-                <CartBody
-                  items={items} removeItem={removeItem} updateQuantity={updateQuantity} clearCart={clearCart}
-                  coupon={coupon} couponCode={couponCode} setCouponCode={setCouponCode} applyCoupon={applyCoupon} loading={loading}
-                  subtotal={subtotal} discount={discount} total={total}
-                  onCheckout={handleCheckout} onContinue={() => setCartDrawer(false)}
-                />
-              </>
-            )}
+            <CartPanel
+              onClose={() => setCartDrawer(false)}
+              onBrowse={() => { setCartDrawer(false); navigate('/menu'); }}
+              onCheckout={() => {
+                setCartDrawer(false);
+                setTimeout(() => navigate('/checkout'), 100);
+              }}
+            />
           </motion.aside>
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+function CartPanel({ onClose, onBrowse, onCheckout }) {
+  const { items, removeItem, updateQuantity, getSubtotal, clearCart, setCoupon, coupon } = useCartStore();
+  const subtotal = getSubtotal();
+  const freeDeliveryProgress = Math.min(100, Math.round((subtotal / FREE_DELIVERY) * 100));
+  const remaining = FREE_DELIVERY - subtotal;
+
+  const discount = coupon?.discount || 0;
+  const total = Math.max(0, subtotal - discount);
+
+  return (
+    <>
+      <CartHeader count={items.length} onClose={onClose} />
+      {items.length === 0 ? (
+        <EmptyCart onBrowse={onBrowse} />
+      ) : (
+        <>
+          <FreeDeliveryBar progress={freeDeliveryProgress} remaining={remaining} />
+          <CartBody
+            items={items} removeItem={removeItem} updateQuantity={updateQuantity} clearCart={clearCart}
+            coupon={coupon} subtotal={subtotal} setCoupon={setCoupon}
+            discount={discount} total={total}
+            onCheckout={onCheckout} onContinue={onClose}
+          />
+        </>
+      )}
+    </>
   );
 }
 
@@ -86,7 +93,9 @@ function FreeDeliveryBar({ progress, remaining }) {
         {unlocked ? <><PartyPopper size={14} /> You've unlocked FREE delivery!</> : <><Truck size={14} /> Free delivery on online payments — no minimum order</>}
       </p>
       <div className="h-1.5 rounded-full bg-ink-200/70 dark:bg-ink-800 overflow-hidden">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.5, ease: 'easeOut' }}
+        {/* CSS width transition instead of framer-motion: width is a layout
+            property, so animating it via JS triggers reflow every frame. */}
+        <div style={{ width: `${progress}%`, transition: 'width 0.5s ease-out' }}
           className={`h-full rounded-full ${unlocked ? 'bg-green-500' : 'bg-brand-gradient'}`} />
       </div>
       <p className="text-[11px] text-ink-400 dark:text-ink-500 mt-1.5 flex items-center gap-1">
@@ -110,13 +119,15 @@ function EmptyCart({ onBrowse }) {
   );
 }
 
-function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, couponCode, setCouponCode, applyCoupon, loading, subtotal, discount, total, onCheckout, onContinue }) {
+function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, subtotal, setCoupon, discount, total, onCheckout, onContinue }) {
   return (
     <>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {items.map(({ food, quantity }) => (
-          <motion.div key={food._id} layout initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}
-            className="flex gap-3 card p-3 hover:shadow-card-hover transition-shadow">
+          // No `layout` prop: framer-motion layout animations re-measure every
+          // row on each render (coupon typing, quantity taps) — pure jank.
+          <div key={food._id}
+            className="flex gap-3 card p-3 hover:shadow-card-hover transition-shadow animate-fade-in-up">
             <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-16 w-16 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" />
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
@@ -130,7 +141,7 @@ function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, coupon
                 <button onClick={() => updateQuantity(food._id, quantity + 1)} className="h-7 w-7 grid place-items-center rounded-lg border border-ink-200 dark:border-ink-700 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-600 transition-colors" aria-label="Increase"><Plus size={13} /></button>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
         <div className="flex justify-center pt-1">
           <button onClick={clearCart} className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors"><Trash2 size={14} /> Clear cart</button>
@@ -138,17 +149,7 @@ function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, coupon
       </div>
 
       <div className="px-4 py-3 border-t border-ink-100 dark:border-ink-800">
-        {coupon ? (
-          <div className="flex items-center justify-between text-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-3 py-2.5 rounded-xl">
-            <span className="flex items-center gap-1.5 font-medium"><Tag size={14} /> {coupon.code} applied</span>
-            <span>-{formatCurrency(discount)}</span>
-          </div>
-        ) : (
-          <form onSubmit={applyCoupon} className="flex gap-2">
-            <input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Coupon code" className="input py-2 text-sm flex-1" />
-            <button type="submit" disabled={loading} className="btn-secondary text-sm shrink-0">Apply</button>
-          </form>
-        )}
+        <CouponForm coupon={coupon} subtotal={subtotal} setCoupon={setCoupon} />
       </div>
 
       <div className="p-4 border-t border-ink-100 dark:border-ink-800 space-y-2 bg-ink-50/50 dark:bg-ink-950/30">
@@ -159,5 +160,41 @@ function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, coupon
         <Link to="/menu" onClick={onContinue} className="block text-center text-sm text-ink-500 hover:text-brand-600 mt-1.5 transition-colors">Continue shopping</Link>
       </div>
     </>
+  );
+}
+
+/**
+ * Owns the coupon-input state so each keystroke re-renders only this form,
+ * not the whole drawer (items, images, totals).
+ */
+function CouponForm({ coupon, subtotal, setCoupon }) {
+  const [couponCode, setCouponCode] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const applyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    setLoading(true);
+    try {
+      const res = await orderApi.applyCoupon({ code: couponCode, subTotal: subtotal });
+      setCoupon({ code: res.data.code, discount: res.data.discount });
+      toast.success(`Coupon applied! You saved ${formatCurrency(res.data.discount)}`);
+    } catch { setCoupon(null); } finally { setLoading(false); }
+  };
+
+  if (coupon) {
+    return (
+      <div className="flex items-center justify-between text-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-3 py-2.5 rounded-xl">
+        <span className="flex items-center gap-1.5 font-medium"><Tag size={14} /> {coupon.code} applied</span>
+        <span>-{formatCurrency(coupon.discount || 0)}</span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={applyCoupon} className="flex gap-2">
+      <input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Coupon code" className="input py-2 text-sm flex-1" />
+      <button type="submit" disabled={loading} className="btn-secondary text-sm shrink-0">Apply</button>
+    </form>
   );
 }

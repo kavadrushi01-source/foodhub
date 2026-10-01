@@ -31,7 +31,10 @@ export default function DeliveryOrders() {
   useEffect(() => { load(); }, [filter]);
 
   useEffect(() => {
-    const t = setInterval(() => load(false), 12000);
+    const t = setInterval(() => {
+      // Skip polling while the tab is hidden — pointless network + re-renders
+      if (!document.hidden) load(false);
+    }, 12000);
     return () => clearInterval(t);
   }, [filter]);
 

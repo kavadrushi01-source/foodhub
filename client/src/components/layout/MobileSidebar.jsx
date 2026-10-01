@@ -13,8 +13,10 @@ const links = [
 ];
 
 export default function MobileSidebar() {
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen);
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
 
   if (!sidebarOpen) return null;
 
@@ -22,7 +24,8 @@ export default function MobileSidebar() {
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+      {/* Plain scrim: backdrop-blur over animated content repaints every frame */}
+      <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
       <aside className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white dark:bg-ink-900 shadow-2xl flex flex-col animate-fade-in-up">
         <div className="flex items-center justify-between p-4 border-b border-ink-100 dark:border-ink-800">
           <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5">
