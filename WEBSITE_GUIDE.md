@@ -16,7 +16,9 @@ as a delivery partner, and as the admin.
 | API health check | <https://foodhub-pearl-tau.vercel.app/health> |
 
 - The **frontend and the backend API are both hosted on Vercel** (free tier) — the API is
-  a serverless function, so it never sleeps and there's no wake-up wait.
+  a serverless function that scales to zero when idle, so the **first request after a
+  quiet period takes 3–6 seconds** while it boots. Later requests are ~50–250 ms, and
+  both the API and the web client retry automatically, so no manual refresh is needed.
 - All demo credentials below work on the live site too.
 
 For **local development** (after following *Getting Started* in the README), the site
@@ -38,9 +40,15 @@ answers questions instantly on any page.
 
 | Role | Email | Password | What you get |
 |------|-------|----------|--------------|
-| Admin | `admin@foodhub.com` | `Admin@123`-- this password is wrong in live site i changed | `/admin` dashboard after login |
+| Admin | `admin@foodhub.com` | `Admin@123` | `/admin` dashboard after login |
 | Customer | `user@foodhub.com` | `User@123` | normal shopping experience |
 | Delivery | `delivery@foodhub.com` | `Delivery@123` | delivery-partner app |
+
+> 🔐 **Full admin walkthrough** — every screen, the order-status pipeline, and how to
+> test Razorpay payments — is in **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)**.
+>
+> ⚠️ These are **shared demo credentials** for this public deployment. If you fork the
+> project, change the admin password before using it for anything real.
 
 The site sends you to your correct area after login based on your role
 ("role-based redirect"). New registrations are **customer** by default.
@@ -79,6 +87,27 @@ The site sends you to your correct area after login based on your role
   Razorpay/UPI if keys are configured. Online payment qualifies for **free delivery**.
 - Review order summary (subtotal, delivery charge, tax, coupon, grand total) and **Place Order**.
 
+#### 💳 Testing online payment on the demo site
+
+The live site runs Razorpay in **test mode** — no real money moves. To try it:
+
+1. Choose **UPI** or **Card** at checkout and place the order.
+2. **Card:** use number **`5267 3181 8797 5449`** (or `4111 1111 1111 1111`),
+   any future expiry (`12/30`), any CVV (`123`), any name.
+3. Razorpay shows an OTP screen — **no real OTP is sent**. Either:
+   - click **Skip OTP**, or
+   - type **any 4–10 digit number** (e.g. `123456`).
+4. Prefer to **untick "Save this card securely"** first — that checkbox is what
+   brings up the OTP screen.
+5. **UPI:** use `success@razorpay` to succeed or `failure@razorpay` to fail.
+
+⚠️ If you see *"Too many failed OTP verification attempts"* or *"International cards
+are not supported"* (even for a normal domestic card), the card got locked after bad
+OTPs. Wait a minute and try again with a different test card.
+
+If a payment fails, the order is **saved as pending** — open **My Orders** and click
+**Retry payment**, which creates a fresh gateway order.
+
 ### My Orders (`/orders`) & Order Detail (`/orders/:id`)
 - Live status timeline: **Pending → Confirmed → Preparing → Out for Delivery → Delivered**.
 - **Cancel order** button while it is still Pending/Confirmed (online payments auto-refund).
@@ -113,6 +142,9 @@ The site sends you to your correct area after login based on your role
 | **Settings** | Store-level: delivery charge, tax %, online-payment toggles |
 
 The sidebar groups these; every admin action updates the store instantly.
+
+> 🔐 Sign-in steps, common login problems, the order-status pipeline and payment
+> testing are all in **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)**.
 
 ---
 

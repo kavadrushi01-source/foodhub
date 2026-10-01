@@ -113,12 +113,17 @@ npm start            # serves the API (server)
 
 | Role | Email | Password | Use |
 |------|-------|----------|-----|
-| Admin | `admin@foodhub.com` | `Admin@123`--> this password is wrong in live  | `/admin` dashboard |
+| Admin | `admin@foodhub.com` | `Admin@123` | `/admin` dashboard |
 | Customer | `user@foodhub.com` | `User@123` | browse/cart/checkout |
 | Delivery | `delivery@foodhub.com` | `Delivery@123` | delivery app |
 
-> ⚠️ **Security note:** these are *local demo* credentials for a fresh database only.
-> Before any live/deployed database, create your own admin account and **change the default password**.
+> 🔐 **Admin panel guide:** [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) — sign-in steps, every
+> admin screen, the order-status pipeline, and how to test Razorpay payments.
+> 💳 **Payment testing:** card `5267 3181 8797 5449`, any future expiry, any CVV,
+> and **any 4–10 digit OTP** (or click *Skip OTP*).
+
+> ⚠️ **Security note:** these are *shared demo* credentials for this public deployment.
+> If you fork this project, change the admin password before any real use.
 
 ---
 

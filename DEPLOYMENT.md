@@ -15,7 +15,16 @@ Everything you need to know about **where the site is live**, **what we changed*
 | **Readiness probe** | <https://foodhub-pearl-tau.vercel.app/ready> |
 | **Source repository** | <https://github.com/kavadrushi01-source/foodhub> |
 
-Both projects run on **Vercel (free tier)**. The API is a **serverless function**.
+Both projects run on **Vercel (free tier)**. The API is a **serverless function**, so
+it scales to zero when idle — the first request after a quiet period takes 3–6s to
+wake up (the client retries automatically, so no manual refresh is needed).
+
+### 📚 Other guides
+
+| Guide | What it covers |
+|-------|----------------|
+| **[WEBSITE_GUIDE.md](./WEBSITE_GUIDE.md)** | Every customer/admin/delivery screen, FAQ, API endpoints |
+| **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)** | Admin sign-in, all 8 admin sections, testing Razorpay payments |
 
 ### Architecture
 
@@ -334,6 +343,52 @@ overlap (important for cross-region Atlas latency).
 
 **Verified clean:** no dead/unreferenced source files, no unused dependencies, no
 `TODO`/`FIXME`, no stray `console.log`, production bundle **0.63 MB**.
+
+### 11. Razorpay checkout never opened after one failed load
+
+**Symptom:** the payment modal failed to open, and once it failed **it never recovered**
+without a full page refresh.
+
+**Root cause** (`client/src/utils/razorpay.js`): the loader short-circuited on
+
+```js
+if (document.querySelector('script[src*="checkout.razorpay.com"]')) return resolve(true);
+```
+
+It resolved as soon as the `<script>` **tag existed**, without checking the script had
+finished loading. On failure it only cleared the cached promise and **left the broken
+tag in the DOM** — so every later attempt saw the tag, resolved instantly, and called
+`new window.Razorpay(...)` while `window.Razorpay` was still `undefined`. An ad-blocker
+or one flaky network request permanently broke checkout for that page session.
+
+**Changes**
+
+- Short-circuit only when `window.Razorpay` genuinely exists.
+- Remove the failed tag and reset the cached promise so a retry re-injects the script.
+- Reuse an in-flight tag and wait for its real `load` event.
+- 20-second timeout so a blocked script cannot spin forever.
+- `Checkout.jsx` / `OrderDetail.jsx` now surface the real Razorpay error
+  (`Error.message`) instead of always showing a generic *"Payment could not be
+  completed"*, which had been hiding the actual cause.
+
+**Verified live:** Razorpay order created against the configured test keys; a bad
+signature is correctly rejected (400) and marks the order `failed`; a **retry** issues
+a fresh gateway order. See **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)** for test cards and
+the OTP procedure.
+
+### 12. Admin password rotated + demo documentation
+
+- Admin account password changed to the documented demo value; the previous password
+  no longer authenticates (verified 401).
+- New **[ADMIN_GUIDE.md](./ADMIN_GUIDE.md)** — sign-in steps, common login problems,
+  all 8 admin sections, the order-status pipeline, delivery assignment, cold-start
+  expectations, and Razorpay test-card/OTP instructions.
+- Removed stale "this password is wrong in live" notes from `README.md` and
+  `WEBSITE_GUIDE.md`; corrected the false claim that the API "never sleeps".
+- Added a payment-testing walkthrough to `WEBSITE_GUIDE.md`.
+
+> ⚠️ Because the repository is **public**, the admin credentials in these docs are
+> **shared demo credentials**. Rotate the password before any real use.
 
 ---
 
