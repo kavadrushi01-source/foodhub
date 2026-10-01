@@ -20,7 +20,37 @@ export const authApi = {
 // VITE_API_URL points at a separate API domain.
 export const getOAuthUrl = (provider) => `${baseURL}/auth/${provider}`;
 
+// ---- Stale-while-revalidate cache for public GET reads ----
+// First visit fetches from the API; every later load renders INSTANTLY from
+// sessionStorage, then quietly revalidates in the background. This makes
+// navigation/refresh feel instant even when the serverless instance is cold.
+const SWR_TTL_MS = 5 * 60 * 1000; // fresh for 5 min
+
+const swrGet = (key) => {
+  try {
+    const raw = sessionStorage.getItem(`fh-swr:${key}`);
+    if (!raw) return null;
+    const { at, payload } = JSON.parse(raw);
+    if (!payload || Date.now() - at > SWR_TTL_MS) {
+      sessionStorage.removeItem(`fh-swr:${key}`);
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+const swrSet = (key, payload) => {
+  try {
+    sessionStorage.setItem(`fh-swr:${key}`, JSON.stringify({ at: Date.now(), payload }));
+  } catch {
+    /* storage full/unavailable — ignore */
+  }
+};
+
 export const foodApi = {
+  getHome: () => api.get('/home'),
   getFeatured: () => api.get('/featured'),
   getCategories: () => api.get('/categories'),
   getFoods: (params) => api.get('/foods', { params }),
@@ -36,6 +66,14 @@ export const foodApi = {
   deleteAddress: (id) => api.delete(`/addresses/${id}`),
   setDefaultAddress: (id) => api.patch(`/addresses/${id}/default`),
 };
+
+export const swrKeys = {
+  home: 'home',
+  categories: 'categories',
+  foods: (params) => `foods:${JSON.stringify(params || {})}`,
+};
+
+export { swrGet, swrSet };
 
 export const orderApi = {
   preview: (data) => api.post('/orders/preview', data),

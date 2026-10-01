@@ -102,6 +102,46 @@ export const getCategories = async (req, res) => {
   return res.status(200).json({ success: true, status: 200, data: { categories: enriched } });
 };
 
+/**
+ * Single-request home payload: featured + categories in ONE cold start.
+ *
+ * Each serverless hit on Vercel can boot its own instance (~3-8s Mongo
+ * handshake each). The Home page needs both resources, so fetching them as
+ * two parallel requests costs two cold starts; this endpoint serves both in
+ * one, halving the worst-case wait.
+ */
+export const getHome = async (_req, res) => {
+  const [featuredRes, categoriesRes] = await Promise.all([
+    (async () => {
+      const [bestsellers, newArrivals, topRated] = await Promise.all([
+        Food.find({ isAvailable: true, isBestseller: true }).sort({ 'rating.count': -1 }).limit(8).lean({ virtuals: true }),
+        Food.find({ isAvailable: true, isNewArrival: true }).sort({ createdAt: -1 }).limit(8).lean({ virtuals: true }),
+        Food.find({ isAvailable: true }).sort({ 'rating.average': -1 }).limit(8).lean({ virtuals: true }),
+      ]);
+      return { bestsellers, newArrivals, topRated };
+    })(),
+    (async () => {
+      const [categories, counts] = await Promise.all([
+        Category.find({ isActive: true }).sort({ displayOrder: 1, name: 1 }).lean(),
+        Food.aggregate([
+          { $match: { isAvailable: true } },
+          { $group: { _id: '$category', count: { $sum: 1 }, image: { $first: '$primaryImage' } } },
+        ]),
+      ]);
+      const countMap = new Map(counts.map((c) => [String(c._id), c]));
+      return categories.map((c) => ({
+        ...c,
+        foodCount: countMap.get(String(c._id))?.count || 0,
+        image: c.image || countMap.get(String(c._id))?.image || '',
+      }));
+    })(),
+  ]);
+  return res.status(200).json({
+    success: true, status: 200,
+    data: { featured: featuredRes, categories: categoriesRes },
+  });
+};
+
 /** Public: get bestsellers / new arrivals for home page. */
 export const getFeatured = async (req, res) => {
   const [bestsellers, newArrivals, topRated] = await Promise.all([

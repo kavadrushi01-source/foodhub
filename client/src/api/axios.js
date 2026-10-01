@@ -27,15 +27,27 @@ export const baseURL = (() => {
 
 const api = axios.create({
   baseURL,
-  withCredentials: true,
+  // withCredentials forces the browser to attach cookies, which makes
+  // Vercel BYPASS its edge cache for every request — even public catalogue
+  // reads. It is safe because public reads don't need cookies; auth calls
+  // re-enable it per-request below.
+  withCredentials: false,
   timeout: 45000,
   headers: { 'Content-Type': 'application/json' },
 });
+
+// Routes that carry a session and therefore MUST send cookies.
+// Everything else (public catalogue reads) goes WITHOUT credentials so the
+// Vercel edge cache can actually serve them.
+const AUTH_PREFIXES = ['/auth/', '/orders', '/admin', '/delivery', '/payments', '/wishlist', '/addresses', '/reviews'];
 
 // Request interceptor: attach the active access token (per-tab session, or the
 // remembered persistent one from localStorage)
 api.interceptors.request.use(
   (config) => {
+    const needsAuth = AUTH_PREFIXES.some((p) => String(config.url || '').startsWith(p));
+    // eslint-disable-next-line no-param-reassign
+    config.withCredentials = needsAuth;
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;

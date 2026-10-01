@@ -1,9 +1,21 @@
 import crypto from 'crypto';
-import Razorpay from 'razorpay';
 import config from '../config/index.js';
 import logger from '../config/logger.js';
 
+// The Razorpay SDK (~1MB with deps) is intentionally NOT imported at module
+// scope: that cost would land on EVERY cold start, including reads that never
+// touch payments. It is dynamically imported only when a test-mode order is
+// actually being created.
 let instance = null;
+let RazorpayCtor = null;
+
+const loadSdk = async () => {
+  if (!RazorpayCtor) {
+    const mod = await import('razorpay');
+    RazorpayCtor = mod.default || mod;
+  }
+  return RazorpayCtor;
+};
 
 /**
  * True only when a valid RAZORPAY *TEST* key pair is configured.
@@ -27,9 +39,10 @@ if (config.payments.razorpayLiveBlocked) {
 }
 
 /** Lazily created singleton Razorpay client (null unless test keys are set). */
-const getClient = () => {
+const getClient = async () => {
   if (!isRazorpayConfigured()) return null;
   if (!instance) {
+    const Razorpay = await loadSdk();
     instance = new Razorpay({
       key_id: config.payments.razorpayKeyId,
       key_secret: config.payments.razorpayKeySecret,
@@ -43,7 +56,7 @@ const getClient = () => {
  * Returns the gateway order object, or null when test mode is not configured.
  */
 export const createRazorpayOrder = async ({ amount, receipt, notes }) => {
-  const client = getClient();
+  const client = await getClient();
   if (!client) return null;
   const order = await client.orders.create({
     amount: Math.round(amount * 100), // paise

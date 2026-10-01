@@ -16,6 +16,7 @@ const router = Router();
 // Atlas round trip), so they get a short server-side cache + edge/browser
 // Cache-Control. The catalogue only changes when an admin edits it, so a 30s
 // window is invisible to users and removes the ~500ms wait on every navigation.
+router.get('/home', cachePublic(30000, 30), asyncHandler(food.getHome));
 router.get('/featured', cachePublic(30000, 30), asyncHandler(food.getFeatured));
 router.get('/categories', cachePublic(60000, 60), asyncHandler(food.getCategories));
 router.get('/foods', cachePublic(30000, 30), asyncHandler(food.getFoods));

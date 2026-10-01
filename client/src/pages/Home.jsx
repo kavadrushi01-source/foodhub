@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, Truck, UtensilsCrossed, MapPin, Star, Zap, Search, Sparkles } from 'lucide-react';
-import { foodApi } from '../api';
+import { foodApi, swrGet, swrSet, swrKeys } from '../api';
 import FoodCard from '../components/food/FoodCard';
 import ApiDownCard from '../components/ui/ApiDownCard';
 import { SkeletonCard } from '../components/ui/Skeleton';
@@ -23,26 +23,54 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     let retryTimer = null;
-    const load = async () => {
+    const load = async (background = false) => {
       let ok = false;
       try {
-        const [featured, categories] = await Promise.all([foodApi.getFeatured(), foodApi.getCategories()]);
+        // Instant paint: a cached payload renders immediately, then we fetch
+        // fresh data in the background and re-render. Only the very first
+        // visit (or an expired cache) shows skeletons.
+        if (!background) {
+          const cached = swrGet(swrKeys.home);
+          if (cancelled) return;
+          if (cached?.featured && cached?.categories) {
+            setData({ featured: cached.featured, categories: cached.categories });
+            setApiDown(false);
+            setLoading(false);
+            load(true); // revalidate silently
+            return;
+          }
+        }
+        // ONE request serves both payloads: two parallel calls could each
+        // cold-boot a separate serverless instance (~3-8s each). Falls back
+        // to the two legacy endpoints if /home is unavailable.
+        let featuredPayload; let categoriesPayload;
+        try {
+          const home = await foodApi.getHome();
+          featuredPayload = home.data.featured;
+          categoriesPayload = home.data.categories;
+        } catch {
+          const [featured, categories] = await Promise.all([foodApi.getFeatured(), foodApi.getCategories()]);
+          featuredPayload = featured.data;
+          categoriesPayload = categories.data.categories;
+        }
         if (cancelled) return;
-        setData({ featured: featured.data, categories: categories.data.categories });
+        setData({ featured: featuredPayload, categories: categoriesPayload });
+        swrSet(swrKeys.home, { featured: featuredPayload, categories: categoriesPayload });
         setApiDown(false);
         ok = true;
       } catch {
         // Error toast already shown by the axios interceptor (deduped).
         // Keep the page usable: hero + static sections still render, and the
         // empty grids show a friendly "server waking up" retry card instead
-        // of blank space.
-        if (!cancelled) setApiDown(true);
-      } finally { if (!cancelled) setLoading(false); }
+        // of blank space. In background revalidation, stay silent: cached
+        // content is already on screen, so a toast would be pure noise.
+        if (!cancelled && !background) setApiDown(true);
+      } finally { if (!cancelled && !background) setLoading(false); }
 
       // Only retry when the load actually FAILED. Previously a timer was armed
       // unconditionally, so a successful visit fired a second duplicate pair of
       // requests 5s later — pointless load on both the browser and the API.
-      if (!ok && !cancelled) {
+      if (!ok && !cancelled && !background) {
         retryTimer = setTimeout(() => { if (!cancelled) load(); }, 4000);
       }
     };

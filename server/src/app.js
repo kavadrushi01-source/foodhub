@@ -62,8 +62,12 @@ const ensureBoot = () => {
   if (!bootPromise) {
     initSentry();
     bootPromise = connectDB()
-      .then(() => seedIfEmpty())
-      .then(() => logger.info('✅ Bootstrap complete: DB connected, seed synced'))
+      .then(() => {
+        logger.info('Db connected');
+        seedIfEmpty()
+          .then(() => logger.info('Seed sync done (background)'))
+          .catch((e) => logger.warn(`Seed sync deferred: ${e.message}`));
+      })
       .catch((err) => {
         // Retry with backoff instead of giving up. Atlas/DNS handshakes fail
         // intermittently on a fresh Vercel instance, and a single transient

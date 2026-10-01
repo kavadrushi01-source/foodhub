@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { foodApi } from '../api';
+import { foodApi, swrGet, swrSet, swrKeys } from '../api';
 import ApiDownCard from '../components/ui/ApiDownCard';
 import FoodCard from '../components/food/FoodCard';
 import { SkeletonCard } from '../components/ui/Skeleton';
@@ -31,22 +31,48 @@ export default function Menu() {
   const sort = params.get('sort') || 'newest';
   const page = Number(params.get('page')) || 1;
 
-  const loadCategories = async () => {
-    try { const res = await foodApi.getCategories(); setCategories(res.data.categories); setApiDown(false); } catch { setApiDown(true); }
+  const loadCategories = async (background = false) => {
+    try {
+      if (!background) {
+        const cached = swrGet(swrKeys.categories);
+        if (cached?.length) {
+          setCategories(cached);
+          loadCategories(true);
+          return;
+        }
+      }
+      const res = await foodApi.getCategories();
+      setCategories(res.data.categories);
+      swrSet(swrKeys.categories, res.data.categories);
+      setApiDown(false);
+    } catch { if (!background) setApiDown(true); }
   };
 
-  const loadFoods = async () => {
-    setLoading(true);
+  const loadFoods = async (background = false) => {
     const query = { page, limit: 12, sort };
     if (search) query.search = search;
     if (category) query.category = category;
     if (isVeg) query.isVeg = isVeg;
+    // Instant paint from cache on the first paint of this filter combo, then
+    // revalidate silently in the background.
+    if (!background) {
+      const cached = swrGet(swrKeys.foods(query));
+      if (cached?.items?.length) {
+        setFoods(cached.items);
+        setMeta(cached.meta);
+        setLoading(false);
+        loadFoods(true);
+        return;
+      }
+      setLoading(true);
+    }
     try {
       const res = await foodApi.getFoods(query);
       setFoods(res.data.items);
       setMeta(res.data.meta);
+      swrSet(swrKeys.foods(query), res.data);
       setApiDown(false);
-    } catch { setApiDown(true); } finally { setLoading(false); }
+    } catch { if (!background) setApiDown(true); } finally { if (!background) setLoading(false); }
   };
 
   const updateParam = (key, value) => {
