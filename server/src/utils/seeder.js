@@ -189,15 +189,37 @@ export const seedIfEmpty = async () => {
   if (newCoupons.length) await Coupon.insertMany(newCoupons);
 
   // Dedupe cloned seed dishes: earlier seeds stored auto-slugged copies
-  // ("classic-veg-burger-4iku") while the new sync uses clean slugs. If both a
-  // clean-slug food and a suffixed clone with the SAME name exist, drop the
-  // suffix clone so the menu shows each dish exactly once.
-  const nameToSlug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // ("classic-veg-burger-4iku") while the new sync uses clean slugs.
+  //
+  // DANGER — the previous implementation deleted real menu items. It flagged a
+  // food when `/^[a-z0-9-]+$/` matched, which is true for EVERY normal slug, so
+  // `cleanSlugs.has(nameToSlug(f.name))` was true for the food's OWN slug. Any
+  // dish whose slug happened to end in a 4-letter word then deleted itself:
+  //   fresh-lime-soda  ("-soda"), paneer-tikka-wrap ("-wrap"),
+  //   choco-lava-cake  ("-cake"), garlic-bread-roll  ("-roll") ...
+  // Because this ran on every boot, the catalogue was gradually eaten down to
+  // only the dishes whose slugs did not end that way.
+  //
+  // Safe rule: only ever consider a food a clone when ANOTHER food shares the
+  // exact same name. A food that is the sole holder of its name is never
+  // deleted, whatever its slug looks like.
+  const AUTO_SUFFIX = /-[0-9a-z]{4}$/;
   const allFoods = await Food.find({}, 'name slug');
-  const cleanSlugs = new Set(allFoods.filter((f) => /^[a-z0-9-]+$/.test(f.slug)).map((f) => f.slug));
-  const cloneIds = allFoods
-    .filter((f) => /-[0-9a-z]{4}$/.test(f.slug) && cleanSlugs.has(nameToSlug(f.name)))
-    .map((f) => f._id);
+  const byName = new Map();
+  for (const f of allFoods) {
+    const key = String(f.name || '').trim().toLowerCase();
+    if (!byName.has(key)) byName.set(key, []);
+    byName.get(key).push(f);
+  }
+  const cloneIds = [];
+  for (const group of byName.values()) {
+    if (group.length < 2) continue; // unique name -> never a clone, never delete
+    const suffixed = group.filter((f) => AUTO_SUFFIX.test(f.slug));
+    const clean = group.filter((f) => !AUTO_SUFFIX.test(f.slug));
+    // Only drop the suffixed copies when a clean-slug version of the SAME name
+    // actually exists to replace them.
+    if (clean.length) cloneIds.push(...suffixed.map((f) => f._id));
+  }
   if (cloneIds.length) {
     await Food.deleteMany({ _id: { $in: cloneIds } });
     logger.info(`🧹 Removed ${cloneIds.length} duplicate seed clones`);
