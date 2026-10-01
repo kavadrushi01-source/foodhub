@@ -199,6 +199,84 @@ export const toggleUserActive = async (req, res) => {
   return res.status(200).json({ success: true, status: 200, message: user.isActive ? 'User activated' : 'User deactivated', data: { isActive: user.isActive } });
 };
 
+/**
+ * Permanently delete a user and everything they own.
+ *
+ * The admin panel could previously only deactivate an account, which left the
+ * row (and its email) in the database forever. This removes it for real.
+ *
+ * Guards, because a hard delete is not undoable:
+ *  - an admin cannot delete their own account (that would lock everyone out)
+ *  - the last remaining admin cannot be deleted
+ *  - orders are deleted too, otherwise they would dangle with a dead owner
+ *
+ * Reviews are kept but detached, so a dish keeps its rating history.
+ */
+export const deleteUser = async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) throw new NotFoundError('User not found');
+
+  if (String(user._id) === String(req.user._id)) {
+    throw new ConflictError('You cannot delete your own account.');
+  }
+  if (user.role === 'admin' && (await User.countDocuments({ role: 'admin' })) <= 1) {
+    throw new ConflictError('Cannot delete the last remaining admin.');
+  }
+
+  const [orders] = await Promise.all([
+    Order.deleteMany({ user: user._id }),
+    Review.updateMany({ user: user._id }, { $unset: { user: 1 } }),
+  ]);
+  await user.deleteOne();
+
+  return res.status(200).json({
+    success: true, status: 200,
+    message: 'User deleted',
+    data: { email: user.email, deletedOrders: orders.deletedCount },
+  });
+};
+
+/**
+ * Bulk-delete every user except the protected demo accounts.
+ *
+ * `keep` lists the emails that must survive; anything not listed is removed
+ * along with its orders. Intended for resetting a demo deployment, so it
+ * refuses to run when `keep` is empty — an empty list must never mean
+ * "delete the entire user table".
+ */
+export const purgeUsers = async (req, res) => {
+  const keep = Array.isArray(req.body?.keep) ? req.body.keep.map((e) => String(e).toLowerCase()) : [];
+  if (keep.length === 0) {
+    throw new ConflictError('Refusing to purge: "keep" must list at least one account to preserve.');
+  }
+  const found = await User.find({ email: { $in: keep } }).select('email');
+  if (found.length !== keep.length) {
+    const missing = keep.filter((e) => !found.some((f) => f.email === e));
+    throw new ConflictError('Refusing to purge: these accounts do not exist — ' + missing.join(', '));
+  }
+
+  const victims = await User.find({ email: { $nin: keep } }).select('email role');
+  if (victims.length === 0) {
+    return res.status(200).json({ success: true, status: 200, message: 'Nothing to remove', data: { deleted: 0, deletedOrders: 0 } });
+  }
+
+  const ids = victims.map((v) => v._id);
+  const orders = await Order.deleteMany({ user: { $in: ids } });
+  await Review.updateMany({ user: { $in: ids } }, { $unset: { user: 1 } });
+  const res1 = await User.deleteMany({ _id: { $in: ids } });
+
+  return res.status(200).json({
+    success: true, status: 200,
+    message: 'Purge complete',
+    data: {
+      deleted: res1.deletedCount,
+      deletedOrders: orders.deletedCount,
+      kept: keep,
+      removed: victims.map((v) => v.email),
+    },
+  });
+};
+
 // ============ REVIEW MANAGEMENT ============
 
 export const getReviewsAdmin = async (req, res) => {

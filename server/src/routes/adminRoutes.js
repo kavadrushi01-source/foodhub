@@ -9,6 +9,7 @@ import {
   couponSchema, updateCouponSchema,
 } from '../validators/adminValidators.js';
 import { updateOrderStatusSchema, assignDeliverySchema, updateItemStatusSchema } from '../validators/orderValidators.js';
+import { ForbiddenError } from '../utils/errors.js';
 import { z } from 'zod';
 
 const router = Router();
@@ -50,6 +51,15 @@ router.post('/orders/:id/refund', asyncHandler(order.refundOrder));
 router.get('/users', asyncHandler(admin.getUsers));
 router.patch('/users/:id/role', validate(z.object({ role: z.enum(['user', 'admin', 'delivery']) })), asyncHandler(admin.updateUserRole));
 router.patch('/users/:id/toggle-active', asyncHandler(admin.toggleUserActive));
+router.delete('/users/:id', asyncHandler(admin.deleteUser));
+// Bulk reset for demo deployments. Disabled unless ADMIN_PURGE_ENABLED=true so
+// a real deployment can never have its whole user table wiped through the API.
+router.post('/users/purge', (req, res, next) => {
+  if (String(process.env.ADMIN_PURGE_ENABLED).toLowerCase() !== 'true') {
+    return next(new ForbiddenError('User purge is disabled on this deployment.'));
+  }
+  return admin.purgeUsers(req, res, next);
+});
 
 // Review management
 router.get('/reviews', asyncHandler(admin.getReviewsAdmin));
