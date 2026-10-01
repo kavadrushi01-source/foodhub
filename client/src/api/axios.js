@@ -2,12 +2,24 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { getAccessToken, setAccessToken, clearTokens } from '../utils/authStorage';
 
+// The API is reached through the SAME ORIGIN on purpose.
+//
+//   dev  -> vite.config.js proxies '/api' to http://localhost:5000
+//   prod -> client/vercel.json rewrites '/api/*' to the API project
+//
+// Going same-origin removes CORS, cross-site cookie/SameSite problems, and
+// makes the client immune to a stale VITE_API_URL baked into the build (a
+// dead API host in that variable silently breaks every request).
+//
+// If you ever MUST talk to the API cross-origin (e.g. a mobile app or a
+// separate API domain), opt in explicitly with VITE_USE_DIRECT_API=true.
+const DIRECT_API = import.meta.env.VITE_USE_DIRECT_API === 'true';
+
 export const baseURL = (() => {
+  if (!DIRECT_API) return '/api';
+
   let v = (import.meta.env.VITE_API_URL || '').trim();
   while (v.endsWith('/')) v = v.slice(0, -1);
-  // No env var (e.g. Vercel env missing) -> use same-origin '/api',
-  // which client/vercel.json proxies to the API project. This is what kills
-  // the "Network error" toasts when VITE_API_URL isn't set at build time.
   if (!v) return '/api';
   if (v === '/api' || v.endsWith('/api')) return v;
   return `${v}/api`;
