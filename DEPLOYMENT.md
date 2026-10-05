@@ -422,6 +422,67 @@ orders that remain all belong to the three kept accounts (14 customer, 11 admin,
 > ⚠️ The per-user delete needs no flag and is available on any deployment. Rotate the
 > admin password if these credentials have ever been exposed.
 
+### 14. 100% free live delivery tracking (no paid map API)
+
+**Problem:** locations were plain text only, so nobody could see where a delivery actually
+was, and a real map would have needed a paid, key-based API (Google Maps) that a free-tier
+deployment cannot afford.
+
+**Changes**
+
+| File | Change |
+|------|--------|
+| `client/package.json` | `leaflet` + `react-leaflet@4` (React 18 compatible) |
+| `client/src/components/map/AddressPicker.jsx` | Checkout map: place search, click-to-drop pin, reverse-geocoded address, store marker + delivery-radius circle |
+| `client/src/components/map/DeliveryMap.jsx` | Shared tracking map (store / drop-off / rider markers) |
+| `client/src/hooks/useGeolocation.js` | `watchPosition` wrapper + **Share live location** toggle (throttled, always stopped on unmount) |
+| `client/src/utils/geo.js` | OSRM road route with a haversine fallback and a 60s cache, plus `kmText` / `etaText` |
+| `client/src/utils/geocode.js` | Nominatim search + reverse geocoding |
+| `client/src/pages/OrderDetail.jsx` | Live map, rider marker, route, distance/ETA — polled only while `out_for_delivery`, paused when the tab is hidden |
+| `client/src/pages/delivery/DeliveryOrderDetail.jsx` | Navigation link, route preview, GPS sharing to `PATCH /api/delivery/orders/:id/location` |
+| `server/src/controllers/orderController.js` | Returns `storeLocation` + `riderLive`, validates incoming rider pins |
+| `server/src/controllers/adminController.js`, `server/src/models/Settings.js` | Admin-editable **store location** and **max delivery radius (km)** |
+| `server/src/validators/*` | `address.location { lat, lng }` accepted on address create/update |
+
+Everything used is free and key-less — OpenStreetMap tiles, Nominatim geocoding and the OSRM
+demo server. Routing falls back to a straight-line (haversine) estimate when OSRM is
+unreachable, so tracking degrades instead of breaking.
+
+**Verified live:** the checkout pin geocodes correctly, the rider marker and road route
+appear while `out_for_delivery`, GPS sharing stops when the page is closed, and the delivery
+radius from admin settings is respected.
+
+### 15. Saved addresses could not be deleted, and the map form started hidden
+
+**Problem:** the only way to change the delivery address at checkout was to *add* another
+one — old entries could never be removed, no address could be promoted to default from the
+checkout page, and the map form started collapsed, so a new customer saw only a bare list.
+Re-saving an existing address also created duplicates (one demo account had three identical
+"Home" entries).
+
+**Changes** — all in `client/src/pages/Checkout.jsx`, frontend only (the API already
+supported `DELETE /api/addresses/:id` and `PATCH /api/addresses/:id/default`)
+
+- **🗑 Delete** button on every saved address, behind a confirmation, calling
+  `DELETE /api/addresses/:id`. Afterwards the selection falls back, the server promotes a new
+  default, and if nothing is left the map form reopens.
+- **⭐ Make default** button on non-default rows only, so exactly one default always exists.
+- The **New Address form with the map now opens by default**; **Cancel** still collapses it to
+  the compact saved-address list.
+- **Duplicate guard** — identical normalised fields *and* a pin within ~25 m select the
+  existing address instead of creating a copy.
+- **Bug fix — the open form silently overrode the selected address.** `placeOrder` always
+  preferred the form's address, so with the form open by default an untouched form submitted
+  an **empty address** even when a saved address was selected. The form now only wins once it
+  has actually been used (`formDirty`); the **Pay** button and its helper text use the same
+  rule.
+- **Bug fix — stale pin.** Cancel and "+ Add new address" now clear the pin and the fields, so
+  reopening the form never shows the previous pin.
+
+**Verified locally and live** (fresh account): add → first address auto-becomes default →
+add second → delete the default (another is promoted) → set default → delete the last one →
+0 addresses, and `GET /api/addresses` without a token returns 401.
+
 ---
 
 ## 🧪 Verification
@@ -447,6 +508,16 @@ order preview 200 · coupon WELCOME10 → discount applied
 create order 201 · order detail 200 (pending) · cancel 200 (cancelled)
 wishlist add/get/remove 200 · chatbot 200 · logout 200
 ```
+
+**Saved addresses + live tracking (live)**
+
+```
+address add 201 (first becomes default) · add 2nd · delete the default → another is promoted
+set default 200 (exactly one default) · delete the last → 0 addresses · no token → 401
+```
+
+Checkout pin geocodes · rider marker + road route render while `out_for_delivery` ·
+`PATCH /api/delivery/orders/:id/location` accepted (delivery role only).
 
 **Google OAuth:** callback URI returns **VALID** (reaches Google's account chooser).
 

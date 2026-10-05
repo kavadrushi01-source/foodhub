@@ -33,10 +33,21 @@ customer account automatically.
 1. **Sign in** as `user@foodhub.com`
 2. **Menu** → add dishes to the cart
 3. **Cart** → apply a coupon, then **Proceed to checkout**
-4. On **Checkout**, add a delivery address (label, address, city, state, pincode, phone)
-5. Pick a payment method → **Place Order**
-6. Watch the status change under **My Orders**:
+4. On **Checkout** the **New Address** form (with the map) is already open:
+   - **Search** a place or **click the map** to drop a pin — the address fills in by itself
+   - Complete **label, address, city, state, pincode, phone** → **Save Address**
+   - Or press **Cancel** and pick one of your **saved addresses** (the default is pre-selected)
+5. Managing saved addresses (all on the Checkout page):
+   - **⭐** promotes an address to **default**
+   - **🗑** **deletes** it after a confirmation — delete the default one and another address
+     becomes the default automatically
+   - Saving an address you already have (same text + same map pin) just **selects** it
+     instead of creating a duplicate
+6. Pick a payment method → **Place Order**
+7. Watch the status change under **My Orders**:
    `Pending → Confirmed → Preparing → Out for Delivery → Delivered`
+8. While the rider is **Out for Delivery**, open the order to watch them **move live on the
+   map** — road route, distance and ETA (free, no Google Maps key needed)
 
 ### Demo coupons
 

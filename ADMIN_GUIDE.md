@@ -61,7 +61,7 @@ Nine sections, all under `/admin`:
 | **Coupons** | `/admin/coupons` | Create discount codes with limits and expiry |
 | **Users** | `/admin/users` | List users, change roles, activate/deactivate an account |
 | **Reviews** | `/admin/reviews` | Moderate reviews, delete inappropriate ones |
-| **Settings** | `/admin/settings` | Delivery charges, free-delivery threshold, payment toggles, contact details |
+| **Settings** | `/admin/settings` | Delivery charges, free-delivery threshold, payment toggles, contact details, **store location + max delivery radius (km)** used by the live maps |
 
 ### Order status pipeline
 

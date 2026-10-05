@@ -81,8 +81,17 @@ The site sends you to your correct area after login based on your role
 - **Proceed to checkout**.
 
 ### Checkout (`/checkout`)
-- Pick or add a **delivery address** (label, line1/line2, city, state, pincode, phone).
-- Choose an address as **default**.
+- The **New Address** form with the **map is open by default**: search a place or **click the map
+  to drop a pin** and the address fills itself in; add **label, line1/line2, city, state,
+  pincode, phone**, then **Save Address**. **Cancel** collapses it to the compact list.
+- Saved addresses appear as selectable cards, and your **default** address is pre-selected.
+- Each card has a **make-default** button and a **delete** button (with a confirmation).
+- Deleting is safe — remove the selected/default address and another one is promoted
+  automatically; delete the last one and the map form opens again.
+- Saving an address you already have (same text **and** the same map pin, within ~25 m) simply
+  **selects** it, so duplicates are never created.
+- If you have not touched the new-address form, the **selected saved address is used** for the
+  order even though the form is open.
 - **Payment method**: Cash on Delivery (recommended for demo; no keys needed) or
   Razorpay/UPI if keys are configured. Online payment qualifies for **free delivery**.
 - Review order summary (subtotal, delivery charge, tax, coupon, grand total) and **Place Order**.
@@ -118,9 +127,13 @@ If a payment fails, the order is **saved as pending** — open **My Orders** and
 - Live status timeline: **Pending → Confirmed → Preparing → Out for Delivery → Delivered**.
 - **Cancel order** button while it is still Pending/Confirmed (online payments auto-refund).
 - Invoice line items, delivery address, payment total.
+- **Live tracking** — while the rider is *Out for Delivery* the order shows a **live map**: the
+  store, the drop-off and the moving rider, plus the **road route, distance and ETA**
+  (OpenStreetMap + OSRM — free, no paid map key).
 
 ### My Account (`/profile`)
-- Update name/phone/avatar, **change password**, manage **addresses**.
+- Update name/phone/avatar and **change password**. Saved delivery addresses are managed on the
+  **Checkout** page — add one there with the map, **make it default** or **delete** it.
 - **Wishlist** — items you starred.
 
 ### AI Chatbot 💬 (every page, bottom-right)
@@ -145,7 +158,7 @@ If a payment fails, the order is **saved as pending** — open **My Orders** and
 | **Orders** | See every order, progress status (✅), **assign a delivery partner**, issue **refunds** |
 | **Users** | List customers/delivery, change role, enable/disable accounts |
 | **Reviews** | Moderate (view / delete) submitted reviews |
-| **Settings** | Store-level: delivery charge, tax %, online-payment toggles |
+| **Settings** | Store-level: delivery charge, tax %, online-payment toggles, **store location + max delivery radius** (drives the live maps) |
 
 The sidebar groups these; every admin action updates the store instantly.
 
@@ -161,6 +174,9 @@ The sidebar groups these; every admin action updates the store instantly.
 - At drop-off the customer gets a **4-digit OTP** — you enter the correct OTP to
   complete the delivery (**OTP-verified completion**, no fake handoffs).
 - **Orders detail** screen shows item list, customer address and phone.
+- **Share live location** — tap it once and the customer watches you move on their map (road
+  route, distance, ETA). It only runs while this page is open and stops when you navigate away.
+- **Navigate** opens the drop-off in your map app, and the order shows a route preview.
 - **Earnings** shows your payout balance.
 
 Demo login uses the *delivery@foodhub.com* demo account in the main app;
@@ -174,6 +190,15 @@ Demo login uses the *delivery@foodhub.com* demo account in the main app;
 **Q: My coupon isn't working** — Check it's still active, respects the min-order, not expired, and has usage left (admin can verify).
 
 **Q: I can't cancel my order** — Only Pending/Confirmed orders can; once Preparing/Out for delivery the rider must complete it.
+
+**Q: How do I delete an address or change which one is the default?** — On **Checkout**, every
+saved address has a **make-default** button and a **delete** button (with a confirmation).
+Delete the default one and another is promoted automatically; delete them all and the map form
+opens again.
+
+**Q: Is the live delivery map really free?** — Yes. Tiles are OpenStreetMap (Leaflet), the
+address search is Nominatim and the road route is OSRM, with a straight-line fallback. No
+Google Maps key or billing account is involved.
 
 **Q: Where are Razorpay payments?** — You must add `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` to `server/.env`; until then COD is used. Payments integration & verification code is complete.
 

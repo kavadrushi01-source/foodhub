@@ -45,7 +45,9 @@ and troubleshooting.
 - **Wishlist** — favourites saved per user
 - **Cart** — persistent cart with quantity controls
 - **Coupons** — percentage / fixed discounts, min-order and usage limits
-- **Checkout** — saved delivery addresses, Cash on Delivery (working) + Razorpay integration point
+- **Checkout** — map-based address entry (search a place or drop a pin, the address
+  auto-fills) with saved-address management: **make default**, **delete** (confirmed) and
+  duplicate detection. Cash on Delivery (working) + Razorpay integration point
 - **Orders** — live status timeline, invoice/payment summary, cancellations and auto-refunds
 - **🤖 AI Chatbot** — floating "Foodie" assistant on every page answering 100+ questions
   (orders, delivery, payments, coupons, the menu, small talk, even math) with quick-suggestion buttons and a browsable FAQ panel
@@ -58,9 +60,13 @@ and troubleshooting.
 
 ### 🛵 Delivery Partner
 - Assigned deliveries, OTP-verified completion, earnings, live status updates
+- **Live tracking, 100% free** — customers watch the rider move on a live map (road route,
+  distance, ETA) while the partner shares GPS from the delivery app
 
 ### 🛡️ Platform
 - Premium mobile-first UI: dark/light mode, animations, skeleton loaders
+- **Maps & routing with no paid keys** — Leaflet + OpenStreetMap tiles, Nominatim
+  search/reverse-geocoding and OSRM road routes (with a haversine fallback)
 - Security: Helmet, CORS allow-list, rate limiting, mongo-sanitize, bcrypt, zod validation, cookie hardening
 
 ---
@@ -69,7 +75,7 @@ and troubleshooting.
 
 | Layer       | Tools |
 |-------------|-------|
-| Frontend    | React 18, Vite, Tailwind CSS, Framer Motion, Zustand, React Router, Axios, react-hot-toast, lucide-react |
+| Frontend    | React 18, Vite, Tailwind CSS, Framer Motion, Zustand, React Router, Axios, react-hot-toast, lucide-react, Leaflet + react-leaflet |
 | Backend     | Node.js, Express, Mongoose, JWT, bcryptjs, zod, helmet, express-rate-limit, winston, nodemailer |
 | Database    | MongoDB (local or Atlas) |
 
