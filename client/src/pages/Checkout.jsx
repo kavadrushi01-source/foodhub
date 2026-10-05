@@ -1,12 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Banknote, CreditCard, ShieldCheck, Plus, Loader2 } from 'lucide-react';
+import { Banknote, CreditCard, ShieldCheck, Plus, Loader2, Trash2, Star } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import { orderApi, foodApi, paymentApi } from '../api';
 import { openRazorpayCheckout } from '../utils/razorpay';
 import { formatCurrency } from '../utils/format';
-import { isValidLatLng } from '../utils/geo';
+import { isValidLatLng, samePlace } from '../utils/geo';
 import toast from 'react-hot-toast';
 
 const AddressPicker = lazy(() => import('../components/map/AddressPicker'));
@@ -17,7 +17,11 @@ export default function Checkout() {
   const { isAuthenticated } = useAuthStore();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
-  const [isNewAddress, setIsNewAddress] = useState(false);
+  // The "New Address" form (with the map) is open by default — drop your pin
+  // right away. Cancel collapses it if you'd rather pick a saved address.
+  const [isNewAddress, setIsNewAddress] = useState(true);
+  const [formDirty, setFormDirty] = useState(false); // user typed in the new-address form or dropped a pin
+  const [addrActionId, setAddrActionId] = useState(null); // address id currently being deleted / set default
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [paymentConfig, setPaymentConfig] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(true);
@@ -40,6 +44,58 @@ export default function Checkout() {
       toast.error('Failed to load addresses');
     } finally {
       setLoadingAddresses(false);
+    }
+  };
+
+  // Fresh start for the new-address form (used by both "Add new address" buttons).
+  const openNewAddress = () => {
+    setAddressForm({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
+    setPin(null);
+    setFormDirty(false);
+    setIsNewAddress(true);
+  };
+
+  const handleDeleteAddress = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm('Delete this saved address?')) return;
+    try {
+      setAddrActionId(id);
+      const res = await foodApi.deleteAddress(id);
+      const remaining = res.data?.addresses || addresses.filter((a) => a._id !== id);
+      setAddresses(remaining);
+      // If the deleted address was selected, fall back to the new default
+      // (server reassigns it) — or open the new-address form when none remain.
+      if (selectedAddress === id) {
+        const next = remaining.find((a) => a.isDefault) || remaining[0];
+        setSelectedAddress(next ? next._id : '');
+        if (!next) {
+          setIsNewAddress(true);
+          setFormDirty(false);
+        }
+      }
+      toast.success('Address deleted');
+    } catch (err) {
+      console.error('Failed to delete address:', err);
+      toast.error(err?.message || 'Failed to delete address');
+    } finally {
+      setAddrActionId(null);
+    }
+  };
+
+  const handleSetDefault = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      setAddrActionId(id);
+      await foodApi.setDefaultAddress(id);
+      setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a._id === id })));
+      toast.success('Default address updated');
+    } catch (err) {
+      console.error('Failed to set default address:', err);
+      toast.error(err?.message || 'Failed to set default address');
+    } finally {
+      setAddrActionId(null);
     }
   };
 
@@ -91,11 +147,35 @@ export default function Checkout() {
       toast.error('Please set your delivery pin on the map.');
       return;
     }
+    // Block accidental clones: an address identical to a saved one (text, phone
+    // AND map pin) just selects the existing entry instead of saving again.
+    const norm = (s) => (s || '').trim().toLowerCase();
+    const dup = addresses.find(
+      (a) =>
+        norm(a.label) === norm(addressForm.label) &&
+        norm(a.line1) === norm(addressForm.line1) &&
+        norm(a.line2) === norm(addressForm.line2) &&
+        norm(a.city) === norm(addressForm.city) &&
+        norm(a.state) === norm(addressForm.state) &&
+        norm(a.pincode) === norm(addressForm.pincode) &&
+        norm(a.phone) === norm(addressForm.phone) &&
+        (a.location?.lat != null && pin
+          ? samePlace({ lat: a.location.lat, lng: a.location.lng }, pin, 0.025)
+          : a.location?.lat == null && !pin),
+    );
+    if (dup) {
+      setSelectedAddress(dup._id);
+      setFormDirty(false);
+      setIsNewAddress(false);
+      toast.success('This address is already saved — selected it for you.');
+      return;
+    }
     try {
       const res = await foodApi.addAddress(pin ? { ...addressForm, location: pin } : addressForm);
       setAddresses(res.data.addresses);
       setSelectedAddress(res.data.addresses[res.data.addresses.length - 1]._id);
       setIsNewAddress(false);
+      setFormDirty(false);
       setAddressForm({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
       setPin(null);
       toast.success('Address saved');
@@ -106,14 +186,18 @@ export default function Checkout() {
   };
 
   const placeOrder = async () => {
-    if (!selectedAddress && !isNewAddress) {
+    // The open form only wins when the user actually typed something or dropped
+    // a pin — otherwise pay to the selected saved address (the form opens by
+    // default now, and an untouched one must not override the radio choice).
+    const useNewForm = isNewAddress && formDirty;
+    if (!selectedAddress && !useNewForm) {
       toast.error('Please select or add a delivery address');
       return;
     }
     setPlacing(true);
     try {
       const payload = { items: items.map((i) => ({ food: i.food._id, quantity: i.quantity })), paymentMethod, couponCode: coupon?.code || '' };
-      if (isNewAddress) payload.address = addressForm;
+      if (useNewForm) payload.address = addressForm;
       else payload.addressId = selectedAddress;
       const res = await orderApi.create(payload);
       const order = res.data.order;
@@ -215,15 +299,15 @@ export default function Checkout() {
             {addresses.length === 0 && !isNewAddress ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 mb-4">No addresses saved</p>
-                <button onClick={() => setIsNewAddress(true)} className="text-emerald-600 hover:underline flex items-center justify-center gap-2 mx-auto">
+                <button onClick={openNewAddress} className="text-emerald-600 hover:underline flex items-center justify-center gap-2 mx-auto">
                   <Plus size={18} /> Add new address
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
                 {addresses.map((addr) => (
-                  <label key={addr._id} className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedAddress === addr._id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                    <input type="radio" name="address" value={addr._id} checked={selectedAddress === addr._id} onChange={() => setSelectedAddress(addr._id)} className="mt-1" />
+                  <label key={addr._id} className={`relative flex items-start gap-3 p-4 pr-20 border rounded-lg cursor-pointer transition-colors ${selectedAddress === addr._id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <input type="radio" name="address" value={addr._id} checked={selectedAddress === addr._id} onChange={() => { setSelectedAddress(addr._id); setFormDirty(false); }} className="mt-1" />
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{addr.label}</span>
@@ -233,10 +317,21 @@ export default function Checkout() {
                       <p className="text-sm text-gray-600">{addr.city}, {addr.state} - {addr.pincode}</p>
                       <p className="text-sm text-gray-600">{addr.phone}</p>
                     </div>
+                    {/* Manage this address: make default + delete */}
+                    <span className="absolute top-3 right-3 flex items-center gap-1">
+                      {!addr.isDefault && (
+                        <button type="button" title="Make this the default address" onClick={(e) => handleSetDefault(e, addr._id)} disabled={addrActionId === addr._id} className="p-1.5 rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-100 disabled:opacity-50">
+                          <Star size={15} />
+                        </button>
+                      )}
+                      <button type="button" title="Delete this address" onClick={(e) => handleDeleteAddress(e, addr._id)} disabled={addrActionId === addr._id} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50">
+                        {addrActionId === addr._id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                      </button>
+                    </span>
                   </label>
                 ))}
                 {!isNewAddress && (
-                  <button onClick={() => setIsNewAddress(true)} className="text-emerald-600 hover:underline flex items-center gap-2 text-sm">
+                  <button onClick={openNewAddress} className="text-emerald-600 hover:underline flex items-center gap-2 text-sm">
                     <Plus size={16} /> Add new address
                   </button>
                 )}
@@ -245,13 +340,14 @@ export default function Checkout() {
 
 
             {isNewAddress && (
-              <form onSubmit={handleSaveAddress} className="mt-4 space-y-3 border-t pt-4">
+              <form onSubmit={handleSaveAddress} onChange={() => setFormDirty(true)} className="mt-4 space-y-3 border-t pt-4">
                 <h3 className="font-semibold">New Address</h3>
                 <Suspense fallback={<div className="h-60 rounded-2xl bg-ink-100 dark:bg-ink-800 animate-pulse" />}>
                   <AddressPicker
                     value={pin}
                     onChange={({ location, suggestion }) => {
                       setPin(location);
+                      setFormDirty(true);
                       if (suggestion) {
                         setAddressForm((f) => ({
                           ...f,
@@ -277,7 +373,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex gap-3">
                   <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">Save Address</button>
-                  <button type="button" onClick={() => { setIsNewAddress(false); setAddressForm({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' }); }} className="border px-4 py-2 rounded-lg hover:bg-gray-50">Cancel</button>
+                  <button type="button" onClick={() => { setIsNewAddress(false); setFormDirty(false); setPin(null); setAddressForm({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' }); }} className="border px-4 py-2 rounded-lg hover:bg-gray-50">Cancel</button>
                 </div>
               </form>
             )}
@@ -342,10 +438,10 @@ export default function Checkout() {
                 <ShieldCheck size={14} /> {isOnline ? 'Free delivery via online payment applied' : `Free delivery — order above ${formatCurrency(preview?.freeDeliveryThreshold)}`}
               </p>
             )}
-            <button disabled={placing || !selectedAddress} onClick={placeOrder} className="w-full mt-4 bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+            <button disabled={placing || (!selectedAddress && !(isNewAddress && formDirty))} onClick={placeOrder} className="w-full mt-4 bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
               {placing ? 'Placing Order...' : `Pay ${formatCurrency(total)}`}
             </button>
-            {(!selectedAddress && !isNewAddress) && <p className="text-red-500 text-sm mt-2 text-center">Please select or add an address</p>}
+            {(!selectedAddress && !(isNewAddress && formDirty)) && <p className="text-red-500 text-sm mt-2 text-center">Please select or add an address</p>}
           </div>
         </div>
       </div>
