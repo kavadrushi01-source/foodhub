@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Save } from 'lucide-react';
 import { adminApi } from '../../api';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
+
+const AddressPicker = lazy(() => import('../../components/map/AddressPicker'));
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState(null);
@@ -21,7 +23,7 @@ export default function AdminSettings() {
   const save = async () => {
     setSaving(true);
     try {
-      await adminApi.updateSettings({ delivery: settings.delivery, charges: settings.charges, features: settings.features, contact: settings.contact });
+      await adminApi.updateSettings({ delivery: settings.delivery, charges: settings.charges, features: settings.features, contact: settings.contact, storeLocation: settings.storeLocation });
       toast.success('Settings saved');
     } catch {} finally { setSaving(false); }
   };
@@ -65,6 +67,31 @@ export default function AdminSettings() {
           </div>
         </section>
 
+        <section className="card p-4 sm:p-6">
+          <h2 className="font-display font-bold text-lg mb-1">Store Location</h2>
+          <p className="text-sm text-ink-500 mb-4">Drop the pin on your restaurant — delivery distances are measured from here.</p>
+          <Suspense fallback={<div className="h-60 rounded-2xl bg-ink-100 dark:bg-ink-800 animate-pulse" />}>
+            <AddressPicker
+              value={settings.storeLocation?.lat != null ? settings.storeLocation : null}
+              onChange={({ location, suggestion }) => {
+                setSettings((s) => ({
+                  ...s,
+                  storeLocation: {
+                    lat: location.lat,
+                    lng: location.lng,
+                    address: suggestion?.display || s.storeLocation?.address || '',
+                  },
+                }));
+              }}
+            />
+          </Suspense>
+          {settings.storeLocation?.lat != null && (
+            <p className="text-xs text-ink-500 mt-2">
+              {settings.storeLocation.lat.toFixed(5)}, {settings.storeLocation.lng.toFixed(5)}
+              {settings.storeLocation.address ? ` — ${settings.storeLocation.address.slice(0, 80)}` : ''}
+            </p>
+          )}
+        </section>
         <section className="card p-4 sm:p-6">
           <h2 className="font-display font-bold text-lg mb-4">Contact Info</h2>
           <div className="grid sm:grid-cols-2 gap-4">

@@ -172,3 +172,18 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============ Leaflet delivery map ============ */
+.fh-pin-dot {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  font-size: 18px;
+  color: #fff;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.35);
+}
+.fh-pin { background: transparent; border: none; }
+.leaflet-container { font-family: inherit; z-index: 0; }

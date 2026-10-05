@@ -18,6 +18,13 @@ const settingsSchema = new mongoose.Schema(
       estimatedPrepTimeMin: { type: Number, default: 15 },
       estimatedDeliveryTimeMin: { type: Number, default: 30 },
     },
+    // Restaurant pin for the delivery map + km display. Set once in
+    // Admin → Settings via the mini-map (Phase 0). Null = not set yet.
+    storeLocation: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+      address: { type: String, default: '' },
+    },
     charges: {
       packagingCharge: { type: Number, default: 0 },
       taxPercent: { type: Number, default: 0 }, // GST % on subtotal

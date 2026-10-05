@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Package, RefreshCw } from 'lucide-react';
-import { deliveryApi } from '../../api';
+import { ChevronRight, Package, RefreshCw, MapPin } from 'lucide-react';
+import { deliveryApi, foodApi } from '../../api';
 import { formatCurrency, timeAgo } from '../../utils/format';
+import { haversineKm, kmText, isValidLatLng } from '../../utils/geo';
 import Badge from '../../components/ui/Badge';
 import Skeleton from '../../components/ui/Skeleton';
 
@@ -21,6 +22,20 @@ export default function DeliveryOrders() {
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [storePin, setStorePin] = useState(null);
+
+  useEffect(() => {
+    foodApi.getPublicSettings().then((r) => {
+      const s = r.data?.storeLocation;
+      if (s && isValidLatLng(s.lat, s.lng)) setStorePin({ lat: s.lat, lng: s.lng });
+    }).catch(() => {});
+  }, []);
+
+  const kmFromStore = (o) => {
+    const dest = o?.address?.location;
+    if (!storePin || !dest || dest.lat == null) return null;
+    return haversineKm(storePin, dest);
+  };
 
   const load = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
@@ -68,6 +83,9 @@ export default function DeliveryOrders() {
                   <Badge tone={STATUS_TONE[o.status] || 'gray'}>{o.status.replace(/_/g, ' ')}</Badge>
                 </div>
                 <p className="text-xs sm:text-sm text-ink-500 mt-0.5 truncate">{o.user?.name} • {o.items?.length} item(s) • {o.address?.city} • {timeAgo(o.createdAt)}</p>
+                {kmFromStore(o) != null && (
+                  <p className="text-xs text-brand-600 dark:text-brand-400 mt-0.5 inline-flex items-center gap-1"><MapPin size={12} /> {kmText(kmFromStore(o))} from store</p>
+                )}
               </div>
               <div className="text-right shrink-0"><p className="font-bold text-sm sm:text-base">{formatCurrency(o.grandTotal)}</p><ChevronRight size={18} className="ml-auto text-ink-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" /></div>
             </Link>

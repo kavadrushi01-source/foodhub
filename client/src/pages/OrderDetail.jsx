@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Package, MapPin, Banknote, ChevronLeft, CheckCircle, XCircle, Truck, CookingPot, ClipboardCheck, Loader2, KeyRound } from 'lucide-react';
-import { orderApi, paymentApi } from '../api';
+import { Package, MapPin, Banknote, ChevronLeft, CheckCircle, XCircle, Truck, CookingPot, ClipboardCheck, Loader2, KeyRound, Navigation } from 'lucide-react';
+import { orderApi, paymentApi, foodApi } from '../api';
 import { openRazorpayCheckout } from '../utils/razorpay';
 import useAuthStore from '../store/authStore';
 import { formatCurrency, formatDateTime } from '../utils/format';
+import { fetchRoute, kmText, etaText, isValidLatLng } from '../utils/geo';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import { imgFallback } from '../utils/imageFallback';
 import toast from 'react-hot-toast';
+
+const DeliveryMap = lazy(() => import('../components/map/DeliveryMap'));
 
 const STATUS_TONE = {
   pending: 'amber', confirmed: 'blue', preparing: 'blue', out_for_delivery: 'brand',
@@ -33,14 +36,40 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [storePin, setStorePin] = useState(null);
+  const [route, setRoute] = useState(null);
   const userName = useAuthStore((s) => s.user?.name);
 
-  const load = async () => {
-    setLoading(true);
-    try { setOrder((await orderApi.getOrder(id)).data.order); } catch {} finally { setLoading(false); }
+  const load = async (spinner = true) => {
+    if (spinner) setLoading(true);
+    try { setOrder((await orderApi.getOrder(id)).data.order); } catch {} finally { if (spinner) setLoading(false); }
   };
 
   useEffect(() => { load(); }, [id]);
+
+  // Poll while the rider is on the way (skip when tab hidden — same pattern as delivery pages).
+  useEffect(() => {
+    if (order?.status !== 'out_for_delivery') return;
+    const t = setInterval(() => { if (!document.hidden) load(false); }, 15000);
+    return () => clearInterval(t);
+  }, [id, order?.status]);
+
+  useEffect(() => {
+    foodApi.getPublicSettings().then((r) => {
+      const s = r.data?.storeLocation;
+      if (s && isValidLatLng(s.lat, s.lng)) setStorePin({ lat: s.lat, lng: s.lng });
+    }).catch(() => {});
+  }, []);
+
+  const riderPin = order?.riderLive?.location?.lat != null ? order.riderLive.location : null;
+  const homePin = order?.address?.location?.lat != null ? order.address.location : null;
+
+  useEffect(() => {
+    let cancelled = false;
+    if (order?.status !== 'out_for_delivery' || !riderPin || !homePin) { setRoute(null); return; }
+    fetchRoute(riderPin, homePin).then((r) => { if (!cancelled) setRoute(r); });
+    return () => { cancelled = true; };
+  }, [order?.status, riderPin?.lat, riderPin?.lng, homePin?.lat, homePin?.lng]);
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -165,6 +194,32 @@ export default function OrderDetail() {
             <p className="text-sm text-ink-600 dark:text-ink-300">{order.address.line1}, {order.address.city}, {order.address.state} - {order.address.pincode}</p>
             <p className="text-sm text-ink-500 mt-1">{order.address.phone}</p>
           </section>
+
+          {/* Live rider tracking */}
+          {order.status === 'out_for_delivery' && (
+            <section className="card p-4 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h2 className="font-display font-bold text-lg"><Navigation size={20} className="text-brand-500 inline mr-1" /> Rider Live</h2>
+                {route?.km != null && (
+                  <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                    {kmText(route.km)} away{route.durationMin != null ? ` • ~${route.durationMin} min` : ` • ${etaText(route.km)}`}
+                  </span>
+                )}
+              </div>
+              {riderPin && homePin ? (
+                <Suspense fallback={<div className="h-[280px] rounded-2xl bg-ink-100 dark:bg-ink-800 animate-pulse" />}>
+                  <DeliveryMap customer={homePin} partner={riderPin} store={storePin} route={route?.polyline} height={280} />
+                </Suspense>
+              ) : (
+                <p className="text-sm text-ink-500">The rider is on the way — live position appears here once they start sharing.</p>
+              )}
+              {order.deliveryOtp && (
+                <p className="mt-3 text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+                  Share this OTP with the rider at drop-off: <span className="font-mono font-bold tracking-widest">{order.deliveryOtp}</span>
+                </p>
+              )}
+            </section>
+          )}
 
           {order.tracking?.length > 0 && (
             <section className="card p-4 sm:p-6">

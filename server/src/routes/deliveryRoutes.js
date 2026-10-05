@@ -4,6 +4,7 @@ import * as order from '../controllers/orderController.js';
 import { protect, deliveryOnly } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
 import { updateOrderStatusSchema, verifyOtpSchema } from '../validators/orderValidators.js';
+import { z } from 'zod';
 
 const router = Router();
 router.use(protect, deliveryOnly);
@@ -13,5 +14,11 @@ router.get('/earnings', asyncHandler(order.getDeliveryEarnings));
 router.get('/orders/:id', asyncHandler(order.getOrderForUser));
 router.patch('/orders/:id/status', validate(updateOrderStatusSchema), asyncHandler(order.updateDeliveryStatus));
 router.post('/orders/:id/verify-otp', validate(verifyOtpSchema), asyncHandler(order.verifyDeliveryOtp));
+// Live GPS from the partner's phone (Phase 4). Validated + deduped in controller.
+router.patch(
+  '/orders/:id/location',
+  validate(z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })),
+  asyncHandler(order.updatePartnerLocation),
+);
 
 export default router;

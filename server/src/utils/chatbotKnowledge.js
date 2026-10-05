@@ -42,8 +42,8 @@ const INTENTS = [
   },
   {
     id: 'order-track-rider',
-    re: /track( the)? rider|where is( my)? rider|rider location|live location|courier/,
-    reply: "Once your order is 'Out for Delivery', a rider is assigned and live status updates in My Orders. You'll get a 4-digit OTP to complete the safe handover.",
+    re: /track( the)? rider|where is( my)? rider|rider location|live location|courier|live map|live tracking/,
+    reply: "Once your order is 'Out for Delivery', open it in My Orders to see the live map: the rider's position, your delivery pin, the road route and live km + ETA. You'll get a 4-digit OTP to complete the safe handover.",
   },
   {
     id: 'order-late',

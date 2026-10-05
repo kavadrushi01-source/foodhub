@@ -238,7 +238,11 @@ export const getOrderForUser = async (req, res) => {
   if (isOwner && order.status === 'out_for_delivery') {
     orderObj.deliveryOtp = order.deliveryOtp;
   }
-  return res.status(200).json({ success: true, status: 200, data: { order: orderObj } });
+  // Live rider pin, gated by role + status (see shapeOrderForViewer).
+  // NOTE: pass the plain orderObj (not {...order}) — spreading a Mongoose
+  // document drops its fields, which broke the isOwner check.
+  const shaped = await shapeOrderForViewer(orderObj, req.user, order.tracking);
+  return res.status(200).json({ success: true, status: 200, data: { order: shaped } });
 };
 
 export const cancelOrder = async (req, res) => {
@@ -447,5 +451,89 @@ export const getDeliveryEarnings = async (req, res) => {
       todaysEarnings: round2(todaysEarnings[0]?.total || 0),
     },
   });
+};
+
+// ============ LIVE DELIVERY MAP ============
+
+const validLatLng = (lat, lng) =>
+  Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)) &&
+  Number(lat) >= -90 && Number(lat) <= 90 && Number(lng) >= -180 && Number(lng) <= 180;
+
+/** Haversine km — used for the 20m dedupe so GPS jitter doesn't spam tracking. */
+const haversineKm = (a, b) => {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s1 = Math.sin(dLat / 2);
+  const s2 = Math.sin(dLng / 2);
+  const h = s1 * s1 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * s2 * s2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+
+/**
+ * Partner posts live GPS. Updates their profile pin + appends a tracking
+ * event (so the customer polling the order sees the dot move).
+ * Ignores fixes <20m from the last one — phone GPS jitters constantly.
+ */
+export const updatePartnerLocation = async (req, res) => {
+  const { lat, lng } = req.body || {};
+  if (!validLatLng(lat, lng)) throw new ValidationError('Valid lat and lng are required.');
+  const order = await findOrderByIdentifier(req.params.id);
+  if (!order) throw new NotFoundError('Order not found');
+  if (order.deliveryPartner && String(order.deliveryPartner) !== String(req.user._id)) {
+    throw new ForbiddenError('This order is assigned to another partner');
+  }
+  if (!order.deliveryPartner) order.deliveryPartner = req.user._id;
+  if (['delivered', 'cancelled', 'refunded'].includes(order.status)) {
+    throw new ValidationError('Order is no longer active.');
+  }
+
+  const fix = { lat: Number(lat), lng: Number(lng) };
+  const partner = await User.findById(req.user._id);
+  const prev = partner.deliveryProfile?.currentLocation;
+  const moved =
+    !prev || prev.lat == null || prev.lng == null || haversineKm(prev, fix) > 0.02;
+  partner.deliveryProfile.currentLocation = fix;
+  await partner.save();
+
+  // Always answer with the fix (client uses it as ACK); only append a
+  // tracking event when the rider actually moved, to avoid flooding history.
+  if (moved) {
+    order.tracking.push({ status: order.status, message: 'Rider location update', by: req.user._id, location: fix, at: new Date() });
+    await order.save();
+  }
+  return res.status(200).json({ success: true, status: 200, data: { location: fix, recorded: moved } });
+};
+
+/** Latest rider pin for an order (from profile, fallback: last tracking fix). */
+const latestPartnerFix = async (orderObj, trackingOverride = null) => {
+  const partnerId = orderObj.deliveryPartner?._id || orderObj.deliveryPartner;
+  if (partnerId) {
+    const partner = await User.findById(partnerId).select('deliveryProfile.currentLocation name phone');
+    const loc = partner?.deliveryProfile?.currentLocation;
+    if (loc && validLatLng(loc.lat, loc.lng)) {
+      return { location: { lat: loc.lat, lng: loc.lng }, name: partner.name, phone: partner.phone };
+    }
+  }
+  const fixes = (trackingOverride || orderObj.tracking || []).filter((t) => t.location?.lat != null);
+  const last = fixes[fixes.length - 1];
+  return last ? { location: { lat: last.location.lat, lng: last.location.lng } } : { location: null };
+};
+
+/**
+ * Privacy gate: live pins are visible ONLY to the order owner while the
+ * order is active (out_for_delivery), or to the assigned partner / admin.
+ * Everyone else gets the order WITHOUT partner coordinates.
+ */
+export const shapeOrderForViewer = async (orderObj, viewer, tracking = null) => {
+  const obj = orderObj && typeof orderObj.toJSON === 'function' ? orderObj.toJSON() : orderObj;
+  const isOwner = viewer && String(obj.user?._id || obj.user) === String(viewer._id);
+  const isPartner = viewer && obj.deliveryPartner && String(obj.deliveryPartner?._id || obj.deliveryPartner) === String(viewer._id);
+  const isAdmin = viewer?.role === 'admin';
+  const active = ['confirmed', 'preparing', 'out_for_delivery'].includes(obj.status);
+  const canSeeLive = active && (isOwner ? obj.status === 'out_for_delivery' : isPartner || isAdmin);
+  if (!canSeeLive) return obj;
+  const fix = await latestPartnerFix(orderObj, tracking);
+  return { ...obj, riderLive: fix };
 };
 

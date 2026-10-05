@@ -6,7 +6,7 @@ import User from '../models/User.js';
 import Review from '../models/Review.js';
 import Settings from '../models/Settings.js';
 import { paginate } from '../utils/helpers.js';
-import { NotFoundError, ConflictError } from '../utils/errors.js';
+import { NotFoundError, ConflictError, ValidationError } from '../utils/errors.js';
 
 // ============ DASHBOARD ANALYTICS ============
 
@@ -306,6 +306,24 @@ export const deleteReview = async (req, res) => {
 
 // ============ SETTINGS ============
 
+/** Public store info for the delivery map (cached, no secrets). */
+export const getPublicSettings = async (req, res) => {
+  const settings = await Settings.getSettings();
+  const loc = settings.storeLocation || {};
+  return res.status(200).json({
+    success: true, status: 200,
+    data: {
+      storeLocation: {
+        lat: loc.lat ?? null,
+        lng: loc.lng ?? null,
+        address: loc.address || settings.contact?.address || '',
+      },
+      maxDeliveryRadiusKm: settings.delivery?.maxDeliveryRadiusKm ?? 10,
+    },
+  });
+};
+
+/** Store-only: full settings doc. */
 export const getSettings = async (req, res) => {
   const settings = await Settings.getSettings();
   return res.status(200).json({ success: true, status: 200, data: { settings } });
@@ -319,6 +337,26 @@ export const updateSettings = async (req, res) => {
       settings[key] = { ...settings[key].toObject?.() ?? settings[key], ...req.body[key] };
     } else {
       settings[key] = req.body[key];
+    }
+  }
+  // Guard the store pin: partial {lat} without {lng} (or out-of-range
+  // values) would corrupt every distance shown on the delivery map.
+  if (req.body.storeLocation !== undefined) {
+    const { lat, lng, address } = req.body.storeLocation || {};
+    const hasLat = lat !== undefined && lat !== null && lat !== '';
+    const hasLng = lng !== undefined && lng !== null && lng !== '';
+    if ((hasLat || hasLng) && !(Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)))) {
+      throw new ValidationError('Store location needs both latitude and longitude.');
+    }
+    const nLat = hasLat ? Number(lat) : null;
+    const nLng = hasLng ? Number(lng) : null;
+    if ((nLat != null && (nLat < -90 || nLat > 90)) || (nLng != null && (nLng < -180 || nLng > 180))) {
+      throw new ValidationError('Store location is out of range.');
+    }
+    if (nLat == null || nLng == null) {
+      settings.storeLocation = { lat: null, lng: null, address: String(address || '') };
+    } else {
+      settings.storeLocation = { lat: nLat, lng: nLng, address: String(address || '') };
     }
   }
   await settings.save();

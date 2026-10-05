@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Banknote, CreditCard, ShieldCheck, Plus, Loader2 } from 'lucide-react';
 import useCartStore from '../store/cartStore';
@@ -6,7 +6,10 @@ import useAuthStore from '../store/authStore';
 import { orderApi, foodApi, paymentApi } from '../api';
 import { openRazorpayCheckout } from '../utils/razorpay';
 import { formatCurrency } from '../utils/format';
+import { isValidLatLng } from '../utils/geo';
 import toast from 'react-hot-toast';
+
+const AddressPicker = lazy(() => import('../components/map/AddressPicker'));
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -23,6 +26,7 @@ export default function Checkout() {
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [addressForm, setAddressForm] = useState({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
+  const [pin, setPin] = useState(null); // {lat,lng} from the map picker
 
   const loadAddresses = async () => {
     try {
@@ -83,12 +87,17 @@ export default function Checkout() {
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
+    if (pin && !isValidLatLng(pin.lat, pin.lng)) {
+      toast.error('Please set your delivery pin on the map.');
+      return;
+    }
     try {
-      const res = await foodApi.addAddress(addressForm);
+      const res = await foodApi.addAddress(pin ? { ...addressForm, location: pin } : addressForm);
       setAddresses(res.data.addresses);
       setSelectedAddress(res.data.addresses[res.data.addresses.length - 1]._id);
       setIsNewAddress(false);
       setAddressForm({ label: 'Home', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
+      setPin(null);
       toast.success('Address saved');
     } catch (err) {
       console.error('Failed to save address:', err);
@@ -238,6 +247,23 @@ export default function Checkout() {
             {isNewAddress && (
               <form onSubmit={handleSaveAddress} className="mt-4 space-y-3 border-t pt-4">
                 <h3 className="font-semibold">New Address</h3>
+                <Suspense fallback={<div className="h-60 rounded-2xl bg-ink-100 dark:bg-ink-800 animate-pulse" />}>
+                  <AddressPicker
+                    value={pin}
+                    onChange={({ location, suggestion }) => {
+                      setPin(location);
+                      if (suggestion) {
+                        setAddressForm((f) => ({
+                          ...f,
+                          line1: f.line1 || suggestion.line1 || f.line1,
+                          city: f.city || suggestion.city || f.city,
+                          state: f.state || suggestion.state || f.state,
+                          pincode: f.pincode || suggestion.pincode || f.pincode,
+                        }));
+                      }
+                    }}
+                  />
+                </Suspense>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input required placeholder="Label (Home/Work)" value={addressForm.label} onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })} className="border rounded-lg px-3 py-2" />
                   <input required placeholder="Phone" value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} className="border rounded-lg px-3 py-2" />

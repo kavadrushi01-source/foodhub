@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wallet, Package, Truck, ChevronRight, BellRing } from 'lucide-react';
-import { deliveryApi } from '../../api';
+import { Wallet, Package, Truck, ChevronRight, BellRing, MapPin } from 'lucide-react';
+import { deliveryApi, foodApi } from '../../api';
 import { formatCurrency, timeAgo } from '../../utils/format';
+import { haversineKm, kmText, isValidLatLng } from '../../utils/geo';
 import Badge from '../../components/ui/Badge';
 import Skeleton from '../../components/ui/Skeleton';
 
@@ -13,6 +14,20 @@ export default function DeliveryDashboard() {
   const [deliveries, setDeliveries] = useState([]);
   const [newOrders, setNewOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [storePin, setStorePin] = useState(null);
+
+  useEffect(() => {
+    foodApi.getPublicSettings().then((r) => {
+      const s = r.data?.storeLocation;
+      if (s && isValidLatLng(s.lat, s.lng)) setStorePin({ lat: s.lat, lng: s.lng });
+    }).catch(() => {});
+  }, []);
+
+  const kmFromStore = (o) => {
+    const dest = o?.address?.location;
+    if (!storePin || !dest || dest.lat == null) return null;
+    return haversineKm(storePin, dest);
+  };
 
   const load = async (spinner = true) => {
     if (spinner) setLoading(true);
@@ -52,6 +67,9 @@ export default function DeliveryDashboard() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap"><span className="font-semibold">#{o.orderNumber}</span><Badge tone={STATUS_TONE[o.status] || 'gray'}>{o.status.replace(/_/g, ' ')}</Badge></div>
         <p className="text-sm text-ink-500 mt-0.5">{o.user?.name} • {o.items?.length} items • {timeAgo(o.createdAt)}</p>
+        {kmFromStore(o) != null && (
+          <p className="text-xs text-brand-600 dark:text-brand-400 mt-0.5 inline-flex items-center gap-1"><MapPin size={12} /> {kmText(kmFromStore(o))} from store</p>
+        )}
       </div>
       <div className="text-right shrink-0"><p className="font-bold">{formatCurrency(o.grandTotal)}</p><ChevronRight size={18} className="ml-auto text-ink-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" /></div>
     </Link>

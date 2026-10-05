@@ -24,7 +24,12 @@ export const checkoutSchema = z.object({
       state: z.string().min(2),
       pincode: z.string().min(3),
       phone: z.string().optional().default(''),
-      location: z.object({ lat: z.number().optional(), lng: z.number().optional() }).optional(),
+      location: z
+        .object({
+          lat: z.number().min(-90).max(90),
+          lng: z.number().min(-180).max(180),
+        })
+        .optional(),
     })
     .optional(),
   paymentMethod: z.enum(['cod', 'razorpay', 'stripe', 'upi']).default('cod'),
@@ -44,7 +49,12 @@ export const updateOrderStatusSchema = z.object({
     'refunded',
   ]),
   message: z.string().trim().max(300).optional().default(''),
-  location: z.object({ lat: z.number().optional(), lng: z.number().optional() }).optional(),
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    })
+    .optional(),
 });
 
 export const assignDeliverySchema = z.object({

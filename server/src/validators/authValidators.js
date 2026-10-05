@@ -48,6 +48,13 @@ export const updateProfileSchema = z.object({
   avatar: z.string().trim().optional(),
 });
 
+export const locationSchema = z
+  .object({
+    lat: z.number().min(-90, 'Latitude must be between -90 and 90').max(90, 'Latitude must be between -90 and 90'),
+    lng: z.number().min(-180, 'Longitude must be between -180 and 180').max(180, 'Longitude must be between -180 and 180'),
+  })
+  .optional();
+
 export const addressSchema = z.object({
   label: z.string().trim().max(40).optional().default('Home'),
   line1: z.string().trim().min(3, 'Address line is required').max(200),
@@ -57,7 +64,5 @@ export const addressSchema = z.object({
   pincode: z.string().trim().min(3).max(12),
   phone: z.string().trim().max(20).optional().default(''),
   isDefault: z.boolean().optional().default(false),
-  location: z
-    .object({ lat: z.number().optional(), lng: z.number().optional() })
-    .optional(),
+  location: locationSchema,
 });

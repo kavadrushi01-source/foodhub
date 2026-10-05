@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, Package, KeyRound, Loader2 } from 'lucide-react';
-import { deliveryApi } from '../../api';
+import { ChevronLeft, MapPin, Package, KeyRound, Loader2, Navigation, Share2, Square } from 'lucide-react';
+import { deliveryApi, foodApi } from '../../api';
 import { formatCurrency, formatDateTime } from '../../utils/format';
+import { fetchRoute, googleMapsDirUrl, kmText, etaText, isValidLatLng, samePlace } from '../../utils/geo';
+import useGeolocation from '../../hooks/useGeolocation';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import toast from 'react-hot-toast';
+
+const DeliveryMap = lazy(() => import('../../components/map/DeliveryMap'));
+
+const ACTIVE = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
 
 export default function DeliveryOrderDetail() {
   const { id } = useParams();
@@ -15,6 +21,67 @@ export default function DeliveryOrderDetail() {
   const [updating, setUpdating] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
+  // Live map state
+  const [myPos, setMyPos] = useState(null);
+  const [sharing, setSharing] = useState(false);
+  const [storePin, setStorePin] = useState(null);
+  const [route, setRoute] = useState(null);
+  const { startWatch, stopWatch } = useGeolocation();
+  const shareTimer = useRef(null);
+  const lastSent = useRef(null);
+
+  const customerPin = order?.address?.location?.lat != null ? order.address.location : null;
+
+  // Store pin (origin for km before partner assigned) — public endpoint.
+  useEffect(() => {
+    foodApi.getPublicSettings().then((r) => {
+      const s = r.data?.storeLocation;
+      if (s && isValidLatLng(s.lat, s.lng)) setStorePin({ lat: s.lat, lng: s.lng });
+    }).catch(() => {});
+  }, []);
+
+  // Road route partner -> customer (OSRM, cached 60s, Haversine fallback).
+  useEffect(() => {
+    let cancelled = false;
+    if (!customerPin) { setRoute(null); return; }
+    const from = myPos || storePin;
+    if (!from) { setRoute(null); return; }
+    fetchRoute(from, customerPin).then((r) => { if (!cancelled) setRoute(r); });
+    return () => { cancelled = true; };
+  }, [myPos?.lat, myPos?.lng, storePin?.lat, storePin?.lng, customerPin?.lat, customerPin?.lng]);
+
+  // Post a fix, deduped at ~20m so GPS jitter doesn't spam the server.
+  const postFix = async (fix) => {
+    setMyPos({ lat: fix.lat, lng: fix.lng });
+    if (!ACTIVE.includes(order?.status)) return;
+    if (lastSent.current && samePlace(lastSent.current, fix)) return;
+    lastSent.current = { lat: fix.lat, lng: fix.lng };
+    try { await deliveryApi.updateLocation(id, { lat: fix.lat, lng: fix.lng }); } catch {}
+  };
+
+  const toggleSharing = async () => {
+    if (sharing) {
+      clearInterval(shareTimer.current);
+      stopWatch();
+      setSharing(false);
+      return;
+    }
+    startWatch((fix) => postFix(fix));
+    setSharing(true);
+    toast.success('Sharing live location with the customer');
+    // Immediate fix + heartbeat every 15s (server dedupes <20m moves).
+    shareTimer.current = setInterval(async () => {
+      if (document.hidden) return;
+      try {
+        const pos = await new Promise((res, rej) =>
+          navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }),
+        );
+        postFix({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      } catch {}
+    }, 15000);
+  };
+
+  useEffect(() => () => { clearInterval(shareTimer.current); stopWatch(); }, []);
 
   const load = async () => {
     setLoading(true);
@@ -68,6 +135,47 @@ export default function DeliveryOrderDetail() {
           <section className="card p-4 sm:p-6">
             <h2 className="font-display font-bold text-lg mb-3"><MapPin size={20} className="text-brand-500 inline mr-1" /> Delivery Address</h2>
             <p className="text-sm">{order.address.line1}, {order.address.city}, {order.address.state} - {order.address.pincode}</p>
+            {order.address.phone && <p className="text-sm text-ink-500 mt-1">{order.address.phone}</p>}
+          </section>
+
+          {/* Live delivery map */}
+          <section className="card p-4 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h2 className="font-display font-bold text-lg"><Navigation size={20} className="text-brand-500 inline mr-1" /> Live Route</h2>
+              {route?.km != null && (
+                <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                  {kmText(route.km)}{route.durationMin != null ? ` • ~${route.durationMin} min` : ` • ${etaText(route.km)}`}
+                  {!route.road && ' (straight-line)'}
+                </span>
+              )}
+            </div>
+            {customerPin ? (
+              <>
+                <Suspense fallback={<div className="h-[280px] rounded-2xl bg-ink-100 dark:bg-ink-800 animate-pulse" />}>
+                  <DeliveryMap customer={customerPin} partner={myPos} store={storePin} route={route?.polyline} height={280} />
+                </Suspense>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <Button variant="secondary" onClick={toggleSharing} className="!py-2 !text-sm">
+                    {sharing ? <><Square size={15} /> Stop sharing</> : <><Share2 size={15} /> Share my location</>}
+                  </Button>
+                  {(myPos || storePin) && (
+                    <a
+                      className="btn-secondary !py-2 !text-sm inline-flex items-center gap-1.5"
+                      href={googleMapsDirUrl(myPos || storePin, customerPin)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Navigation size={15} /> Navigate
+                    </a>
+                  )}
+                </div>
+                {!sharing && ACTIVE.includes(order.status) && (
+                  <p className="text-xs text-ink-400 mt-2">Turn on sharing so the customer can watch you arrive live.</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-ink-500">No delivery pin on this order — the customer ordered before map pins existed. Use the address above.</p>
+            )}
           </section>
 
           <section className="card p-4 sm:p-6">

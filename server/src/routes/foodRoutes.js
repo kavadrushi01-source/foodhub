@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as food from '../controllers/foodController.js';
 import * as user from '../controllers/userController.js';
+import * as admin from '../controllers/adminController.js';
 import { protect } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
 import { reviewSchema } from '../validators/adminValidators.js';
@@ -9,6 +10,9 @@ import { addressSchema as userAddressSchema } from '../validators/authValidators
 import { cachePublic } from '../utils/helpers.js';
 
 const router = Router();
+
+// Public store pin for the delivery map (no secrets). Cached like catalogue.
+router.get('/settings/public', cachePublic(60000, 60), asyncHandler(admin.getPublicSettings));
 
 // Public catalog.
 //

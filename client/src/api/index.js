@@ -55,6 +55,7 @@ export const foodApi = {
   getCategories: () => api.get('/categories'),
   getFoods: (params) => api.get('/foods', { params }),
   getFoodBySlug: (slug) => api.get(`/foods/${slug}`),
+  getPublicSettings: () => api.get('/settings/public'),
   getReviews: (foodId, params) => api.get(`/reviews/${foodId}`, { params }),
   addReview: (data) => api.post('/reviews', data),
   markReviewHelpful: (id) => api.post(`/reviews/${id}/helpful`),
@@ -123,6 +124,7 @@ export const deliveryApi = {
   getOrder: (id) => api.get(`/delivery/orders/${id}`),
   updateStatus: (id, data) => api.patch(`/delivery/orders/${id}/status`, data),
   verifyOtp: (id, otp) => api.post(`/delivery/orders/${id}/verify-otp`, { otp }),
+  updateLocation: (id, { lat, lng }) => api.patch(`/delivery/orders/${id}/location`, { lat, lng }),
 };
 
 export const paymentApi = {
