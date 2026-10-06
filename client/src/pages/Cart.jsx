@@ -4,6 +4,7 @@ import useCartStore from '../store/cartStore';
 import { orderApi } from '../api';
 import { formatCurrency, getEffectivePrice } from '../utils/format';
 import { imgFallback } from '../utils/imageFallback';
+import { imgSrc } from '../utils/imgSrc';
 import EmptyState from '../components/ui/EmptyState';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -48,7 +49,7 @@ export default function Cart() {
           {items.map(({ food, quantity }) => (
             <div key={food._id} className="card p-3 sm:p-4 flex gap-3 sm:gap-4">
               <Link to={`/food/${food.slug}`} className="shrink-0">
-                <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" />
+                <img src={imgSrc(food.primaryImage || food.images?.[0], 160)} alt={food.name} onError={imgFallback} className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" decoding="async" />
               </Link>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">

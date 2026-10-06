@@ -58,11 +58,11 @@ export default function Navbar() {
   const handleLogout = async () => { await logout(); navigate('/'); };
 
   return (
-    // Constant backdrop-blur-md in both states: animating `transition-all`
-    // over a swapping blur radius (lg→xl) forced a full-width filter repaint
-    // on every scroll toggle — a major scroll-jank source on mobile. Blur is
-    // now static; only cheap properties transition.
-    <header className={`sticky top-0 z-40 backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-300 ${scrolled ? 'bg-white/70 dark:bg-ink-950/60 shadow-card border-b border-white/60 dark:border-ink-800/60' : 'bg-cream/60 dark:bg-ink-950/40 border-b border-transparent'}`}>
+    // No backdrop-blur: a full-width sticky filter re-composites the region
+    // behind the header on EVERY scroll frame — the top cause of scroll jank
+    // on mid/mobile GPUs. High-opacity backgrounds look nearly identical and
+    // keep the compositor out of the picture; only cheap properties transition.
+    <header className={`sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-300 ${scrolled ? 'bg-white/95 dark:bg-ink-950/95 shadow-card border-b border-white/60 dark:border-ink-800/60' : 'bg-cream/95 dark:bg-ink-950/85 border-b border-transparent'}`}>
       <nav className="container-app flex items-center justify-between h-16 gap-2 sm:gap-3">
         <button onClick={toggleSidebar} className="lg:hidden p-2 -ml-2 text-ink-600 dark:text-ink-300 hover:bg-ink-100/80 dark:hover:bg-ink-800 rounded-lg" aria-label="Open menu">
           <Menu size={22} />

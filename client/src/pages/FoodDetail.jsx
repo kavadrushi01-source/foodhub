@@ -6,6 +6,7 @@ import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import { formatCurrency, getEffectivePrice } from '../utils/format';
 import { imgFallback } from '../utils/imageFallback';
+import { imgSrc } from '../utils/imgSrc';
 import Skeleton from '../components/ui/Skeleton';
 import Rating from '../components/ui/Rating';
 import Badge from '../components/ui/Badge';
@@ -71,7 +72,7 @@ export default function FoodDetail() {
         {/* Image */}
         <div className="card overflow-hidden h-fit">
           <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-ink-100 dark:bg-ink-800">
-            <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-full w-full object-cover" loading="eager" />
+            <img src={imgSrc(food.primaryImage || food.images?.[0], 900)} alt={food.name} onError={imgFallback} className="h-full w-full object-cover" loading="eager" decoding="async" fetchpriority="high" />
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
               {discountPercent > 0 && <Badge tone="red" className="font-bold">-{discountPercent}%</Badge>}
               {food.isBestseller && <Badge tone="brand">⭐ Bestseller</Badge>}

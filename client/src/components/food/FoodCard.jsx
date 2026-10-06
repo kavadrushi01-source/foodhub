@@ -7,6 +7,7 @@ import useUIStore from '../../store/uiStore';
 import { foodApi } from '../../api';
 import { formatCurrency, getEffectivePrice } from '../../utils/format';
 import { imgFallback } from '../../utils/imageFallback';
+import { imgSrc } from '../../utils/imgSrc';
 import Badge from '../ui/Badge';
 import toast from 'react-hot-toast';
 
@@ -45,7 +46,7 @@ function FoodCard({ food }) {
     <div className="card gradient-border group overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-[transform,box-shadow] duration-300 flex flex-col animate-fade-in-up">
       <Link to={`/food/${food.slug}`} className="block relative">
         <div className="group-shine relative h-48 overflow-hidden bg-ink-100 dark:bg-ink-800">
-          <img src={food.primaryImage || food.images?.[0]} alt={food.name} loading="lazy" onError={imgFallback} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <img src={imgSrc(food.primaryImage || food.images?.[0], 700)} alt={food.name} loading="lazy" decoding="async" onError={imgFallback} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
             {discountPercent > 0 && <Badge tone="red" className="font-bold shadow-sm">-{discountPercent}%</Badge>}

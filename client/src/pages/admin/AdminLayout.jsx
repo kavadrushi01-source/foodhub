@@ -1,7 +1,8 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { LayoutDashboard, UtensilsCrossed, ShoppingBag, TicketPercent, Package, Users, Star, Settings, ChevronLeft, Store, Menu, X } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import RouteFallback from '../../components/ui/RouteFallback';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -93,7 +94,10 @@ export default function AdminLayout() {
         )}
 
         <main className="p-4 md:p-8">
-          <Outlet />
+          {/* Scoped Suspense: lazy admin pages load without flashing the sidebar. */}
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

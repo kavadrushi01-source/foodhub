@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import RouteFallback from './components/ui/RouteFallback';
 
 // Layout (kept eager — it renders on every page)
 import Layout from './components/layout/Layout';
@@ -45,15 +46,6 @@ const DeliveryLayout = lazy(() => import('./pages/delivery/DeliveryLayout'));
 const DeliveryDashboard = lazy(() => import('./pages/delivery/DeliveryDashboard'));
 const DeliveryOrders = lazy(() => import('./pages/delivery/DeliveryOrders'));
 const DeliveryOrderDetail = lazy(() => import('./pages/delivery/DeliveryOrderDetail'));
-
-// Simple centered spinner shown while a route chunk loads
-function RouteFallback() {
-  return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="h-10 w-10 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
-    </div>
-  );
-}
 
 export default function App() {
   return (

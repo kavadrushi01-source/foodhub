@@ -3,6 +3,7 @@ import { Package, ChevronRight } from 'lucide-react';
 import { adminApi } from '../../api';
 import { formatCurrency, formatDate } from '../../utils/format';
 import { imgFallback } from '../../utils/imageFallback';
+import { imgSrc } from '../../utils/imgSrc';
 import Badge from '../../components/ui/Badge';
 import Skeleton from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
@@ -93,7 +94,7 @@ export default function AdminOrders() {
                   const now = item.status || 'pending';
                   return (
                     <div key={key} className="flex flex-wrap items-center gap-3 p-3.5 hover:bg-ink-50/50 dark:hover:bg-ink-800/30 transition-colors">
-                      <img src={item.image} alt={item.name} loading="lazy" onError={imgFallback} className="h-12 w-12 rounded-xl object-cover bg-ink-100 dark:bg-ink-800 shrink-0" />
+                      <img src={imgSrc(item.image, 160)} alt={item.name} loading="lazy" decoding="async" onError={imgFallback} className="h-12 w-12 rounded-xl object-cover bg-ink-100 dark:bg-ink-800 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-ink-800 dark:text-ink-100 truncate">{item.name}</p>
                         <p className="text-xs text-ink-400">Qty {item.quantity} × {formatCurrency(item.price)}</p>

@@ -483,6 +483,35 @@ supported `DELETE /api/addresses/:id` and `PATCH /api/addresses/:id/default`)
 add second → delete the default (another is promoted) → set default → delete the last one →
 0 addresses, and `GET /api/addresses` without a token returns 401.
 
+### 16. The site felt laggy — performance pass on the client critical path
+
+**Problem:** the site worked but felt slow and "always loading": heavy JS on first paint,
+a full-page spinner on every navigation, scroll jank on the sticky header, oversized
+images, and a render-blocking font stylesheet.
+
+**Changes**
+
+| File | Change |
+|------|--------|
+| `client/src/hooks/usePresence.js` | **New** — CSS enter/exit animation helper (mount → next-frame → visible; delayed unmount), the job `AnimatePresence` did in framer-motion |
+| `client/src/components/layout/CartDrawer.jsx`, `client/src/components/chat/ChatWidget.jsx` | Rewritten to pure CSS transitions (`transform` + `opacity`, compositor-only). **framer-motion dependency removed** — its 115 kB (38 kB gz) chunk used to load eagerly on every page via `Layout` |
+| `client/src/main.jsx` | Sentry now loads via **dynamic `import()`** only when `VITE_SENTRY_DSN` is set (and never blocks first paint); `tracesSampleRate` 1.0 → 0.2 |
+| `client/src/components/layout/Layout.jsx` | `<Suspense>` moved **inside** the layout so route changes only swap `<main>` (Navbar/Footer stay mounted); **idle route prefetch** of Menu/Cart/Categories/FoodDetail/Login (+ Orders/Checkout when signed in); **instant scroll-to-top** on path change (bypasses `scroll-behavior: smooth`) |
+| `client/src/pages/admin/AdminLayout.jsx`, `client/src/pages/delivery/DeliveryLayout.jsx` | Scoped `<Suspense>` around `<Outlet />` so child pages load without flashing the sidebar |
+| `client/src/components/layout/Navbar.jsx` | **Removed `backdrop-blur-md`** — a full-width sticky filter re-composites behind the header on every scroll frame (top scroll-jank cause on mobile); high-opacity backgrounds look nearly identical |
+| `client/src/index.css` | `.glass` loses `backdrop-blur-xl` (invisible over the near-solid cream bg); `.btn`/`.btn-primary`/`.input` transition **specific properties** instead of `transition-all` |
+| `client/src/store/uiStore.js` | Persist **only the theme** (`partialize`) — a cart drawer left open when the tab closed used to spring back open on the next visit |
+| `client/src/utils/imgSrc.js` | **New** — Unsplash URL optimizer: correct width per slot (64 px thumbs no longer fetch 800 px files), `auto=format` (AVIF/WebP), `q=72`; applied to FoodCard, Cart, FoodDetail, OrderDetail, categories, admin lists |
+| `client/index.html` | Non-blocking Google Fonts CSS (`media="print"` swap + `<noscript>` fallback), `preconnect` to `images.unsplash.com`, **hero image preload** matched to `Home.jsx` (LCP starts with the HTML) |
+| `client/src/pages/Home.jsx`, `FoodDetail.jsx` | `fetchpriority="high"` + `decoding="async"` on LCP images |
+| `client/vite.config.js`, `client/package.json` | Dropped the `motion` manual chunk + uninstalled `framer-motion` |
+| `client/eslint.config.js` | Allow lowercase `fetchpriority` (React 18 only forwards the lowercase attribute) |
+
+**Measured (production build, gzip):** initial JS went from **419 kB raw / 138 gz**
+(`index` + `react-vendor` + `motion`) to **307 kB raw / 100 gz** — **−27%** — and the
+entry chunk contains no framer-motion and no Sentry. Verified with `vite preview`:
+hero preload, async font CSS and preconnect present in the served HTML.
+
 ---
 
 ## 🧪 Verification

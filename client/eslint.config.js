@@ -29,6 +29,9 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react/prop-types': 'off',
+      // React 18 only forwards the all-lowercase `fetchpriority` attribute to
+      // the DOM (camelCase fetchPriority is React 19+), so lowercase is correct here.
+      'react/no-unknown-property': ['error', { ignore: ['fetchpriority'] }],
       'react/react-in-jsx-scope': 'off',
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'react/no-unescaped-entities': ['error', { forbid: ['>', '}', '"'] }],

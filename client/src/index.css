@@ -29,10 +29,10 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-[color,background-color,background-position,border-color,box-shadow,transform,opacity] duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-brand-gradient text-white px-5 py-2.5 hover:shadow-glow active:scale-[0.98] bg-[length:150%_150%] hover:bg-right transition-all duration-300;
+    @apply btn bg-brand-gradient text-white px-5 py-2.5 hover:shadow-glow active:scale-[0.98] bg-[length:150%_150%] hover:bg-right transition-[color,background-color,background-position,border-color,box-shadow,transform,opacity] duration-300;
   }
   .btn-secondary {
     @apply btn bg-white text-ink-800 dark:bg-ink-800 dark:text-ink-100 px-5 py-2.5 border border-ink-200 dark:border-ink-700 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-300 hover:shadow-card;
@@ -44,7 +44,7 @@
     @apply btn bg-red-500 text-white px-5 py-2.5 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/20;
   }
   .input {
-    @apply w-full rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-ink-900 dark:text-ink-100 placeholder:text-ink-400 dark:placeholder:text-ink-500 focus:border-brand-400 focus:ring-4 focus:ring-brand-500/15 transition-all;
+    @apply w-full rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-ink-900 dark:text-ink-100 placeholder:text-ink-400 dark:placeholder:text-ink-500 focus:border-brand-400 focus:ring-4 focus:ring-brand-500/15 transition-[border-color,box-shadow,background-color];
   }
   .card {
     @apply bg-white dark:bg-ink-900 rounded-2xl border border-ink-100 dark:border-ink-800 shadow-card;
@@ -63,7 +63,10 @@
     animation: shimmer 1.5s infinite;
   }
   .glass {
-    @apply bg-white/70 dark:bg-ink-950/60 backdrop-blur-xl border border-white/60 dark:border-ink-800/60;
+    /* No backdrop-blur: .glass sits over the near-solid cream page background,
+       where a blur is visually invisible but still forces a filter repaint
+       whenever the page scrolls (it's a sticky-width strip). */
+    @apply bg-white/90 dark:bg-ink-950/85 border border-white/60 dark:border-ink-800/60;
   }
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-brand-500 to-rose-500;

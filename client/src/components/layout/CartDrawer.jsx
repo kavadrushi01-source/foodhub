@@ -6,7 +6,8 @@ import useUIStore from '../../store/uiStore';
 import { orderApi } from '../../api';
 import { formatCurrency, getEffectivePrice } from '../../utils/format';
 import { imgFallback } from '../../utils/imageFallback';
-import { motion, AnimatePresence } from 'framer-motion';
+import { imgSrc } from '../../utils/imgSrc';
+import usePresence from '../../hooks/usePresence';
 import toast from 'react-hot-toast';
 
 const FREE_DELIVERY = 299;
@@ -15,32 +16,45 @@ const FREE_DELIVERY = 299;
  * Thin shell that only subscribes to the open flag — while the drawer is
  * closed it re-renders on nothing except open/close, not on every cart edit.
  * All cart state lives in CartPanel, which mounts only when opened.
+ *
+ * The slide-in/out is pure CSS (transform + opacity → compositor-only) via
+ * usePresence instead of framer-motion, which used to drag a 115 kB chunk onto
+ * the critical path of every page.
  */
 export default function CartDrawer() {
   const navigate = useNavigate();
   const cartDrawerOpen = useUIStore((s) => s.cartDrawerOpen);
   const setCartDrawer = useUIStore((s) => s.setCartDrawer);
+  const { mounted, shown } = usePresence(cartDrawerOpen, 300);
+
+  if (!mounted) return null;
 
   return (
-    <AnimatePresence>
-      {cartDrawerOpen && (
-        <div className="fixed inset-0 z-50">
-          {/* Plain dark overlay (no backdrop-blur): blurring the whole page
-              behind an animated drawer repaints every frame on open/close. */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-ink-950/50" onClick={() => setCartDrawer(false)} />
-          <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.28, ease: 'easeInOut' }} className="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-ink-900 shadow-float flex flex-col">
-            <CartPanel
-              onClose={() => setCartDrawer(false)}
-              onBrowse={() => { setCartDrawer(false); navigate('/menu'); }}
-              onCheckout={() => {
-                setCartDrawer(false);
-                setTimeout(() => navigate('/checkout'), 100);
-              }}
-            />
-          </motion.aside>
-        </div>
-      )}
-    </AnimatePresence>
+    <div
+      className={`fixed inset-0 z-50 ${shown ? '' : 'pointer-events-none'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Shopping cart"
+    >
+      {/* Plain dark overlay (no backdrop-blur): blurring the whole page
+          behind an animated drawer repaints every frame on open/close. */}
+      <div
+        onClick={() => setCartDrawer(false)}
+        className={`absolute inset-0 bg-ink-950/50 transition-opacity duration-300 ease-out ${shown ? 'opacity-100' : 'opacity-0'}`}
+      />
+      <aside
+        className={`absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-ink-900 shadow-float flex flex-col transition-transform duration-300 ease-out ${shown ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <CartPanel
+          onClose={() => setCartDrawer(false)}
+          onBrowse={() => { setCartDrawer(false); navigate('/menu'); }}
+          onCheckout={() => {
+            setCartDrawer(false);
+            setTimeout(() => navigate('/checkout'), 100);
+          }}
+        />
+      </aside>
+    </div>
   );
 }
 
@@ -128,7 +142,7 @@ function CartBody({ items, removeItem, updateQuantity, clearCart, coupon, subtot
           // row on each render (coupon typing, quantity taps) — pure jank.
           <div key={food._id}
             className="flex gap-3 card p-3 hover:shadow-card-hover transition-shadow animate-fade-in-up">
-            <img src={food.primaryImage || food.images?.[0]} alt={food.name} onError={imgFallback} className="h-16 w-16 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" />
+            <img src={imgSrc(food.primaryImage || food.images?.[0], 160)} alt={food.name} onError={imgFallback} className="h-16 w-16 rounded-xl object-cover bg-ink-100 dark:bg-ink-800" loading="lazy" decoding="async" />
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-semibold text-sm text-ink-800 dark:text-ink-100 truncate">{food.name}</h4>

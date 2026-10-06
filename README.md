@@ -75,7 +75,7 @@ and troubleshooting.
 
 | Layer       | Tools |
 |-------------|-------|
-| Frontend    | React 18, Vite, Tailwind CSS, Framer Motion, Zustand, React Router, Axios, react-hot-toast, lucide-react, Leaflet + react-leaflet |
+| Frontend    | React 18, Vite, Tailwind CSS, Zustand, React Router, Axios, react-hot-toast, lucide-react, Leaflet + react-leaflet |
 | Backend     | Node.js, Express, Mongoose, JWT, bcryptjs, zod, helmet, express-rate-limit, winston, nodemailer |
 | Database    | MongoDB (local or Atlas) |
 

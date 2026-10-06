@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, PackageX } from 'lucide-react';
 import { adminApi } from '../../api';
 import { formatCurrency } from '../../utils/format';
 import { imgFallback } from '../../utils/imageFallback';
+import { imgSrc } from '../../utils/imgSrc';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Skeleton from '../../components/ui/Skeleton';
@@ -105,7 +106,7 @@ export default function AdminFoods() {
                 {foods.map((f) => (
                   <tr key={f._id} className="hover:bg-ink-50 dark:hover:bg-ink-800/40">
                     <td className="p-3">
-                      <div className="flex items-center gap-2"><img src={f.primaryImage || f.images?.[0]} alt="" onError={imgFallback} className="h-9 w-9 rounded-lg object-cover bg-ink-100 dark:bg-ink-800" /><span className="font-medium truncate max-w-[180px]">{f.name}</span></div>
+                      <div className="flex items-center gap-2"><img src={imgSrc(f.primaryImage || f.images?.[0], 96)} alt="" onError={imgFallback} className="h-9 w-9 rounded-lg object-cover bg-ink-100 dark:bg-ink-800" decoding="async" /><span className="font-medium truncate max-w-[180px]">{f.name}</span></div>
                     </td>
                     <td className="p-3 text-ink-500">{f.category?.name || '-'}</td>
                     <td className="p-3"><span className="font-semibold">{formatCurrency(adminEffectivePrice(f))}</span>{f.discountPrice && f.discountPrice < f.price ? <span className="text-xs text-ink-400 line-through ml-1">{formatCurrency(f.price)}</span> : null}</td>

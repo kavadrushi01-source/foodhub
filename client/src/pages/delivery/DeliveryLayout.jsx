@@ -1,7 +1,8 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Bike, LayoutDashboard, Package, ChevronLeft, Store, Menu, X } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import RouteFallback from '../../components/ui/RouteFallback';
 
 const navItems = [
   { to: '/delivery', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -81,7 +82,12 @@ export default function DeliveryLayout() {
           </div>
         )}
 
-        <main className="p-4 md:p-8"><Outlet /></main>
+        <main className="p-4 md:p-8">
+          {/* Scoped Suspense: lazy delivery pages load without flashing the sidebar. */}
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
+        </main>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import usePresence from '../../hooks/usePresence';
 import { MessageCircle, X, Send, Bot, Sparkles, Trash2, HelpCircle, ArrowLeft } from 'lucide-react';
 import { chatApi } from '../../api';
 
@@ -50,6 +50,9 @@ export default function ChatWidget() {
   const [mode, setMode] = useState('chat');
   const [unread, setUnread] = useState(true);
   const bodyRef = useRef(null);
+  // Pure-CSS open/close (transform + opacity) — same visuals as the old
+  // framer-motion exit/scale animation without shipping its 115 kB chunk.
+  const { mounted: panelMounted, shown: panelShown } = usePresence(open, 250);
 
   useEffect(() => {
     const el = bodyRef.current;
@@ -104,30 +107,17 @@ export default function ChatWidget() {
         aria-label="Open AI help assistant"
         className="fixed bottom-5 right-5 z-[45] h-14 w-14 rounded-full bg-brand-gradient text-white shadow-glow-lg grid place-items-center hover:scale-105 active:scale-95 transition-transform"
       >
-        <AnimatePresence mode="wait" initial={false}>
-          {open ? (
-            <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-              <X size={26} />
-            </motion.span>
-          ) : (
-            <motion.span key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
-              <MessageCircle size={26} />
-            </motion.span>
-          )}
-        </AnimatePresence>
+        {open
+          ? <X size={26} className="animate-fade-in" />
+          : <MessageCircle size={26} className="animate-fade-in" />}
         {!open && unread && (
           <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 border-2 border-white dark:border-ink-900 animate-pulse-soft" />
         )}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed right-4 sm:right-5 z-[45] w-[calc(100vw-2rem)] max-w-[380px] h-[70dvh] max-h-[min(560px,calc(100dvh-7.5rem))] flex flex-col rounded-3xl overflow-hidden shadow-float border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900"
+      {panelMounted && (
+          <div
+            className={`fixed right-4 sm:right-5 z-[45] w-[calc(100vw-2rem)] max-w-[380px] h-[70dvh] max-h-[min(560px,calc(100dvh-7.5rem))] flex flex-col rounded-3xl overflow-hidden shadow-float border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 transition-[opacity,transform] duration-[250ms] ease-out ${panelShown ? 'opacity-100 translate-y-0 scale-100' : 'pointer-events-none opacity-0 translate-y-6 scale-95'}`}
             style={{ bottom: '5.5rem' }}
           >
             {/* Header */}
@@ -240,10 +230,9 @@ export default function ChatWidget() {
               >
                 <Send size={18} />
               </button>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </form>
+          </div>
+      )}
     </>
   );
 }

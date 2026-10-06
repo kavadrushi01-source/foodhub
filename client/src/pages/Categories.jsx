@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { foodApi } from '../api';
+import { imgSrc } from '../utils/imgSrc';
 import { SkeletonCard } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 
@@ -37,7 +38,7 @@ export default function Categories() {
             <Link key={c._id} to={`/menu?category=${c.slug}`} className="group card overflow-hidden rounded-2xl hover:shadow-card-hover hover:-translate-y-1 transition-all">
               <div className="relative h-32 sm:h-40 overflow-hidden">
                 {c.image ? (
-                  <img src={c.image} alt={c.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={imgSrc(c.image, 600)} alt={c.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100 dark:from-ink-800 dark:to-ink-900 text-6xl">{c.icon}</div>
                 )}

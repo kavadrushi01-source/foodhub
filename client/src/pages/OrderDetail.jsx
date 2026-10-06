@@ -9,6 +9,7 @@ import { fetchRoute, kmText, etaText, isValidLatLng } from '../utils/geo';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import { imgFallback } from '../utils/imageFallback';
+import { imgSrc } from '../utils/imgSrc';
 import toast from 'react-hot-toast';
 
 const DeliveryMap = lazy(() => import('../components/map/DeliveryMap'));
@@ -178,7 +179,7 @@ export default function OrderDetail() {
             <div className="divide-y divide-ink-100 dark:divide-ink-800">
               {order.items.map((item, idx) => (
                 <div key={item._id || idx} className="flex items-center py-3 gap-3">
-                  {item.image ? <img src={item.image} alt={item.name} onError={imgFallback} className="h-12 w-12 rounded-lg object-cover bg-ink-100 dark:bg-ink-800" /> : <div className="h-12 w-12 rounded-lg bg-ink-100 dark:bg-ink-800" />}
+                  {item.image ? <img src={imgSrc(item.image, 160)} alt={item.name} onError={imgFallback} decoding="async" className="h-12 w-12 rounded-lg object-cover bg-ink-100 dark:bg-ink-800" /> : <div className="h-12 w-12 rounded-lg bg-ink-100 dark:bg-ink-800" />}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-ink-800 dark:text-ink-100">{item.name}</p>
                     <p className="text-xs text-ink-400">Qty: {item.quantity} × {formatCurrency(item.price)}</p>

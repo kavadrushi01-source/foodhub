@@ -32,6 +32,16 @@ const useUIStore = create(
     }),
     {
       name: 'foodhub-ui',
+      // Persist ONLY the theme. sidebarOpen/cartDrawerOpen are transient UI
+      // flags — saving them meant a drawer left open when the tab closed
+      // sprang back open (with its animation) on the next visit.
+      partialize: (s) => ({ theme: s.theme }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted || {}),
+        sidebarOpen: false,
+        cartDrawerOpen: false,
+      }),
     },
   ),
 );
